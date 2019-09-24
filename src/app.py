@@ -40,7 +40,7 @@ def asyncStartCrawl(quest_type):
     time.sleep(1)
     _print('asyncStartCrawl')
     target = startCrawl
-    if str(quest_type) == '1':
+    if (str(quest_type) == '1'):
         target = startFillInfo
     thr = Thread(target=target)
     thr.start()
@@ -55,6 +55,7 @@ def get_():
 def get_start():
     token = request.args.get('token')
     quest_type = request.args.get('quest')
+    _print(quest_type)
     if(token != 'q1w2e3r4'):
         return Response('Not Found'), 404
     _isCrawling = isCrawling

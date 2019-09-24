@@ -102,5 +102,5 @@ class DB(object):
         }, upsert=True)
 
     def find_missing_apartments(self):
-        res = apartments.find({'title': {"$exists": False}})
+        res = self.apartments.find({'title': {"$exists": False}})
         return list(map(lambda x: x.get('house_url'), res))
