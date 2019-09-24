@@ -2,11 +2,10 @@ import pandas as pd
 import re
 from bs4 import BeautifulSoup
 from helper import _print
-def get_info_of_single_url(self, driver, url):
+def get_info_of_single_url(driver, url):
     """
     get info of single url
     """
-    driver.get(url)
     # TODO：支持对公寓房源的爬取。
     if 'apartment' in url:
         pass

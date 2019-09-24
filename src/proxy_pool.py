@@ -49,6 +49,7 @@ def init_driver():
     capabilities = webdriver.DesiredCapabilities.CHROME
     prox.add_to_capabilities(capabilities)
 
+    # options are unnecessary
     chrome_options = webdriver.ChromeOptions()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-dev-shm-usage')

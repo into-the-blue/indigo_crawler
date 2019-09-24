@@ -87,7 +87,8 @@ class GrapPage(object):
         urls = []
         for i in self.driver.find_elements_by_xpath("//a[@class='content__list--item--aside']"):
             url = i.get_attribute('href')
-            db.save_url(url)
+            if 'apartment' not in url:
+                db.save_url(url)
             urls.append(url)
         return urls
 
@@ -133,11 +134,18 @@ class GrapPage(object):
             _print('START', url)
             try:
                 time.sleep(2)
-                info = get_info_of_single_url(url)
+                info = get_info_of_single_url(driver, url)
                 db.upsert_apartment(info.get('house_code'), info)
                 _print("SUCCESS", url)
             except:
                 _print('ENCOUNTER ERR', url)
+
+    def start_filling_missing_info(self):
+        _print('START FILLING')
+        all_urls = db.find_missing_apartments()
+        _print('CRAWL URL DONE, START CRAWL INFO')
+        self.crawl_data_from_urls(all_urls)
+        _print('DONE')
 
     def start(self):
         _print('START')

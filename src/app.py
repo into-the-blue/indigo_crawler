@@ -25,10 +25,24 @@ def startCrawl():
         ins.quit()
 
 
-def asyncStartCrawl():
+def startFillInfo():
+    global isCrawling
+    isCrawling = True
+    ins = GrapPage('sh', 'https://sh.zu.ke.com/zufang')
+    try:
+        ins.start_filling_missing_info()
+    finally:
+        isCrawling = False
+        ins.quit()
+
+
+def asyncStartCrawl(quest_type):
     time.sleep(1)
     _print('asyncStartCrawl')
-    thr = Thread(target=startCrawl)
+    target = startCrawl
+    if str(quest_type) == '1':
+        target = startFillInfo
+    thr = Thread(target=target)
     thr.start()
 
 
@@ -40,11 +54,12 @@ def get_():
 @app.route('/start', methods=['GET'])
 def get_start():
     token = request.args.get('token')
+    quest_type = request.args.get('quest')
     if(token != 'q1w2e3r4'):
         return Response('Not Found'), 404
     _isCrawling = isCrawling
     if(_isCrawling is False):
-        asyncStartCrawl()
+        asyncStartCrawl(quest_type)
     return Response(str(_isCrawling))
 
 
