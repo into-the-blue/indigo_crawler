@@ -36,14 +36,34 @@ def startFillInfo():
         ins.quit()
 
 
+def startAsyncTask(target):
+    try:
+        time.sleep(1)
+        thr = Thread(target=target)
+        thr.start()
+    finally:
+        isCrawling = False
+
+
 def asyncStartCrawl(quest_type):
-    time.sleep(1)
-    _print('asyncStartCrawl')
-    target = startCrawl
-    if (str(quest_type) == '1'):
-        target = startFillInfo
-    thr = Thread(target=target)
-    thr.start()
+    startAsyncTask(startCrawl)
+
+
+def asyncStartFillEmpty():
+    startAsyncTask(startFillInfo)
+
+
+def asyncStartCrawlLatest():
+    def crawlLatest():
+        global isCrawling
+        isCrawling = True
+        ins = GrapPage('sh', 'https://sh.zu.ke.com/zufang')
+        try:
+            ins.start_by_latest()
+        finally:
+            isCrawling = False
+            ins.quit()
+    startAsyncTask(crawlLatest)
 
 
 @app.route('/', methods=['GET'])
@@ -54,13 +74,33 @@ def get_():
 @app.route('/start', methods=['GET'])
 def get_start():
     token = request.args.get('token')
-    quest_type = request.args.get('quest')
-    _print(quest_type)
     if(token != 'q1w2e3r4'):
         return Response('Not Found'), 404
     _isCrawling = isCrawling
     if(_isCrawling is False):
-        asyncStartCrawl(quest_type)
+        asyncStartCrawl()
+    return Response(str(_isCrawling))
+
+
+@app.route('/fill_empty', methods=['GET'])
+def get_fill_empty():
+    token = request.args.get('token')
+    if(token != 'q1w2e3r4'):
+        return Response('Not Found'), 404
+    _isCrawling = isCrawling
+    if(_isCrawling is False):
+        asyncStartFillEmpty()
+    return Response(str(_isCrawling))
+
+
+@app.route('/latest', methods=['GET'])
+def get_latest():
+    token = request.args.get('token')
+    if(token != 'q1w2e3r4'):
+        return Response('Not Found'), 404
+    _isCrawling = isCrawling
+    if(_isCrawling is False):
+        asyncStartCrawlLatest()
     return Response(str(_isCrawling))
 
 

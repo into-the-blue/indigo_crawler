@@ -88,8 +88,9 @@ class GrapPage(object):
         for i in self.driver.find_elements_by_xpath("//a[@class='content__list--item--aside']"):
             url = i.get_attribute('href')
             if 'apartment' not in url:
-                db.save_url(url)
-            urls.append(url)
+                exist = db.save_url(url)
+                if exist is False:
+                    urls.append(url)
         return urls
 
     def get_all_urls(self):
@@ -135,8 +136,12 @@ class GrapPage(object):
             try:
                 time.sleep(2)
                 info = get_info_of_single_url(driver, url)
-                db.upsert_apartment(info.get('house_code'), info)
-                _print("SUCCESS", url)
+                if info is None:
+                    db.delete_apartment_from_url(url)
+                    _print('EXPIRED', url)
+                else:
+                    db.upsert_apartment(info.get('house_code'), info)
+                    _print("SUCCESS", url)
             except:
                 _print('ENCOUNTER ERR', url)
 

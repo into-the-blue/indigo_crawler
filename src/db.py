@@ -74,7 +74,8 @@ class DB(object):
 
     def exist_apartment(self, house_code):
         house_id = extract_house_id(house_code)
-        res = self.apartments.find_one({'house_id': house_id})
+        res = self.apartments.find_one(
+            {'house_id': house_id, 'title': {'$exists': True}})
         return bool(res)
 
     def exist_apartment_from_url(self, url):
@@ -92,14 +93,30 @@ class DB(object):
         house_id = extract_house_id(house_code)
         return self.apartments.replace_one({'house_id': house_id}, doc, upsert=True)
 
+    def delete_apartment_from_house_id(self, house_id):
+        return self.apartments.delete_one({'house_id': house_id})
+
+    def delete_apartment_from_url(self, url):
+        house_code = extract_house_code_from_url(url)
+        house_id = extract_house_id(house_code)
+        if(self.exist_apartment(house_code)):
+            self.apartments.update_one(
+                {'house_id': house_id}, {'$set': {'expired': True}})
+        else:
+            self.delete_apartment_from_house_id(house_id)
+
     def save_url(self, url):
         house_code = extract_house_code_from_url(url)
         house_id = extract_house_id(house_code)
-        return self.apartments.replace_one({'house_id': house_id}, {
-            'house_url': url,
-            'house_code': house_code,
-            'house_id': house_id
-        }, upsert=True)
+        if (self.exist_apartment(house_code)):
+            return True
+        else:
+            self.apartments.insert_one({
+                'house_url': url,
+                'house_code': house_code,
+                'house_id': house_id
+            })
+            return False
 
     def find_missing_apartments(self):
         res = self.apartments.find({'title': {"$exists": False}})

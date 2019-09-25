@@ -12,6 +12,12 @@ def get_info_of_single_url(driver, url):
     if 'apartment' in url:
         pass
     else:
+        try:
+            # url expired
+            driver.find_element_by_xpath("//p[@class='offline__title']").text == '你访问的房源已失效'
+            return None
+        except:
+            pass
         # 类型/标题：可能为空，导致标题的爬取报错
         # try:
         #     rent_type = driver.find_element_by_xpath("//p[@class='content__title']").text.split(' · ')[0]
