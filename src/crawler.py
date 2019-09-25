@@ -110,8 +110,8 @@ class GrapPage(object):
         all_urls = list(set(all_urls))
         return all_urls
 
-    def click_order_by_time(self, driver):
-        driver.find_element_by_link_text('最新上架').click()
+    def click_order_by_time(self):
+        self.driver.find_element_by_link_text('最新上架').click()
 
     def get_all_station_urls(self, driver):
         stations = driver.find_elements_by_xpath(
