@@ -45,7 +45,7 @@ def startAsyncTask(target):
         isCrawling = False
 
 
-def asyncStartCrawl(quest_type):
+def asyncStartCrawl():
     startAsyncTask(startCrawl)
 
 

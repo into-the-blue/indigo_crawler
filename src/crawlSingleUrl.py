@@ -2,8 +2,8 @@ import pandas as pd
 import re
 from bs4 import BeautifulSoup
 from helper import _print
-# TODO: 房源失效
-# https://sh.zu.ke.com/zufang/SH2351459221016412160.html
+# TODO: 公寓 error
+# https://sh.zu.ke.com/zufang/SH2353502593189421056.html
 def get_info_of_single_url(driver, url):
     """
     get info of single url
