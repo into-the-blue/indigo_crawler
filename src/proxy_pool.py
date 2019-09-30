@@ -13,7 +13,7 @@ is_ubuntu = os.environ.get('PY_ENV', 'mac') == 'ubuntu'
 def test_proxy(driver, proxy_url):
     try:
         driver.set_page_load_timeout(20)
-        driver.get('http://httpbin.org/ip')
+        driver.get('https://sh.zu.ke.com/zufang')
         # requests.get('http://httpbin.org/ip',
         #              proxies={"http": "http://{}".format(proxy_url)})
         return True
