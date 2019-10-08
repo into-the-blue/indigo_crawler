@@ -28,7 +28,7 @@ class GrapPage(object):
         return get_driver_with_proxy()
 
     def check_driver(self):
-        if(self.driver_period >= 15):
+        if(self.driver_period >= 10):
             _print('GET NEW PROXY')
             current_url = self.driver.current_url
             self.driver.quit()

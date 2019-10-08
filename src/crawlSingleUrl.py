@@ -125,13 +125,27 @@ def get_info_of_single_url(driver, url):
             minimal_lease = rent_peroid
             maximal_lease = rent_peroid
 
-        # 所在楼层
-        floor = driver.find_element_by_xpath(
-            "//div[@class='content__article__info']/ul/li[8]").text[3:].split('/')[0]
-
-        # 总楼层
-        building_total_floors = int(driver.find_element_by_xpath(
-            "//div[@class='content__article__info']/ul/li[8]").text[3:].split('/')[1].replace('层', ''))
+        ### 楼层
+        building_floor_text = driver.find_element_by_xpath(
+            "//div[@class='content__article__info']/ul/li[8]").text[3:]
+        if(building_floor_text.find('/') != -1):
+            # 所在楼层
+            floor = building_floor_text.split('/')[0]
+            # 总楼层
+            building_total_floors = int(building_floor_text.split('/')[1].replace('层', ''))
+        else:
+            # 所在楼层
+            res = re.findall('\w+(?=\d)',building_floor_text)
+            if(len(res) > 0):
+                floor = res[0]
+            else:
+                floor = building_floor_text
+            # 总楼层
+            res2 = re.findall('\d+',building_floor_text)
+            if(len(res2) > 0):
+                building_total_floors = res2[0]
+            else:
+                building_total_floors = building_floor_text
 
         # 车位
         carport = driver.find_element_by_xpath(
