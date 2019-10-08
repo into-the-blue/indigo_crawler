@@ -12,7 +12,7 @@ is_ubuntu = os.environ.get('PY_ENV', 'mac') == 'ubuntu'
 
 def test_proxy(driver, proxy_url):
     try:
-        driver.set_page_load_timeout(20)
+        driver.set_page_load_timeout(10)
         driver.get('https://sh.zu.ke.com/zufang')
         # requests.get('http://httpbin.org/ip',
         #              proxies={"http": "http://{}".format(proxy_url)})
@@ -66,7 +66,7 @@ def init_driver():
 def get_driver_with_proxy(times=0):
     if(times >= 10):
         _print('no available proxy')
-        raise 'no available proxy'
+        raise Exception('no available proxy')
     # proxy_url = get_proxy().get('proxy')
     # prox = Proxy()
     # prox.proxy_type = ProxyType.MANUAL

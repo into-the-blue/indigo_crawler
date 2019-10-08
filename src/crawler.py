@@ -11,7 +11,7 @@ import os
 from crawlSingleUrl import get_info_of_single_url
 from proxy_pool import get_driver_with_proxy
 from db import DB
-from helper import _print
+from helper import _print, _error
 is_ubuntu = os.environ.get('PY_ENV', 'mac') == 'ubuntu'
 
 db = DB()
@@ -27,8 +27,8 @@ class GrapPage(object):
     def initDriver(self):
         return get_driver_with_proxy()
 
-    def check_driver(self):
-        if(self.driver_period >= 10):
+    def check_driver(self, force=False):
+        if(self.driver_period >= 10 or force):
             _print('GET NEW PROXY')
             current_url = self.driver.current_url
             self.driver.quit()
@@ -38,6 +38,18 @@ class GrapPage(object):
             return self.driver
         self.driver_period += 1
         return self.driver
+
+    def _get(self, url, times=0):
+        if(times > 5):
+            raise Exception('TOO MANY TIMES')
+        try:
+            self.driver.set_page_load_timeout(10)
+            self.driver.get(url)
+            return self.driver
+        except Exception as e:
+            _error('PROXY BLOCKED', e)
+            self.check_driver(force=True)
+            return self._get(url, times=times + 1)
 
     def renew_driver(self):
         current_url = self.driver.current_url
@@ -130,8 +142,7 @@ class GrapPage(object):
 
     def crawl_data_from_urls(self, urls):
         for url in tqdm(urls):
-            driver = self.check_driver()
-            driver.get(url)
+            driver = self._get(url)
             _print('START', url)
             try:
                 time.sleep(2)
@@ -142,8 +153,8 @@ class GrapPage(object):
                 else:
                     db.upsert_apartment(info.get('house_code'), info)
                     _print("SUCCESS", url)
-            except:
-                _print('ENCOUNTER ERR', url)
+            except Exception as e:
+                _error('ENCOUNTER ERR', url, Exception)
 
     def start_filling_missing_info(self):
         _print('START FILLING')
