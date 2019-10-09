@@ -72,26 +72,32 @@ class DB(object):
         self.station_col = self.indigo.stations
         self.apartments = self.indigo.apartments
 
+    def find_apartment_by_house_id(self, house_id):
+        return self.apartments.find_one(
+            {'house_id': house_id, 'title': {'$exists': True}})
+
     def exist_apartment(self, house_code):
         house_id = extract_house_id(house_code)
-        res = self.apartments.find_one(
-            {'house_id': house_id, 'title': {'$exists': True}})
+        res = self.find_apartment_by_house_id(house_id)
         return bool(res)
 
     def exist_apartment_from_url(self, url):
         house_code = extract_house_code_from_url(url)
         return self.exist_apartment(house_code)
 
-    def update_apartment(self, house_code, doc):
-        house_id = extract_house_id(house_code)
+    def update_apartment(self, house_id, doc):
         res = self.apartments.update_one({'house_id': house_id}, {
             '$set': doc
         })
-        pass
 
     def upsert_apartment(self, house_code, doc):
         house_id = extract_house_id(house_code)
-        return self.apartments.replace_one({'house_id': house_id}, doc, upsert=True)
+        res = self.apartments.find_one({'house_id': house_id})
+        if(bool(res)):
+            self.update_apartment(house_id, doc)
+        else:
+            self.apartments.insert_one(doc)
+        # return self.apartments.replace_one({'house_id': house_id}, doc, upsert=True)
 
     def delete_apartment_from_house_id(self, house_id):
         return self.apartments.delete_one({'house_id': house_id})
@@ -105,7 +111,36 @@ class DB(object):
         else:
             self.delete_apartment_from_house_id(house_id)
 
-    def save_url(self, url):
+    def save_url_with_station(self, url, station_info):
+        house_code = extract_house_code_from_url(url)
+        house_id = extract_house_id(house_code)
+        station_id = station_info.get('station_id')
+        line_id = station_info.get('line_id')
+        if(self.exist_apartment(house_code)):
+            res = self.find_apartment_by_house_id(house_id)
+            stations_ids = res.get('stations_ids', [])
+            line_ids = res.get('line_ids', [])
+            if (line_id not in line_ids) or (station_id not in stations_ids):
+                stations_ids.append(station_id)
+                stations_ids = list(set(stations_ids))
+                line_ids.append(line_id)
+                line_ids = list(set(line_ids))
+                self.update_apartment(
+                    house_id, {'line_ids': line_ids, 'stations_ids': stations_ids})
+            return True
+        else:
+            self.apartments.insert_one({
+                'house_url': url,
+                'house_code': house_code,
+                'house_id': house_id,
+                'station_ids': [station_id],
+                'line_ids': [line_id]
+            })
+            return False
+
+    def save_url(self, url, station_info=None):
+        if(station_info is not None):
+            return self.save_url_with_station(url, station_info)
         house_code = extract_house_code_from_url(url)
         house_id = extract_house_id(house_code)
         if (self.exist_apartment(house_code)):
@@ -121,3 +156,6 @@ class DB(object):
     def find_missing_apartments(self):
         res = self.apartments.find({'title': {"$exists": False}})
         return list(map(lambda x: x.get('house_url'), res))
+
+    def find_all_stations(self):
+        return list(self.station_col.find({'city': 'sh'}))

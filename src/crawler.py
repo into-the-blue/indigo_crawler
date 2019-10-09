@@ -92,7 +92,7 @@ class GrapPage(object):
         except:
             return 0
 
-    def get_urls_in_page(self):
+    def get_urls_in_page(self, station_info=None):
         '''
             get urls in one page
         '''
@@ -100,23 +100,23 @@ class GrapPage(object):
         for i in self.driver.find_elements_by_xpath("//a[@class='content__list--item--aside']"):
             url = i.get_attribute('href')
             if 'apartment' not in url:
-                exist = db.save_url(url)
+                exist = db.save_url(url, station_info)
                 if exist is False:
                     urls.append(url)
         return urls
 
-    def get_all_urls(self):
+    def get_all_urls(self, station_info=None):
         '''
         loop all pages, get all urls
         '''
         page_count = self.read_page_count()
         all_urls = []
         if(page_count != 0):
-            all_urls = self.get_urls_in_page()
+            all_urls = self.get_urls_in_page(station_info)
             for _ in tqdm(range(page_count - 1)):
                 time.sleep(2)
                 self.go_to_next_page()
-                urls = self.get_urls_in_page()
+                urls = self.get_urls_in_page(station_info)
                 all_urls += urls
                 _print('URLS SAVED!', len(urls), 'TOTAL:', len(all_urls))
         all_urls = list(set(all_urls))
@@ -125,20 +125,29 @@ class GrapPage(object):
     def click_order_by_time(self):
         self.driver.find_element_by_link_text('最新上架').click()
 
-    def get_all_station_urls(self, driver):
-        stations = driver.find_elements_by_xpath(
-            "//div[@class='filter__wrapper w1150']/ul[4]/li/a")
-        filterd = filter(lambda x: x.text != '不限', stations)
-        filterd = list(map(lambda x: x.get_attribute('href'), filterd))
-        return filterd
+    # def click_order_by_metro(self):
+    #     self.driver.find_element_by_link_text('按地铁线').click()
 
-    def get_all_line_urls(self, driver):
-        driver.find_element_by_link_text('按地铁线').click()
-        lines = driver.find_elements_by_xpath(
-            "//div[@class='filter__wrapper w1150']/ul[3]/li/a")
-        filterd = filter(lambda x: x.text != '不限', lines)
-        filterd = list(map(lambda x: x.get_attribute('href'), filterd))
-        return filterd
+    # def get_all_lines(self):
+    #     elms = self.driver.find_elements_by_xpath("//div[@class='filter__wrapper w1150']/ul[3]/*")
+    #     return elms[1:]
+
+    # def get_all_stations_in_line(self):
+    #     elms = self.driver.find_elements_by_xpath("//div[@class='filter__wrapper w1150']/ul[4]/*")
+    #     return elms[1:]
+
+    # def get_all_station_urls(self, driver):
+    #     stations = driver.find_elements_by_xpath(
+    #         "//div[@class='filter__wrapper w1150']/ul[4]/li/a")
+    #     filterd = list(map(lambda x: x.get_attribute('href'), stations[1:]))
+    #     return filterd
+
+    # def get_all_line_urls(self, driver):
+    #     self.click_order_by_metro()
+    #     lines = driver.find_elements_by_xpath(
+    #         "//div[@class='filter__wrapper w1150']/ul[3]/li/a")
+    #     filterd = list(map(lambda x: x.get_attribute('href'), lines[1:]))
+    #     return filterd
 
     def crawl_data_from_urls(self, urls):
         for url in tqdm(urls):
@@ -177,18 +186,19 @@ class GrapPage(object):
         urls = self.get_all_urls()
         self.crawl_data_from_urls(urls)
 
-    def start_by_lines(self):
-        self.driver.get(self.city_url)
-        all_line_urls = self.get_all_line_urls(self.driver)
-        all_station_urls = []
-        for line_url in all_line_urls:
-            self.driver.get(line_url)
-            all_station_urls += self.get_all_station_urls(self.driver)
-        all_station_urls = list(set(all_station_urls))
-        _print(len(all_station_urls))
-        self.crawl_data_from_urls(all_station_urls)
-        # for station_url in tqdm(all_station_urls):
-        #     self.get_all_urls(self.driver)
+    def start_by_metro(self, latest=True):
+        stations = DB.find_all_stations()
+        for station in tqdm(stations):
+            url = station.get('url')
+            station_id = station.get('station_id')
+            line_id = station.get('line_id')
+            if latest:
+                self.click_order_by_time()
+            all_urls = self.get_all_urls(station)
+            _print(station_id, 'CRAWL URL BY STATION DONE, START CRAWL INFO')
+            self.crawl_data_from_urls(all_urls)
+            _print(station_id, 'DONE')
+        print('DONE')
 
     def quit(self):
         self.driver.quit()
