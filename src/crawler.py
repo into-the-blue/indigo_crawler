@@ -184,7 +184,7 @@ class GrapPage(object):
         self.crawl_data_from_urls(urls)
 
     def start_by_metro(self, latest=True):
-        stations = DB.find_all_stations()
+        stations = db.find_all_stations()
         for station in tqdm(stations):
             url = station.get('url')
             station_id = station.get('station_id')
