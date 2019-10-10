@@ -12,7 +12,7 @@ services:
       context: .
     image: meanless/indigo_crawler
     working_dir: /apps/crawler
-    command: ['python3', '-u', 'app.py']
+    command: ['python3', '-u', 'cron_job.py']
     depends_on:
       - mongo
       - chrome
