@@ -1,6 +1,7 @@
 import pymongo
 import os
 from helper import extract_house_id, extract_house_code_from_url
+import datetime
 db_username = os.environ.get('DB_USERNAME')
 db_password = os.environ.get('DB_PASSWORD')
 db_host = os.environ.get('DB_HOST')
@@ -60,6 +61,10 @@ db_host = os.environ.get('DB_HOST')
 '''
 
 
+def currentDate():
+    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
 class DB(object):
     def __init__(self):
         self.initDb()
@@ -71,6 +76,7 @@ class DB(object):
         self.line_col = self.indigo.lines
         self.station_col = self.indigo.stations
         self.apartments = self.indigo.apartments
+        self.cronjob = self.indigo.cronjob
 
     def find_apartment_by_house_id(self, house_id):
         return self.apartments.find_one(
@@ -85,18 +91,15 @@ class DB(object):
         house_code = extract_house_code_from_url(url)
         return self.exist_apartment(house_code)
 
-    def update_apartment(self, house_id, doc):
+    def update_apartment(self, house_id, doc, upsert=False):
         res = self.apartments.update_one({'house_id': house_id}, {
             '$set': doc
-        })
+        }, upsert=upsert)
 
     def upsert_apartment(self, house_code, doc):
         house_id = extract_house_id(house_code)
-        res = self.apartments.find_one({'house_id': house_id})
-        if(bool(res)):
-            self.update_apartment(house_id, doc)
-        else:
-            self.apartments.insert_one(doc)
+        self.update_apartment(house_id, doc, upsert=True)
+
         # return self.apartments.replace_one({'house_id': house_id}, doc, upsert=True)
 
     def delete_apartment_from_house_id(self, house_id):
@@ -159,3 +162,16 @@ class DB(object):
 
     def find_all_stations(self):
         return list(self.station_col.find({'city': 'sh'}))
+
+    def start_cron_job(self, job_type, status='running'):
+        return self.cronjob.insert_one({'job_type': job_type, 'start_time': currentDate(), 'status': 'running', 'error': None}).inserted_id
+
+    def update_cron_job(self, _id, status='done', error=None):
+        self.cronjob.update_one({'_id': _id}, {'$set': {
+            'status': status,
+            'error': error,
+            'end_time': currentDate()
+        }})
+
+
+db = DB()

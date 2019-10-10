@@ -5,6 +5,7 @@ from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from pytz import utc,timezone
 from crawler import GrapPage
 from helper import _error, logger
+from db import db
 
 zh_sh = timezone('Asia/Shanghai')
 
@@ -27,30 +28,37 @@ scheduler = BlockingScheduler(
 
 
 def start_by_metro():
-    return print('start_filling_missing')
     ins = GrapPage('sh','https://sh.zu.ke.com/zufang')
+    _id = db.start_cron_job('crawl_by_metro')
     try:
         ins.start_by_metro()
+        db.update_cron_job(_id)
     except Exception as e:
+        db.update_cron_job(_id,'error',str(e))
         _error(e)
     finally:
         ins.quit()
 
 def start_by_latest():
     ins = GrapPage('sh','https://sh.zu.ke.com/zufang')
+    _id = db.start_cron_job('crawl_by_latest')
     try:
         ins.start_by_latest()
+        db.update_cron_job(_id)
     except Exception as e:
+        db.update_cron_job(_id,'error',str(e))
         _error(e)
     finally:
         ins.quit()
 
 def start_filling_missing():
-    return print('start_filling_missing')
     ins = GrapPage('sh','https://sh.zu.ke.com/zufang')
+    _id = db.start_cron_job('fill_missing_info')
     try:
         ins.start_filling_missing_info()
+        db.update_cron_job(_id)
     except Exception as e:
+        db.update_cron_job(_id,'error',str(e))
         _error(e)
     finally:
         ins.quit()

@@ -10,12 +10,9 @@ import re
 import os
 from crawlSingleUrl import get_info_of_single_url
 from proxy_pool import get_driver_with_proxy
-from db import DB
+from db import db
 from helper import _print, _error
 is_ubuntu = os.environ.get('PY_ENV', 'mac') == 'ubuntu'
-
-db = DB()
-
 
 class GrapPage(object):
     def __init__(self, city, city_url):
