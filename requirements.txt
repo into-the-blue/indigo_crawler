@@ -4,4 +4,6 @@ pandas
 tqdm 
 pymongo 
 bs4 
-requests 
+requests
+apscheduler
+pytz
