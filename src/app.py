@@ -77,8 +77,8 @@ def get_start():
     if(token != 'q1w2e3r4'):
         return Response('Not Found'), 404
     _isCrawling = isCrawling
-    if(_isCrawling is False):
-        asyncStartCrawl()
+    # if(_isCrawling is False):
+    #     asyncStartCrawl()
     return Response(str(_isCrawling))
 
 
@@ -88,8 +88,8 @@ def get_fill_empty():
     if(token != 'q1w2e3r4'):
         return Response('Not Found'), 404
     _isCrawling = isCrawling
-    if(_isCrawling is False):
-        asyncStartFillEmpty()
+    # if(_isCrawling is False):
+    #     asyncStartFillEmpty()
     return Response(str(_isCrawling))
 
 
@@ -99,8 +99,8 @@ def get_latest():
     if(token != 'q1w2e3r4'):
         return Response('Not Found'), 404
     _isCrawling = isCrawling
-    if(_isCrawling is False):
-        asyncStartCrawlLatest()
+    # if(_isCrawling is False):
+    #     asyncStartCrawlLatest()
     return Response(str(_isCrawling))
 
 
