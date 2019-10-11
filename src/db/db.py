@@ -2,9 +2,9 @@ import pymongo
 import os
 from utils.util import extract_house_id, extract_house_code_from_url, currentDate
 import datetime
-db_username = os.environ.get('DB_USERNAME')
-db_password = os.environ.get('DB_PASSWORD')
-db_host = os.environ.get('DB_HOST')
+db_username = os.getenv('DB_USERNAME')
+db_password = os.getenv('DB_PASSWORD')
+db_host = os.getenv('DB_HOST')
 '''
 {'type': '整租',
  'title': '整租·骏豪国际 1室1厅 南',
@@ -168,6 +168,9 @@ class DB(object):
             'error': error,
             'end_time': currentDate()
         }})
+
+    def findApartmentsWithoutCoor(self, limit=50):
+        return self.apartments.find({'lat': {'$exists': False}, 'title': {'$exists': True}}).limit(limit)
 
 
 db = DB()

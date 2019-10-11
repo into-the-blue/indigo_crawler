@@ -10,9 +10,11 @@ import re
 import os
 from crawlSingleUrl import get_info_of_single_url
 from proxy_pool import get_driver_with_proxy
-from db import db
+from baiduMap.getCoordinates import getGeoInfo
+from db.db import db
 from utils.util import _print, _error
-is_ubuntu = os.environ.get('PY_ENV', 'mac') == 'ubuntu'
+is_ubuntu = os.getenv('PY_ENV', 'mac') == 'ubuntu'
+
 
 class GrapPage(object):
     def __init__(self, city, city_url):
@@ -145,6 +147,17 @@ class GrapPage(object):
     #         "//div[@class='filter__wrapper w1150']/ul[3]/li/a")
     #     filterd = list(map(lambda x: x.get_attribute('href'), lines[1:]))
     #     return filterd
+    def getLocationInfo(self,apartment_info):
+        result = getGeoInfo(apartment_info.get('city'), apartment_info.get(
+                        'district'), apartment_info.get('community_name'), apartment_info.get('bizcircle'))
+        lng = result['location']['lng']
+        lat = result['location']['lat']
+        location_info = {
+            'lng': lng,
+            'lat': lat,
+            'geo_info': result
+        }
+        return location_info
 
     def crawl_data_from_urls(self, urls):
         for url in tqdm(urls):
@@ -157,7 +170,9 @@ class GrapPage(object):
                     db.delete_apartment_from_url(url)
                     _print('EXPIRED', url)
                 else:
-                    db.upsert_apartment(info.get('house_code'), info)
+                    location_info = self.getLocationInfo(info)
+                    doc = {**info, **location_info}
+                    db.upsert_apartment(info.get('house_code'), doc)
                     _print("SUCCESS", url)
             except Exception as e:
                 _error('ENCOUNTER ERR', url, Exception)
@@ -185,7 +200,7 @@ class GrapPage(object):
 
     def start_by_metro(self, latest=True):
         stations = db.find_all_stations()
-        for station in tqdm(stations):
+        for station in stations:
             url = station.get('url')
             station_id = station.get('station_id')
             line_id = station.get('line_id')

@@ -4,18 +4,16 @@ from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from utils.util import _print
-proxy_server = os.environ.get('PROXY_SERVER')
-chrome_driver_pth = os.environ.get(
+proxy_server = os.getenv('PROXY_SERVER')
+chrome_driver_pth = os.getenv(
     'CHROME_DRIVER_PTH', '/Users/origami/Downloads/chromedriver')
-is_ubuntu = os.environ.get('PY_ENV', 'mac') == 'ubuntu'
+is_ubuntu = os.getenv('PY_ENV', 'mac') == 'ubuntu'
 
 
 def test_proxy(driver, proxy_url):
     try:
         driver.set_page_load_timeout(10)
         driver.get('https://sh.zu.ke.com/zufang')
-        # requests.get('http://httpbin.org/ip',
-        #              proxies={"http": "http://{}".format(proxy_url)})
         return True
     except:
         return False
@@ -67,16 +65,6 @@ def get_driver_with_proxy(times=0):
     if(times >= 10):
         _print('no available proxy')
         raise Exception('no available proxy')
-    # proxy_url = get_proxy().get('proxy')
-    # prox = Proxy()
-    # prox.proxy_type = ProxyType.MANUAL
-    # prox.http_proxy = proxy_url
-    # # prox.socks_proxy = "ip_addr:port"
-    # # prox.ssl_proxy = "ip_addr:port"
-    # capabilities = webdriver.DesiredCapabilities.CHROME
-    # prox.add_to_capabilities(capabilities)
-    # driver = webdriver.Chrome(
-    #     chrome_driver_pth, desired_capabilities=capabilities)
     driver, proxy_url = init_driver()
     ok = test_proxy(driver, proxy_url)
     _print('PROXY', proxy_url, 'WORKS?', ok)

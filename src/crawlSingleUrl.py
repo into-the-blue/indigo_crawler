@@ -293,7 +293,7 @@ def get_info_of_single_url(driver, url):
                 columns=['成交日期', '居室', '面积', '租赁方式', '出租价格']
             ).to_json(orient='records', force_ascii=False)
         except:
-            _print("无小区最新成交信息：", url)
+            # _print("无小区最新成交信息：", url)
             community_deals = ''
 
         # 房源描述
