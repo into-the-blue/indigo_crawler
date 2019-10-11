@@ -1,6 +1,6 @@
 import pymongo
 import os
-from helper import extract_house_id, extract_house_code_from_url
+from helper import extract_house_id, extract_house_code_from_url, currentDate
 import datetime
 db_username = os.environ.get('DB_USERNAME')
 db_password = os.environ.get('DB_PASSWORD')
@@ -59,10 +59,6 @@ db_host = os.environ.get('DB_HOST')
  'floor_accessibility': 1,
  'subway_accessibility': 1}
 '''
-
-
-def currentDate():
-    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
 
 class DB(object):

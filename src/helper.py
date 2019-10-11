@@ -1,8 +1,10 @@
 import re
 import sys
 import logging
+from datetime import datetime, timezone, timedelta
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(stream=sys.stdout, level=logging.INFO,
+                    datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger('INDIGO')
 
 
@@ -24,3 +26,8 @@ def _print(*args):
 
 def _error(*args):
     logger.error(normal_msg(args))
+
+
+def currentDate():
+    tz = timezone(timedelta(hours=8))
+    return datetime.now(tz=tz).strftime('%Y-%m-%d %H:%M:%S')
