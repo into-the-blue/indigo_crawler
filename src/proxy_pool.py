@@ -3,7 +3,7 @@ import os
 from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from helper import _print
+from utils.util import _print
 proxy_server = os.environ.get('PROXY_SERVER')
 chrome_driver_pth = os.environ.get(
     'CHROME_DRIVER_PTH', '/Users/origami/Downloads/chromedriver')

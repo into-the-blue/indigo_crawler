@@ -11,7 +11,7 @@ import os
 from crawlSingleUrl import get_info_of_single_url
 from proxy_pool import get_driver_with_proxy
 from db import db
-from helper import _print, _error
+from utils.util import _print, _error
 is_ubuntu = os.environ.get('PY_ENV', 'mac') == 'ubuntu'
 
 class GrapPage(object):

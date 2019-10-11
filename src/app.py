@@ -6,7 +6,7 @@ import asyncio
 from crawler import GrapPage
 from threading import Thread
 import time
-from helper import _print
+from utils.util import _print
 app = Flask(__name__)
 dir = path.dirname(__file__)
 PORT = 5001

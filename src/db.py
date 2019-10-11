@@ -1,6 +1,6 @@
 import pymongo
 import os
-from helper import extract_house_id, extract_house_code_from_url, currentDate
+from utils.util import extract_house_id, extract_house_code_from_url, currentDate
 import datetime
 db_username = os.environ.get('DB_USERNAME')
 db_password = os.environ.get('DB_PASSWORD')
