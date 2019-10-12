@@ -38,7 +38,6 @@ active_proxy = None
 
 def delete_proxy(proxy):
     _proxy = proxy if bool(proxy) else active_proxy
-    
     if(bool(_proxy) is False):
         return
     requests.get(f"http://{proxy_server}/delete/?proxy={proxy}")
