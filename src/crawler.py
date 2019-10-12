@@ -215,12 +215,14 @@ class GrapPage(object):
             url = station.get('url')
             station_id = station.get('station_id')
             line_id = station.get('line_id')
+            _print("START", station_id, line_id)
             if latest:
                 self.click_order_by_time()
             all_urls = self.get_all_urls(station)
-            _print(station_id, 'CRAWL URL BY STATION DONE, START CRAWL INFO')
+            _print(station_id, line_id,
+                   'CRAWL URL BY STATION DONE, START CRAWL INFO')
             self.crawl_data_from_urls(all_urls, log=False)
-            _print(station_id, 'DONE')
+            _print(station_id, line_id, 'DONE')
         print('DONE', count)
 
     def quit(self):
