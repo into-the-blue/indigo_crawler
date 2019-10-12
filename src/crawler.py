@@ -52,13 +52,6 @@ class GrapPage(object):
             self.check_driver(force=True, open_last_page=False)
             return self._get(url, times=times + 1)
 
-    def renew_driver(self):
-        current_url = self.driver.current_url
-        self.driver.quit()
-        self.driver = self.initDriver()
-        self.driver.get(current_url)
-        return self.driver
-
     def go_to_next_page(self):
         driver = self.check_driver()
         try:
@@ -79,7 +72,7 @@ class GrapPage(object):
                 elm.click()
             except:
                 _print('BLOCKED, CHANGE PROXY')
-                self.renew_driver()
+                self.check_driver(force=True)
 
     def read_page_count(self):
         '''
@@ -123,12 +116,14 @@ class GrapPage(object):
         all_urls = list(set(all_urls))
         return all_urls
 
-    def click_order_by_time(self):
+    def click_order_by_time(self, retry=True):
         try:
             self.driver.find_element_by_link_text('最新上架').click()
         except Exception as e:
-            _print(self.driver.page_source)
             _print('UNABLE TO LOCATE 最新上架')
+            if(retry):
+                self.check_driver(force=True)
+                self.click_order_by_time(retry=False)
 
     # def click_order_by_metro(self):
     #     self.driver.find_element_by_link_text('按地铁线').click()
@@ -215,6 +210,7 @@ class GrapPage(object):
             url = station.get('url')
             station_id = station.get('station_id')
             line_id = station.get('line_id')
+            self._get(url)
             _print("START", station_id, line_id)
             if latest:
                 self.click_order_by_time()

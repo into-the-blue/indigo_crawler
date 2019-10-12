@@ -116,15 +116,15 @@ class DB(object):
         line_id = station_info.get('line_id')
         if(self.exist_apartment(house_code)):
             res = self.find_apartment_by_house_id(house_id)
-            stations_ids = res.get('stations_ids', [])
+            station_ids = res.get('station_ids', [])
             line_ids = res.get('line_ids', [])
-            if (line_id not in line_ids) or (station_id not in stations_ids):
-                stations_ids.append(station_id)
-                stations_ids = list(set(stations_ids))
+            if (line_id not in line_ids) or (station_id not in station_ids):
+                station_ids.append(station_id)
+                station_ids = list(set(station_ids))
                 line_ids.append(line_id)
                 line_ids = list(set(line_ids))
                 self.update_apartment(
-                    house_id, {'line_ids': line_ids, 'stations_ids': stations_ids})
+                    house_id, {'line_ids': line_ids, 'station_ids': station_ids})
             return True
         else:
             self.apartments.insert_one({
