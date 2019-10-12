@@ -33,7 +33,13 @@ def get_proxy():
     return requests.get(f"http://{proxy_server}/get/").json()
 
 
+active_proxy = None
+
+
 def delete_proxy(proxy):
+    _proxy = proxy if bool(proxy) else active_proxy
+    if(bool(_proxy) is False):
+        return
     requests.get(f"http://{proxy_server}/delete/?proxy={proxy}")
 
 
@@ -69,6 +75,7 @@ def get_driver_with_proxy(times=0):
     ok = test_proxy(driver, proxy_url)
     _print('PROXY', proxy_url, 'WORKS?', ok)
     if(ok):
+        active_proxy = proxy_url
         driver.maximize_window()
         return driver
     else:

@@ -99,7 +99,7 @@ class DB(object):
         # return self.apartments.replace_one({'house_id': house_id}, doc, upsert=True)
 
     def delete_apartment_from_house_id(self, house_id):
-        return self.apartments.delete_one({'house_id': house_id})
+        return self.apartments.delete_one({'house_id': house_id, 'title': {'$exists': False}})
 
     def delete_apartment_from_url(self, url):
         house_code = extract_house_code_from_url(url)
@@ -107,8 +107,7 @@ class DB(object):
         if(self.exist_apartment(house_code)):
             self.apartments.update_one(
                 {'house_id': house_id}, {'$set': {'expired': True}})
-        else:
-            self.delete_apartment_from_house_id(house_id)
+        self.delete_apartment_from_house_id(house_id)
 
     def save_url_with_station(self, url, station_info):
         house_code = extract_house_code_from_url(url)

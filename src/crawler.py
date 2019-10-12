@@ -9,7 +9,7 @@ import pymongo
 import re
 import os
 from crawlSingleUrl import get_info_of_single_url
-from proxy_pool import get_driver_with_proxy
+from proxy_pool import get_driver_with_proxy, delete_proxy
 from baiduMap.getCoordinates import getGeoInfo
 from db.db import db
 from utils.util import _print, _error
@@ -26,13 +26,14 @@ class GrapPage(object):
     def initDriver(self):
         return get_driver_with_proxy()
 
-    def check_driver(self, force=False):
+    def check_driver(self, open_last_page=True,  force=False):
         if(self.driver_period >= 10 or force):
             _print('GET NEW PROXY')
             current_url = self.driver.current_url
             self.driver.quit()
             self.driver = self.initDriver()
-            self.driver.get(current_url)
+            if open_last_page:
+                self.driver.get(current_url)
             self.driver_period = 0
             return self.driver
         self.driver_period += 1
@@ -47,7 +48,8 @@ class GrapPage(object):
             return self.driver
         except Exception as e:
             _error('PROXY BLOCKED', e)
-            self.check_driver(force=True)
+            delete_proxy()
+            self.check_driver(force=True, open_last_page=False)
             return self._get(url, times=times + 1)
 
     def renew_driver(self):
@@ -122,7 +124,11 @@ class GrapPage(object):
         return all_urls
 
     def click_order_by_time(self):
-        self.driver.find_element_by_link_text('最新上架').click()
+        try:
+            self.driver.find_element_by_link_text('最新上架').click()
+        except Exception as e:
+            _print(self.driver.page_source)
+            _print('UNABLE TO LOCATE 最新上架')
 
     # def click_order_by_metro(self):
     #     self.driver.find_element_by_link_text('按地铁线').click()
@@ -147,9 +153,9 @@ class GrapPage(object):
     #         "//div[@class='filter__wrapper w1150']/ul[3]/li/a")
     #     filterd = list(map(lambda x: x.get_attribute('href'), lines[1:]))
     #     return filterd
-    def getLocationInfo(self,apartment_info):
+    def getLocationInfo(self, apartment_info):
         result = getGeoInfo(apartment_info.get('city'), apartment_info.get(
-                        'district'), apartment_info.get('community_name'), apartment_info.get('bizcircle'))
+            'district'), apartment_info.get('community_name'), apartment_info.get('bizcircle'))
         lng = result['location']['lng']
         lat = result['location']['lat']
         location_info = {
@@ -215,11 +221,3 @@ class GrapPage(object):
     def quit(self):
         self.driver.quit()
 
-
-# if __name__ == '__main__':
-#     ins = GrapPage('sh', 'https://sh.zu.ke.com/zufang')
-#     try:
-#         ins.start()
-#     finally:
-#         pass
-#         ins.quit()

@@ -63,7 +63,7 @@ def start_filling_missing():
     finally:
         ins.quit()
 
-def filling_missing_geo_info():
+def _filling_missing_geo_info():
     datas = list(db.findApartmentsWithoutCoor())
     lth = len(datas)
     if(lth > 0):
@@ -84,10 +84,19 @@ def filling_missing_geo_info():
                 'geo_info': result
             })
         _print(lth, 'BATCH DONE')
-        return filling_missing_geo_info()
+        return _filling_missing_geo_info()
     else:
         _print('FILL GEO INFO DONE')
 
+def filling_missing_geo_info():
+    _id = db.start_cron_job('filling_missing_geo_info')
+    try:
+        _filling_missing_geo_info()
+        db.update_cron_job(_id)
+    except Exception as e:
+        db.update_cron_job(_id,'error',str(e))
+        _error(e)
+        
 # everyday 8:00, 18:00
 scheduler.add_job(start_by_metro,trigger='cron',hour='8,18')
 
