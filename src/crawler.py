@@ -165,21 +165,24 @@ class GrapPage(object):
         }
         return location_info
 
-    def crawl_data_from_urls(self, urls):
+    def crawl_data_from_urls(self, urls, log=True):
         for url in tqdm(urls):
             driver = self._get(url)
-            _print('START', url)
+            if log:
+                _print('START', url)
             try:
                 time.sleep(2)
                 info = get_info_of_single_url(driver, url)
                 if info is None:
                     db.delete_apartment_from_url(url)
-                    _print('EXPIRED', url)
+                    if log:
+                        _print('EXPIRED', url)
                 else:
                     location_info = self.getLocationInfo(info)
                     doc = {**info, **location_info}
                     db.upsert_apartment(info.get('house_code'), doc)
-                    _print("SUCCESS", url)
+                    if log:
+                        _print("SUCCESS", url)
             except Exception as e:
                 _error('ENCOUNTER ERR', url, Exception)
 
@@ -206,7 +209,9 @@ class GrapPage(object):
 
     def start_by_metro(self, latest=True):
         stations = db.find_all_stations()
+        count = 0
         for station in stations:
+            count += 1
             url = station.get('url')
             station_id = station.get('station_id')
             line_id = station.get('line_id')
@@ -214,10 +219,9 @@ class GrapPage(object):
                 self.click_order_by_time()
             all_urls = self.get_all_urls(station)
             _print(station_id, 'CRAWL URL BY STATION DONE, START CRAWL INFO')
-            self.crawl_data_from_urls(all_urls)
+            self.crawl_data_from_urls(all_urls, log=False)
             _print(station_id, 'DONE')
-        print('DONE')
+        print('DONE', count)
 
     def quit(self):
         self.driver.quit()
-
