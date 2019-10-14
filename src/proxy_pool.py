@@ -36,7 +36,7 @@ def get_proxy():
 active_proxy = None
 
 
-def delete_proxy(proxy):
+def delete_proxy(proxy=None):
     _proxy = proxy if bool(proxy) else active_proxy
     if(bool(_proxy) is False):
         return
