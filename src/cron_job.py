@@ -104,7 +104,7 @@ def filling_missing_geo_info():
 
 # everyday 8:00, 18:00
 scheduler.add_job(start_by_metro, trigger='cron', hour='11', args=[True])
-scheduler.add_job(start_by_metro, trigger='cron', hour='17')
+scheduler.add_job(start_by_metro, trigger='cron', hour='19')
 # everyday 0:00
 scheduler.add_job(start_filling_missing, trigger='cron', hour='0')
 
