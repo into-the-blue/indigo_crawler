@@ -89,7 +89,7 @@ class DB(object):
 
     def update_apartment(self, house_id, doc, upsert=False):
         res = self.apartments.update_one({'house_id': house_id}, {
-            '$set': {**doc,'updated_at': datetime.now()}
+            '$set': {**doc,'updated_time': datetime.now()}
         }, upsert=upsert)
 
     def upsert_apartment(self, house_code, doc):
@@ -106,7 +106,7 @@ class DB(object):
         house_id = extract_house_id(house_code)
         if(self.exist_apartment(house_code)):
             self.apartments.update_one(
-                {'house_id': house_id}, {'$set': {'expired': True, 'updated_at': datetime.now()}})
+                {'house_id': house_id}, {'$set': {'expired': True, 'updated_time': datetime.now()}})
         self.delete_apartment_from_house_id(house_id)
 
     def save_url_with_station(self, url, station_info):
@@ -133,7 +133,7 @@ class DB(object):
                 'house_id': house_id,
                 'station_ids': [station_id],
                 'line_ids': [line_id],
-                'created_at': datetime.now()
+                'created_time': datetime.now()
             })
             return False
 
@@ -149,7 +149,7 @@ class DB(object):
                 'house_url': url,
                 'house_code': house_code,
                 'house_id': house_id,
-                'created_at': datetime.now()
+                'created_time': datetime.now()
             })
             return False
 
