@@ -205,7 +205,7 @@ class GrapPage(object):
     def start_by_metro(self, latest=True, reverse=False):
         stations = db.find_all_stations()
         if(reverse):
-            stations = stations[::-1]
+            stations.reverse()
         count = 0
         for station in stations:
             count += 1
