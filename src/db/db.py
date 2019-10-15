@@ -1,7 +1,7 @@
 import pymongo
 import os
 from utils.util import extract_house_id, extract_house_code_from_url, currentDate
-import datetime
+from datetime import datetime
 db_username = os.getenv('DB_USERNAME')
 db_password = os.getenv('DB_PASSWORD')
 db_host = os.getenv('DB_HOST')
@@ -89,7 +89,7 @@ class DB(object):
 
     def update_apartment(self, house_id, doc, upsert=False):
         res = self.apartments.update_one({'house_id': house_id}, {
-            '$set': doc
+            '$set': {**doc,'updated_at': datetime.now()}
         }, upsert=upsert)
 
     def upsert_apartment(self, house_code, doc):
@@ -106,7 +106,7 @@ class DB(object):
         house_id = extract_house_id(house_code)
         if(self.exist_apartment(house_code)):
             self.apartments.update_one(
-                {'house_id': house_id}, {'$set': {'expired': True}})
+                {'house_id': house_id}, {'$set': {'expired': True, 'updated_at': datetime.now()}})
         self.delete_apartment_from_house_id(house_id)
 
     def save_url_with_station(self, url, station_info):
@@ -132,7 +132,8 @@ class DB(object):
                 'house_code': house_code,
                 'house_id': house_id,
                 'station_ids': [station_id],
-                'line_ids': [line_id]
+                'line_ids': [line_id],
+                'created_at': datetime.now()
             })
             return False
 
@@ -147,7 +148,8 @@ class DB(object):
             self.apartments.insert_one({
                 'house_url': url,
                 'house_code': house_code,
-                'house_id': house_id
+                'house_id': house_id,
+                'created_at': datetime.now()
             })
             return False
 
