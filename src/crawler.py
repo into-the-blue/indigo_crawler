@@ -202,8 +202,10 @@ class GrapPage(object):
         urls = self.get_all_urls()
         self.crawl_data_from_urls(urls)
 
-    def start_by_metro(self, latest=True):
+    def start_by_metro(self, latest=True, reverse=False):
         stations = db.find_all_stations()
+        if(reverse):
+            stations = list(reversed(stations))
         count = 0
         for station in stations:
             count += 1
