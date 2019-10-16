@@ -23,15 +23,15 @@ class GrapPage(object):
         self.driver_period = 0
         self.city_url = city_url
 
-    def initDriver(self):
-        return get_driver_with_proxy()
+    def initDriver(self, test_url):
+        return get_driver_with_proxy(test_url=test_url)
 
     def check_driver(self, open_last_page=True,  force=False):
         if(self.driver_period >= 10 or force):
             _print('GET NEW PROXY')
             current_url = self.driver.current_url
             self.driver.quit()
-            self.driver = self.initDriver()
+            self.driver = self.initDriver(current_url)
             if open_last_page:
                 self.driver.get(current_url)
             self.driver_period = 0
@@ -208,20 +208,23 @@ class GrapPage(object):
             stations.reverse()
         count = 0
         for station in stations:
-            count += 1
-            url = station.get('url')
-            station_id = station.get('station_id')
-            line_id = station.get('line_id')
-            self._get(url)
-            _print("START", station_id, line_id)
-            if latest:
-                self.click_order_by_time()
-            all_urls = self.get_all_urls(station)
-            _print(station_id, line_id,
-                   'CRAWL URL BY STATION DONE, START CRAWL INFO')
-            self.crawl_data_from_urls(all_urls, log=False)
-            _print(station_id, line_id, 'DONE')
-        print('DONE', count)
+            try:
+                count += 1
+                url = station.get('url')
+                station_id = station.get('station_id')
+                line_id = station.get('line_id')
+                self._get(url)
+                _print("START", station_id, line_id)
+                if latest:
+                    self.click_order_by_time()
+                all_urls = self.get_all_urls(station)
+                _print(station_id, line_id,
+                       'CRAWL URL BY STATION DONE, START CRAWL INFO')
+                self.crawl_data_from_urls(all_urls, log=False)
+                _print(station_id, line_id, 'DONE', count)
+            except Exception as e:
+                pass
+        print('DONE')
 
     def quit(self):
         self.driver.quit()

@@ -10,10 +10,10 @@ chrome_driver_pth = os.getenv(
 is_ubuntu = os.getenv('PY_ENV', 'mac') == 'ubuntu'
 
 
-def test_proxy(driver, proxy_url):
+def test_proxy(driver, proxy_url, test_url):
     try:
         driver.set_page_load_timeout(10)
-        driver.get('https://sh.zu.ke.com/zufang')
+        driver.get(test_url)
         return True
     except:
         return False
@@ -67,12 +67,14 @@ def init_driver():
         return driver, proxy_url
 
 
-def get_driver_with_proxy(times=0):
+def get_driver_with_proxy(times=0, test_url='https://sh.zu.ke.com/zufang'):
+    if(test_url is None):
+        test_url = 'https://sh.zu.ke.com/zufang'
     if(times >= 10):
         _print('no available proxy')
         raise Exception('no available proxy')
     driver, proxy_url = init_driver()
-    ok = test_proxy(driver, proxy_url)
+    ok = test_proxy(driver, proxy_url, test_url)
     _print('PROXY', proxy_url, 'WORKS?', ok)
     if(ok):
         active_proxy = proxy_url
