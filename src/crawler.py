@@ -23,7 +23,7 @@ class GrapPage(object):
         self.driver_period = 0
         self.city_url = city_url
 
-    def initDriver(self, test_url):
+    def initDriver(self, test_url=None):
         return get_driver_with_proxy(test_url=test_url)
 
     def check_driver(self, open_last_page=True,  force=False):
