@@ -207,6 +207,7 @@ class GrapPage(object):
         if(reverse):
             stations.reverse()
         count = 0
+        error_count = 0
         for station in stations:
             try:
                 count += 1
@@ -223,7 +224,10 @@ class GrapPage(object):
                 self.crawl_data_from_urls(all_urls, log=False)
                 _print(station_id, line_id, 'DONE', count)
             except Exception as e:
-                pass
+                if(error_count >= 10):
+                    raise e
+                error_count += 1
+                _error('start_by_metro', e)
         print('DONE')
 
     def quit(self):
