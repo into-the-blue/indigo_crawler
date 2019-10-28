@@ -83,13 +83,18 @@ class DB(object):
         res = self.find_apartment_by_house_id(house_id)
         return bool(res)
 
+    def exist_apartment_without_title(self, house_code):
+        house_id = extract_house_id(house_code)
+        return bool(self.apartments.find_one(
+            {'house_id': house_id, 'title': {'$exists': False}}))
+
     def exist_apartment_from_url(self, url):
         house_code = extract_house_code_from_url(url)
         return self.exist_apartment(house_code)
 
     def update_apartment(self, house_id, doc, upsert=False):
         res = self.apartments.update_one({'house_id': house_id}, {
-            '$set': {**doc,'updated_time': datetime.now()}
+            '$set': {**doc, 'updated_time': datetime.now()}
         }, upsert=upsert)
 
     def upsert_apartment(self, house_code, doc):
@@ -145,12 +150,15 @@ class DB(object):
         if (self.exist_apartment(house_code)):
             return True
         else:
-            self.apartments.insert_one({
-                'house_url': url,
-                'house_code': house_code,
-                'house_id': house_id,
-                'created_time': datetime.now()
-            })
+            if self.exist_apartment_without_title(house_code):
+                pass
+            else:
+                self.apartments.insert_one({
+                    'house_url': url,
+                    'house_code': house_code,
+                    'house_id': house_id,
+                    'created_time': datetime.now()
+                })
             return False
 
     def find_missing_apartments(self):
