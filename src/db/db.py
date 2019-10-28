@@ -60,7 +60,6 @@ db_host = os.getenv('DB_HOST')
  'subway_accessibility': 1}
 '''
 
-
 class DB(object):
     def __init__(self):
         self.initDb()
@@ -132,14 +131,17 @@ class DB(object):
                     house_id, {'line_ids': line_ids, 'station_ids': station_ids})
             return True
         else:
-            self.apartments.insert_one({
-                'house_url': url,
-                'house_code': house_code,
-                'house_id': house_id,
-                'station_ids': [station_id],
-                'line_ids': [line_id],
-                'created_time': datetime.now()
-            })
+            if self.exist_apartment_without_title(self,house_code):
+                pass
+            else:
+                self.apartments.insert_one({
+                    'house_url': url,
+                    'house_code': house_code,
+                    'house_id': house_id,
+                    'station_ids': [station_id],
+                    'line_ids': [line_id],
+                    'created_time': datetime.now()
+                })
             return False
 
     def save_url(self, url, station_info=None):
