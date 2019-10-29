@@ -60,6 +60,7 @@ db_host = os.getenv('DB_HOST')
  'subway_accessibility': 1}
 '''
 
+
 class DB(object):
     def __init__(self):
         self.initDb()
@@ -73,9 +74,9 @@ class DB(object):
         self.apartments = self.indigo.apartments
         self.cronjob = self.indigo.cronjob
 
-    def find_apartment_by_house_id(self, house_id):
+    def find_apartment_by_house_id(self, house_id, exists=True):
         return self.apartments.find_one(
-            {'house_id': house_id, 'title': {'$exists': True}})
+            {'house_id': house_id, 'title': {'$exists': exists}})
 
     def exist_apartment(self, house_code):
         house_id = extract_house_id(house_code)
@@ -84,8 +85,7 @@ class DB(object):
 
     def exist_apartment_without_title(self, house_code):
         house_id = extract_house_id(house_code)
-        return bool(self.apartments.find_one(
-            {'house_id': house_id, 'title': {'$exists': False}}))
+        return bool(self.find_apartment_by_house_id(house_id, exists=False))
 
     def exist_apartment_from_url(self, url):
         house_code = extract_house_code_from_url(url)
@@ -113,33 +113,39 @@ class DB(object):
                 {'house_id': house_id}, {'$set': {'expired': True, 'updated_time': datetime.now()}})
         self.delete_apartment_from_house_id(house_id)
 
+    def _update_station_info_for_apartment(self, house_id, station_info, exists=True):
+        line_ids = station_info.get('line_ids')
+        station_id = station_info.get('station_id')
+        res = self.find_apartment_by_house_id(house_id)
+        _station_ids = res.get('station_ids', [])
+        _line_ids = res.get('line_ids', [])
+        if (len(list(set(line_ids) - set(_line_ids))) > 0) or (station_id not in _station_ids):
+            _station_ids.append(station_id)
+            _station_ids = list(set(_station_ids))
+            _line_ids += line_ids
+            _line_ids = list(set(_line_ids))
+            self.update_apartment(
+                house_id, {'line_ids': _line_ids, 'station_ids': _station_ids})
+
     def save_url_with_station(self, url, station_info):
         house_code = extract_house_code_from_url(url)
         house_id = extract_house_id(house_code)
-        station_id = station_info.get('station_id')
-        line_id = station_info.get('line_id')
+        line_ids = station_info.get('line_ids')
+        station_id = station_info.get('station_info')
         if(self.exist_apartment(house_code)):
-            res = self.find_apartment_by_house_id(house_id)
-            station_ids = res.get('station_ids', [])
-            line_ids = res.get('line_ids', [])
-            if (line_id not in line_ids) or (station_id not in station_ids):
-                station_ids.append(station_id)
-                station_ids = list(set(station_ids))
-                line_ids.append(line_id)
-                line_ids = list(set(line_ids))
-                self.update_apartment(
-                    house_id, {'line_ids': line_ids, 'station_ids': station_ids})
+            self._update_station_info_for_apartment(house_id, station_info)
             return True
         else:
-            if self.exist_apartment_without_title(self,house_code):
-                pass
+            if self.exist_apartment_without_title(self, house_code):
+                self._update_station_info_for_apartment(
+                    house_id, station_info, exists=False)
             else:
                 self.apartments.insert_one({
                     'house_url': url,
                     'house_code': house_code,
                     'house_id': house_id,
                     'station_ids': [station_id],
-                    'line_ids': [line_id],
+                    'line_ids': line_ids,
                     'created_time': datetime.now()
                 })
             return False
@@ -168,7 +174,7 @@ class DB(object):
         return list(map(lambda x: x.get('house_url'), res))
 
     def find_all_stations(self):
-        return list(self.station_col.find({'city': 'sh'}))
+        return list(self.station_col.find({'city': 'sh', 'line_ids': {'$exists': True}}))
 
     def start_cron_job(self, job_type, status='running'):
         return self.cronjob.insert_one({'job_type': job_type, 'start_time': currentDate(), 'status': 'running', 'error': None}).inserted_id

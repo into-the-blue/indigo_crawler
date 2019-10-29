@@ -213,16 +213,17 @@ class GrapPage(object):
                 count += 1
                 url = station.get('url')
                 station_id = station.get('station_id')
-                line_id = station.get('line_id')
+                station_name = station.get('station_name')
+                line_ids = station.get('line_ids')
                 self._get(url)
-                _print("START", station_id, line_id)
+                _print("START", station_id, station.get('station_name'))
                 if latest:
                     self.click_order_by_time()
                 all_urls = self.get_all_urls(station)
-                _print(station_id, line_id,
+                _print(station_id, station_name,
                        'CRAWL URL BY STATION DONE, START CRAWL INFO')
                 self.crawl_data_from_urls(all_urls, log=False)
-                _print(station_id, line_id, 'DONE', count)
+                _print(station_id, station_name, 'DONE', count)
             except Exception as e:
                 if(error_count >= 10):
                     raise e
