@@ -103,9 +103,13 @@ class DB(object):
         # return self.apartments.replace_one({'house_id': house_id}, doc, upsert=True)
 
     def delete_apartment_from_house_id(self, house_id):
-        return self.apartments.delete_one({'house_id': house_id, 'title': {'$exists': False}})
+        return self.apartments.delete_many({'house_id': house_id, 'title': {'$exists': False}})
 
     def delete_apartment_from_url(self, url):
+        '''
+        delete apartments from a url
+        if apartment has info, set expired to true
+        '''
         house_code = extract_house_code_from_url(url)
         house_id = extract_house_id(house_code)
         if(self.exist_apartment(house_code)):
@@ -114,6 +118,11 @@ class DB(object):
         self.delete_apartment_from_house_id(house_id)
 
     def _update_station_info_for_apartment(self, house_id, station_info, exists=True):
+        '''
+        update station info 
+        check if station id and line ids exist in apartment info
+        if not add it
+        '''
         line_ids = station_info.get('line_ids')
         station_id = station_info.get('station_id')
         res = self.find_apartment_by_house_id(house_id)
