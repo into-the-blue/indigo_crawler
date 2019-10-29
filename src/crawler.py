@@ -216,7 +216,7 @@ class GrapPage(object):
                 station_name = station.get('station_name')
                 line_ids = station.get('line_ids')
                 self._get(url)
-                _print("START", station_id, station.get('station_name'))
+                _print("START", station_id, station_name)
                 if latest:
                     self.click_order_by_time()
                 all_urls = self.get_all_urls(station)

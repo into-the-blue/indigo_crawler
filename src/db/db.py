@@ -125,7 +125,7 @@ class DB(object):
         '''
         line_ids = station_info.get('line_ids')
         station_id = station_info.get('station_id')
-        res = self.find_apartment_by_house_id(house_id)
+        res = self.find_apartment_by_house_id(house_id, exists=exists)
         _station_ids = res.get('station_ids', [])
         _line_ids = res.get('line_ids', [])
         if (len(list(set(line_ids) - set(_line_ids))) > 0) or (station_id not in _station_ids):
