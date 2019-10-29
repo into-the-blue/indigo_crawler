@@ -145,7 +145,7 @@ class DB(object):
             self._update_station_info_for_apartment(house_id, station_info)
             return True
         else:
-            if self.exist_apartment_without_title(self, house_code):
+            if self.exist_apartment_without_title(house_code):
                 self._update_station_info_for_apartment(
                     house_id, station_info, exists=False)
             else:
