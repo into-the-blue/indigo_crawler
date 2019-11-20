@@ -30,7 +30,7 @@ class GrapPage(object):
         if(self.driver_period >= 10 or force):
             _print('GET NEW PROXY')
             current_url = self.driver.current_url
-            self.driver.quit()
+            self.quit()
             self.driver = self.initDriver(current_url)
             if open_last_page:
                 self.driver.get(current_url)
@@ -232,4 +232,7 @@ class GrapPage(object):
         print('DONE')
 
     def quit(self):
-        self.driver.quit()
+        try:
+            self.driver.quit()
+        except Exception as e:
+            _error('QUIT ERROR', e)
