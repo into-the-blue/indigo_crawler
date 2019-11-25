@@ -2,8 +2,8 @@ import pandas as pd
 import re
 from bs4 import BeautifulSoup
 from utils.util import _print
+from time import sleep
 # TODO: 公寓 error
-# https://sh.zu.ke.com/zufang/SH2353502593189421056.html
 def get_info_of_single_url(driver, url):
     """
     get info of single url
@@ -25,6 +25,12 @@ def get_info_of_single_url(driver, url):
         # except:
         #     rent_type = '未知'
         #     title = driver.find_element_by_xpath("//p[@class='content__title']").text
+        
+        # scroll to end of the page to avoid lazy rendering
+        sleep(1)
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        
+        
         rent_type = driver.find_elements_by_xpath(
             "//p[@class='content__article__table']/span")[0].text
         title = driver.find_element_by_xpath(
@@ -338,8 +344,15 @@ def get_info_of_single_url(driver, url):
             price_per_square_meter = ''
 
         # 经纪人品牌
-        broker_brand = driver.find_element_by_xpath(
-            "//div[@class='content__aside fr']/ul[@class='content__aside__list']/li/p").text
+        broker_brand = 'None'
+        try:
+            broker_brand = driver.find_element_by_xpath(
+            "//div[@class='content__aside fr']/ul[@class='content__aside__list house-detail']/li/p").text
+        except:
+            _print('unale to locate broker element ',url)
+            # unable to locate element
+            pass
+            
         if ' 经纪人' in broker_brand:
             broker_brand = broker_brand[:-4]
         if '管家' in broker_brand:
