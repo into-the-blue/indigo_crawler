@@ -3,7 +3,39 @@ import re
 from bs4 import BeautifulSoup
 from utils.util import _print
 from time import sleep
+
+
+def get_house_type_info_old(driver):
+    try:
+        house_type = driver.find_elements_by_xpath(
+            "//p[@class='content__article__table']/span")[1].text
+        area = int(driver.find_elements_by_xpath(
+            "//p[@class='content__article__table']/span")[2].text.split('㎡')[0])
+        orient = driver.find_elements_by_xpath(
+            "//p[@class='content__article__table']/span")[3].text.split('朝')[1]
+
+        return house_type, area, orient
+    except:
+        return None, None, None
+
+
+def get_house_type_info_27_nov(driver):
+    def get_text(_elms, idx): return _elms[idx].text.replace(
+        _elms[idx].find_element_by_xpath('./span').text, '')
+    try:
+        elms = driver.find_elements_by_xpath(
+            "//ul[@class='content__aside__list']/li")
+        type_area_text = get_text(elms, 1)
+        house_type = type_area_text.split(' ')[0]
+        area = int(re.findall('\d+', type_area_text.split(' ')[1])[0])
+        orient = get_text(elms, 2).split(' ')[0]
+        return house_type, area, orient
+    except:
+        return None, None, None
+
 # TODO: 公寓 error
+
+
 def get_info_of_single_url(driver, url):
     """
     get info of single url
@@ -14,7 +46,8 @@ def get_info_of_single_url(driver, url):
     else:
         try:
             # url expired
-            driver.find_element_by_xpath("//p[@class='offline__title']").text == '你访问的房源已失效'
+            driver.find_element_by_xpath(
+                "//p[@class='offline__title']").text == '你访问的房源已失效'
             return None
         except:
             pass
@@ -25,17 +58,19 @@ def get_info_of_single_url(driver, url):
         # except:
         #     rent_type = '未知'
         #     title = driver.find_element_by_xpath("//p[@class='content__title']").text
-        
+
         # scroll to end of the page to avoid lazy rendering
         sleep(1)
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        
-        
-        rent_type = driver.find_elements_by_xpath(
-            "//p[@class='content__article__table']/span")[0].text
+        driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);")
+
+        # get rent type from title
+        # eg.合租·瑞和城叁街区(汇臻路815弄) 4居室 南卧
+        # rent_type = driver.find_elements_by_xpath(
+        #     "//p[@class='content__article__table']/span")[0].text
         title = driver.find_element_by_xpath(
             "//p[@class='content__title']").text
-
+        rent_type = title.split('·')[0]
         if '未知' in rent_type:
             rent_type = '未知'
 
@@ -85,21 +120,16 @@ def get_info_of_single_url(driver, url):
 
         # 价格
         price = int(driver.find_element_by_xpath(
-            "//p[@class='content__aside--title']/span").text)
+            "//div[@class='content__aside--title']/span").text)
 
         # 特色标签列表
         tags = []
         for i in driver.find_elements_by_xpath("//p[@class='content__aside--tags']/i"):
             tags.append(i.text)
-#             json_house_tags = json.dumps(json_house_tags, ensure_ascii=False)
+        # json_house_tags = json.dumps(json_house_tags, ensure_ascii=False)
 
         # 户型、面积、朝向
-        house_type = driver.find_elements_by_xpath(
-            "//p[@class='content__article__table']/span")[1].text
-        area = int(driver.find_elements_by_xpath(
-            "//p[@class='content__article__table']/span")[2].text.split('㎡')[0])
-        orient = driver.find_elements_by_xpath(
-            "//p[@class='content__article__table']/span")[3].text.split('朝')[1]
+        house_type, area, orient = get_house_type_info_27_nov(driver)
 
         # 经纪人姓名：可能为空
         # TODO
@@ -131,23 +161,24 @@ def get_info_of_single_url(driver, url):
             minimal_lease = rent_peroid
             maximal_lease = rent_peroid
 
-        ### 楼层
+        # 楼层
         building_floor_text = driver.find_element_by_xpath(
             "//div[@class='content__article__info']/ul/li[8]").text[3:]
         if(building_floor_text.find('/') != -1):
             # 所在楼层
             floor = building_floor_text.split('/')[0]
             # 总楼层
-            building_total_floors = int(building_floor_text.split('/')[1].replace('层', ''))
+            building_total_floors = int(
+                building_floor_text.split('/')[1].replace('层', ''))
         else:
             # 所在楼层
-            res = re.findall('\w+(?=\d)',building_floor_text)
+            res = re.findall('\w+(?=\d)', building_floor_text)
             if(len(res) > 0):
                 floor = res[0]
             else:
                 floor = building_floor_text
             # 总楼层
-            res2 = re.findall('\d+',building_floor_text)
+            res2 = re.findall('\d+', building_floor_text)
             if(len(res2) > 0):
                 building_total_floors = res2[0]
             else:
@@ -347,12 +378,12 @@ def get_info_of_single_url(driver, url):
         broker_brand = 'None'
         try:
             broker_brand = driver.find_element_by_xpath(
-            "//div[@class='content__aside fr']/ul[@class='content__aside__list house-detail']/li/p").text
+                "//div[@class='content__aside fr']/ul[@class='content__aside__list house-detail']/li/p").text
         except:
-            _print('unale to locate broker element ',url)
+            _print('unale to locate broker element ', url)
             # unable to locate element
             pass
-            
+
         if ' 经纪人' in broker_brand:
             broker_brand = broker_brand[:-4]
         if '管家' in broker_brand:
