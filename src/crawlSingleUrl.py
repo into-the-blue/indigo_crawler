@@ -22,16 +22,16 @@ def get_house_type_info_old(driver):
 def get_house_type_info_27_nov(driver):
     def get_text(_elms, idx): return _elms[idx].text.replace(
         _elms[idx].find_element_by_xpath('./span').text, '')
-    try:
-        elms = driver.find_elements_by_xpath(
-            "//ul[@class='content__aside__list']/li")
-        type_area_text = get_text(elms, 1)
-        house_type = type_area_text.split(' ')[0]
-        area = int(re.findall('\d+', type_area_text.split(' ')[1])[0])
-        orient = get_text(elms, 2).split(' ')[0]
-        return house_type, area, orient
-    except:
-        return None, None, None
+    # try:
+    elms = driver.find_elements_by_xpath(
+        "//ul[@class='content__aside__list']/li")
+    type_area_text = get_text(elms, 1)
+    house_type = type_area_text.split(' ')[0]
+    area = int(re.findall('\d+', type_area_text.split(' ')[1])[0])
+    orient = get_text(elms, 2).split(' ')[0]
+    return house_type, area, orient
+    # except:
+    #     return None, None, None
 
 # TODO: 公寓 error
 
