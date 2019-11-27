@@ -41,3 +41,7 @@ def find_index(func, li, first=True):
 def find_item(func, li, first=True):
     res = [item for idx, item in enumerate(li) if bool(func(item))]
     return res[0] if len(res) > 0 else None
+
+
+def cleanNoneValue(arr):
+    return list(filter(lambda x: bool(x), arr))

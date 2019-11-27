@@ -1,6 +1,6 @@
 import pymongo
 import os
-from utils.util import extract_house_id, extract_house_code_from_url, currentDate
+from utils.util import extract_house_id, extract_house_code_from_url, currentDate, cleanNoneValue
 from datetime import datetime
 db_username = os.getenv('DB_USERNAME')
 db_password = os.getenv('DB_PASSWORD')
@@ -130,7 +130,7 @@ class DB(object):
         _line_ids = res.get('line_ids', [])
         if (len(list(set(line_ids) - set(_line_ids))) > 0) or (station_id not in _station_ids):
             _station_ids.append(station_id)
-            _station_ids = list(set(_station_ids))
+            _station_ids = cleanNoneValue(set(_station_ids))
             _line_ids += line_ids
             _line_ids = list(set(_line_ids))
             self.update_apartment(
@@ -140,7 +140,7 @@ class DB(object):
         house_code = extract_house_code_from_url(url)
         house_id = extract_house_id(house_code)
         line_ids = station_info.get('line_ids')
-        station_id = station_info.get('station_info')
+        station_id = station_info.get('station_id')
         if(self.exist_apartment(house_code)):
             self._update_station_info_for_apartment(house_id, station_info)
             return True
