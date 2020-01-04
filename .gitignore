@@ -4,3 +4,4 @@
 .DS_Store
 dev.env
 **/__pycache__
+prod.env
