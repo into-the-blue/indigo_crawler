@@ -5,3 +5,4 @@
 dev.env
 **/__pycache__
 prod.env
+notebooks/
