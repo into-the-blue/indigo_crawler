@@ -15,7 +15,7 @@ TEST_URL = 'https://sh.zu.ke.com/zufang'
 global_driver = None
 
 
-def test_proxy(driver, test_url=NOne):
+def test_proxy(driver, test_url=None):
     test_url = test_url or TEST_URL
     try:
         driver.set_page_load_timeout(10)
