@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.common.exceptions import InvalidSessionIdException
 import pandas as pd
 from tqdm import tqdm
 import time
@@ -31,7 +32,7 @@ class GrapPage(object):
             logger.info('GET NEW PROXY')
 
             current_url = self.driver.current_url
-            
+
             if open_last_page:
                 self.driver.close()
 
@@ -128,30 +129,7 @@ class GrapPage(object):
             if(retry):
                 self.check_driver(force=True)
                 self.click_order_by_time(retry=False)
-
-    # def click_order_by_metro(self):
-    #     self.driver.find_element_by_link_text('按地铁线').click()
-
-    # def get_all_lines(self):
-    #     elms = self.driver.find_elements_by_xpath("//div[@class='filter__wrapper w1150']/ul[3]/*")
-    #     return elms[1:]
-
-    # def get_all_stations_in_line(self):
-    #     elms = self.driver.find_elements_by_xpath("//div[@class='filter__wrapper w1150']/ul[4]/*")
-    #     return elms[1:]
-
-    # def get_all_station_urls(self, driver):
-    #     stations = driver.find_elements_by_xpath(
-    #         "//div[@class='filter__wrapper w1150']/ul[4]/li/a")
-    #     filterd = list(map(lambda x: x.get_attribute('href'), stations[1:]))
-    #     return filterd
-
-    # def get_all_line_urls(self, driver):
-    #     self.click_order_by_metro()
-    #     lines = driver.find_elements_by_xpath(
-    #         "//div[@class='filter__wrapper w1150']/ul[3]/li/a")
-    #     filterd = list(map(lambda x: x.get_attribute('href'), lines[1:]))
-    #     return filterd
+                
     def getLocationInfo(self, apartment_info):
         result = getGeoInfo(apartment_info.get('city'), apartment_info.get(
             'district'), apartment_info.get('community_name'), apartment_info.get('bizcircle'))
@@ -228,6 +206,12 @@ class GrapPage(object):
                        'CRAWL URL BY STATION DONE, START CRAWL INFO')
                 self.crawl_data_from_urls(all_urls, log=False)
                 _print(station_id, station_name, 'DONE', count)
+            except InvalidSessionIdException:
+                if(error_count >= 10):
+                    raise e
+                error_count += 1
+                _error('start_by_metro Invalid Session Id', e)
+                self.check_driver(force=True)
             except Exception as e:
                 if(error_count >= 10):
                     raise e
