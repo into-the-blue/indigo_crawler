@@ -9,29 +9,33 @@ import pymongo
 import re
 import os
 from crawlSingleUrl import get_info_of_single_url
-from proxy_pool import get_driver_with_proxy, delete_proxy
+from proxy_pool import renew_or_create_driver
 from baiduMap.getCoordinates import getGeoInfo
 from db.db import db
-from utils.util import _print, _error
+from utils.util import _print, _error, logger
 is_ubuntu = os.getenv('PY_ENV', 'mac') == 'ubuntu'
 
 
 class GrapPage(object):
     def __init__(self, city, city_url):
-        self.driver = self.initDriver()
+        self.driver = self.init_driver()
         self.city = city
         self.driver_period = 0
         self.city_url = city_url
 
-    def initDriver(self, test_url=None):
-        return get_driver_with_proxy(test_url=test_url)
+    def init_driver(self, test_url=None):
+        return renew_or_create_driver(test_url=test_url)
 
     def check_driver(self, open_last_page=True,  force=False):
         if(self.driver_period >= 10 or force):
-            _print('GET NEW PROXY')
+            logger.info('GET NEW PROXY')
+
             current_url = self.driver.current_url
-            self.quit()
-            self.driver = self.initDriver(current_url)
+            
+            if open_last_page:
+                self.driver.close()
+
+            self.driver = self.init_driver(current_url)
             if open_last_page:
                 self.driver.get(current_url)
             self.driver_period = 0
@@ -48,7 +52,7 @@ class GrapPage(object):
             return self.driver
         except Exception as e:
             _error('PROXY BLOCKED', e)
-            delete_proxy()
+            # delete_proxy()
             self.check_driver(force=True, open_last_page=False)
             return self._get(url, times=times + 1)
 
