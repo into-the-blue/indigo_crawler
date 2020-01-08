@@ -4,7 +4,7 @@ from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.executors.pool import ThreadPoolExecutor, ProcessPoolExecutor
 from pytz import utc, timezone
 from crawler import GrapPage
-from utils.util import _error, logger, _print
+from utils.util import logger
 from db.db import db
 from baiduMap.getCoordinates import getGeoInfo
 zh_sh = timezone('Asia/Shanghai')
@@ -35,7 +35,7 @@ def start_by_metro(reverse=False):
         db.update_cron_job(_id)
     except Exception as e:
         db.update_cron_job(_id, 'error', str(e))
-        _error(e)
+        logger.error(e)
     finally:
         ins.quit()
 
@@ -48,7 +48,7 @@ def start_by_latest():
         db.update_cron_job(_id)
     except Exception as e:
         db.update_cron_job(_id, 'error', str(e))
-        _error(e)
+        logger.error(e)
     finally:
         ins.quit()
 
@@ -61,7 +61,7 @@ def start_filling_missing():
         db.update_cron_job(_id)
     except Exception as e:
         db.update_cron_job(_id, 'error', str(e))
-        _error(e)
+        logger.error(e)
     finally:
         ins.quit()
 
@@ -79,17 +79,17 @@ def _filling_missing_geo_info():
             lng = result['location']['lng']
             lat = result['location']['lat']
             if (result['confidence'] < 60):
-                _print(district+community_name,
-                       result['confidence'], data['house_id'])
+                logger.info(district+community_name,
+                            result['confidence'], data['house_id'])
             db.update_apartment(data.get('house_id'), {
                 'lng': lng,
                 'lat': lat,
                 'geo_info': result
             })
-        _print(lth, 'BATCH DONE')
+        logger.info(lth, 'BATCH DONE')
         return _filling_missing_geo_info()
     else:
-        _print('FILL GEO INFO DONE')
+        logger.info('FILL GEO INFO DONE')
 
 
 def filling_missing_geo_info():
@@ -99,7 +99,7 @@ def filling_missing_geo_info():
         db.update_cron_job(_id)
     except Exception as e:
         db.update_cron_job(_id, 'error', str(e))
-        _error(e)
+        logger.error(e)
 
 
 # everyday 11:00, 19:00

@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 from bs4 import BeautifulSoup
-from utils.util import _print
+from utils.util import logger
 from time import sleep
 import os
 
@@ -326,7 +326,7 @@ def get_info_of_single_url(driver, url):
         # 房源描述
         if len(driver.find_elements_by_xpath("//div[@class='content__article__info3 ']/ul/li/p")) > 2:
             house_description = ''
-            _print("请调整子函数get_list_info的房源描述部分，有超过一条评论的情况需要全部考虑。（做成列表而不再是文本）", url)
+            logger.info("请调整子函数get_list_info的房源描述部分，有超过一条评论的情况需要全部考虑。（做成列表而不再是文本）", url)
         else:
             try:
                 house_description = driver.find_element_by_xpath(
@@ -344,7 +344,7 @@ def get_info_of_single_url(driver, url):
         try:
             price_per_square_meter = round(price/content_article_info.get('area'), 2)
         except:
-            _print('无法计算每平米房价：', url)
+            logger.info('无法计算每平米房价：', url)
             price_per_square_meter = ''
             
         # 上下楼便利性：无障碍性，楼层与电梯的合成项

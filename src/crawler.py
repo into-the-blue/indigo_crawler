@@ -13,8 +13,8 @@ from crawlSingleUrl import get_info_of_single_url
 from proxy_pool import renew_or_create_driver
 from baiduMap.getCoordinates import getGeoInfo
 from db.db import db
-from utils.util import _print, _error, logger
-is_ubuntu = os.getenv('PY_ENV', 'mac') == 'ubuntu'
+from utils.util import logger
+# is_ubuntu = os.getenv('PY_ENV', 'mac') == 'ubuntu'
 
 
 class GrapPage(object):
@@ -33,8 +33,7 @@ class GrapPage(object):
 
             current_url = self.driver.current_url
 
-            if open_last_page:
-                self.driver.close()
+            self.driver.close()
 
             self.driver = self.init_driver(current_url)
             if open_last_page:
@@ -52,7 +51,7 @@ class GrapPage(object):
             self.driver.get(url)
             return self.driver
         except Exception as e:
-            _error('PROXY BLOCKED', e)
+            logger.error('PROXY BLOCKED', e)
             # delete_proxy()
             self.check_driver(force=True, open_last_page=False)
             return self._get(url, times=times + 1)
@@ -76,7 +75,7 @@ class GrapPage(object):
                     "//div[@class='content__pg']/a[@data-page='{}']".format(current_page+1))
                 elm.click()
             except:
-                _print('BLOCKED, CHANGE PROXY')
+                logger.info('BLOCKED, CHANGE PROXY')
                 self.check_driver(force=True)
 
     def read_page_count(self):
@@ -117,7 +116,7 @@ class GrapPage(object):
                 self.go_to_next_page()
                 urls = self.get_urls_in_page(station_info)
                 all_urls += urls
-                _print('URLS SAVED!', len(urls), 'TOTAL:', len(all_urls))
+                logger.info('URLS SAVED!', len(urls), 'TOTAL:', len(all_urls))
         all_urls = list(set(all_urls))
         return all_urls
 
@@ -125,11 +124,11 @@ class GrapPage(object):
         try:
             self.driver.find_element_by_link_text('最新上架').click()
         except Exception as e:
-            _print('UNABLE TO LOCATE 最新上架')
+            logger.info('UNABLE TO LOCATE 最新上架')
             if(retry):
                 self.check_driver(force=True)
                 self.click_order_by_time(retry=False)
-                
+
     def getLocationInfo(self, apartment_info):
         result = getGeoInfo(apartment_info.get('city'), apartment_info.get(
             'district'), apartment_info.get('community_name'), apartment_info.get('bizcircle'))
@@ -146,37 +145,37 @@ class GrapPage(object):
         for url in tqdm(urls):
             driver = self._get(url)
             if log:
-                _print('START', url)
+                logger.info('START', url)
             try:
                 time.sleep(2)
                 info = get_info_of_single_url(driver, url)
                 if info is None:
                     db.delete_apartment_from_url(url)
                     if log:
-                        _print('EXPIRED', url)
+                        logger.info('EXPIRED', url)
                 else:
                     location_info = self.getLocationInfo(info)
                     doc = {**info, **location_info}
                     db.upsert_apartment(info.get('house_code'), doc)
                     if log:
-                        _print("SUCCESS", url)
+                        logger.info("SUCCESS", url)
             except Exception as e:
-                _error('ENCOUNTER ERR', url, Exception)
+                logger.error('ENCOUNTER ERR', url, Exception)
 
     def start_filling_missing_info(self):
-        _print('START FILLING')
+        logger.info('START FILLING')
         all_urls = db.find_missing_apartments()
-        _print('CRAWL URL DONE, START CRAWL INFO')
+        logger.info('CRAWL URL DONE, START CRAWL INFO')
         self.crawl_data_from_urls(all_urls)
-        _print('DONE')
+        logger.info('DONE')
 
     def start(self):
-        _print('START')
+        logger.info('START')
         self.driver.get(self.city_url)
         all_urls = self.get_all_urls()
-        _print('CRAWL URL DONE, START CRAWL INFO')
+        logger.info('CRAWL URL DONE, START CRAWL INFO')
         self.crawl_data_from_urls(all_urls)
-        _print('DONE')
+        logger.info('DONE')
 
     def start_by_latest(self):
         self.driver.get(self.city_url)
@@ -198,29 +197,29 @@ class GrapPage(object):
                 station_name = station.get('station_name')
                 line_ids = station.get('line_ids')
                 self._get(url)
-                _print("START", station_id, station_name)
+                logger.info("START", station_id, station_name)
                 if latest:
                     self.click_order_by_time()
                 all_urls = self.get_all_urls(station)
-                _print(station_id, station_name,
-                       'CRAWL URL BY STATION DONE, START CRAWL INFO')
+                logger.info(station_id, station_name,
+                            'CRAWL URL BY STATION DONE, START CRAWL INFO')
                 self.crawl_data_from_urls(all_urls, log=False)
-                _print(station_id, station_name, 'DONE', count)
+                logger.info(station_id, station_name, 'DONE', count)
             except InvalidSessionIdException:
                 if(error_count >= 10):
                     raise e
                 error_count += 1
-                _error('start_by_metro Invalid Session Id', e)
+                logger.error('start_by_metro Invalid Session Id', e)
                 self.check_driver(force=True)
             except Exception as e:
                 if(error_count >= 10):
                     raise e
                 error_count += 1
-                _error('start_by_metro', e)
+                logger.error('start_by_metro', e)
         print('DONE')
 
     def quit(self):
         try:
             self.driver.quit()
         except Exception as e:
-            _error('QUIT ERROR', e)
+            logger.error('QUIT ERROR', e)

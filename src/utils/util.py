@@ -20,12 +20,6 @@ def normal_msg(args):
     return ' '.join(map(lambda x: str(x), args))
 
 
-def _print(*args):
-    logger.info(normal_msg(args))
-
-
-def _error(*args):
-    logger.error(normal_msg(args))
 
 
 def currentDate():
