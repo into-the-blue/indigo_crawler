@@ -36,7 +36,7 @@ def get_proxy():
     'last_status': 1,
     'last_time': '2019-09-21 11:47:09'}
     '''
-    return requests.get(f"http://{proxy_server}/get/").json()
+    return requests.get(f"{proxy_server}/get/").json()
 
 
 active_proxy = None
@@ -46,7 +46,7 @@ def delete_proxy(proxy=None):
     _proxy = proxy if bool(proxy) else active_proxy
     if not bool(_proxy):
         return
-    requests.get(f"http://{proxy_server}/delete/?proxy={proxy}")
+    requests.get(f"{proxy_server}/delete/?proxy={proxy}")
 
 
 def init_driver():
