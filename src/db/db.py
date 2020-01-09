@@ -74,22 +74,24 @@ class DB(object):
         self.apartments = self.indigo.apartments
         self.cronjob = self.indigo.cronjob
 
-    def find_apartment_by_house_id(self, house_id, exists=True):
+    def find_apartment_by_house_id(self, house_id, title_exists=True):
         return self.apartments.find_one(
-            {'house_id': house_id, 'title': {'$exists': exists}})
+            {'house_id': house_id, 'title': {'$exists': title_exists}})
 
     def exist_apartment(self, house_code):
         house_id = extract_house_id(house_code)
-        res = self.find_apartment_by_house_id(house_id)
+        res = self.apartments.find_one(
+            {'house_id': house_id, 'title': {'$exists': True}})
+
         return bool(res)
 
     def exist_apartment_without_title(self, house_code):
         house_id = extract_house_id(house_code)
-        return bool(self.find_apartment_by_house_id(house_id, exists=False))
+        return bool(self.find_apartment_by_house_id(house_id, title_exists=False))
 
-    def exist_apartment_from_url(self, url):
-        house_code = extract_house_code_from_url(url)
-        return self.exist_apartment(house_code)
+    # def exist_apartment_from_url(self, url):
+    #     house_code = extract_house_code_from_url(url)
+    #     return self.exist_apartment(house_code)
 
     def update_apartment(self, house_id, doc, upsert=False):
         res = self.apartments.update_one({'house_id': house_id}, {
@@ -112,7 +114,7 @@ class DB(object):
         '''
         house_code = extract_house_code_from_url(url)
         house_id = extract_house_id(house_code)
-        if(self.exist_apartment(house_code)):
+        if self.exist_apartment(house_code):
             self.apartments.update_one(
                 {'house_id': house_id}, {'$set': {'expired': True, 'updated_time': datetime.now()}})
         self.delete_apartment_from_house_id(house_id)
@@ -121,11 +123,11 @@ class DB(object):
         '''
         update station info 
         check if station id and line ids exist in apartment info
-        if not add it
+        if not, add it
         '''
         line_ids = station_info.get('line_ids')
         station_id = station_info.get('station_id')
-        res = self.find_apartment_by_house_id(house_id, exists=exists)
+        res = self.find_apartment_by_house_id(house_id, title_exists == exists)
         _station_ids = res.get('station_ids', [])
         _line_ids = res.get('line_ids', [])
         if (len(list(set(line_ids) - set(_line_ids))) > 0) or (station_id not in _station_ids):
@@ -137,11 +139,18 @@ class DB(object):
                 house_id, {'line_ids': _line_ids, 'station_ids': _station_ids})
 
     def save_url_with_station(self, url, station_info):
+        '''
+        when get url
+        save it to database
+        if exists (has `title`, `missing_info` exists and is false)
+            return true
+
+        '''
         house_code = extract_house_code_from_url(url)
         house_id = extract_house_id(house_code)
         line_ids = station_info.get('line_ids')
         station_id = station_info.get('station_id')
-        if(self.exist_apartment(house_code)):
+        if self.exist_apartment(house_code):
             self._update_station_info_for_apartment(house_id, station_info)
             return True
         else:
@@ -179,8 +188,14 @@ class DB(object):
             return False
 
     def find_missing_apartments(self):
-        res = self.apartments.find({'title': {"$exists": False}})
-        return list(map(lambda x: x.get('house_url'), res))
+        '''
+        find all record without `title`
+        or `missing_info` is True
+        '''
+        res = self.apartments.find(
+            {'$or': [{'missing_info': True}, {'title': {"$exists": False}}]})
+
+        return [x.get('house_url') for x in res]
 
     def find_all_stations(self):
         return list(self.station_col.find({'city': 'sh', 'line_ids': {'$exists': True}}))

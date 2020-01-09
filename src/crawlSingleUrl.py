@@ -36,51 +36,54 @@ def get_house_type_info_27_nov(driver):
         print(e)
         return None, None, None
 
+
 def get_info_1(driver):
-    info_elms = driver.find_elements_by_xpath("//div[@class='content__article__info']/ul/li")
+    info_elms = driver.find_elements_by_xpath(
+        "//div[@class='content__article__info']/ul/li")
     all_texts = [elm.text for elm in info_elms if len(elm.text.strip())]
-    
-    def _match_text(txt,keyword,obj=None,obj_key=None):
+
+    def _match_text(txt, keyword, obj=None, obj_key=None):
         if keyword in txt:
-            if obj is None: return txt.replace(keyword,'').strip()
-            obj[obj_key] = txt.replace(keyword,'').strip()
+            if obj is None:
+                return txt.replace(keyword, '').strip()
+            obj[obj_key] = txt.replace(keyword, '').strip()
         return None
-    
+
     info = {
-        'area':None,
+        'area': None,
         'orient': None,
-        'floor_full_info':None,
+        'floor_full_info': None,
         'floor': None,
         'building_total_floors': None,
         'lease': None,
         'carport': None,
         'electricity_type': None,
         'check_in_date': None,
-#         'reservation': None,
+        #         'reservation': None,
         'elevator': None,
         'water': None,
         'gas': None,
-        'heating':None
+        'heating': None
     }
     for txt in all_texts:
          # area
         if '面积' in txt:
             try:
-                info['area'] = int(re.findall('\d{1,3}',txt)[0])
+                info['area'] = int(re.findall('\d{1,3}', txt)[0])
             except:
                 pass
-        
+
         # orient
-        _match_text(txt,'朝向：',info,'orient')
-            
+        _match_text(txt, '朝向：', info, 'orient')
+
         # floor
         if '楼层' in txt:
-            floor_full_info = _match_text(txt,'楼层：')
+            floor_full_info = _match_text(txt, '楼层：')
             info['floor_full_info'] = floor_full_info
             floor = None
             building_total_floors = None
             if(floor_full_info.find('/') != -1):
-            # 所在楼层
+                # 所在楼层
                 floor = floor_full_info.split('/')[0]
                 # 总楼层
                 building_total_floors = int(
@@ -100,31 +103,31 @@ def get_info_1(driver):
                     building_total_floors = floor_full_info
             info['floor'] = floor
             info['building_total_floors'] = building_total_floors
-            
+
         # lease
-        _match_text(txt,'租期：',info,'lease')
-            
+        _match_text(txt, '租期：', info, 'lease')
+
         # carport
-        _match_text(txt,'车位：',info,'carport')
-            
-        # water type 
-        _match_text(txt,'用水：',info,'water')
-            
+        _match_text(txt, '车位：', info, 'carport')
+
+        # water type
+        _match_text(txt, '用水：', info, 'water')
+
         # electricity type
-        _match_text(txt,'用电：',info,'electricity')
-            
-        # gas 
-        _match_text(txt,'燃气：',info,'gas')
-            
+        _match_text(txt, '用电：', info, 'electricity')
+
+        # gas
+        _match_text(txt, '燃气：', info, 'gas')
+
         # heating
-        _match_text(txt,'采暖：',info,'heating')
-        
+        _match_text(txt, '采暖：', info, 'heating')
+
         # elevator
-        _match_text(txt,'电梯：',info,'elevator')
-            
+        _match_text(txt, '电梯：', info, 'elevator')
+
         # check in date
-        _match_text(txt,'入住：',info,'check_in_date')
-            
+        _match_text(txt, '入住：', info, 'check_in_date')
+
     floor_accessibility = 0
     if info.get('elevator') == '有':
         floor_accessibility = 1
@@ -139,8 +142,10 @@ def get_info_1(driver):
         'floor_accessibility': floor_accessibility
     }
 
+
 def get_facility_info(driver):
-    elms = driver.find_elements_by_xpath("//ul[@class='content__article__info2']/li")
+    elms = driver.find_elements_by_xpath(
+        "//ul[@class='content__article__info2']/li")
     info = {
         'television': 0,
         'fridge': 0,
@@ -153,23 +158,25 @@ def get_facility_info(driver):
         'closet': 0,
         'natural_gas': 0,
     }
-    def _matcher(elm,keyword,obj,key):
+
+    def _matcher(elm, keyword, obj, key):
         if keyword in elm.text:
-            obj[key] =  1 if '_no' not in elm.get_attribute('class') else 0
-            
+            obj[key] = 1 if '_no' not in elm.get_attribute('class') else 0
+
     for elm in elms:
-        _matcher(elm,'电视',info,'television')
-        _matcher(elm,'冰箱',info,'fridge')
-        _matcher(elm,'洗衣机',info,'washing_machine')
-        _matcher(elm,'空调',info,'air_condition')
-        _matcher(elm,'热水器',info,'water_heater')
-        _matcher(elm,'床',info,'bed')
-        _matcher(elm,'暖气',info,'heating')
-        _matcher(elm,'宽带',info,'wifi')
-        _matcher(elm,'衣柜',info,'closet')
-        _matcher(elm,'天然气',info,'natural_gas')
-    
+        _matcher(elm, '电视', info, 'television')
+        _matcher(elm, '冰箱', info, 'fridge')
+        _matcher(elm, '洗衣机', info, 'washing_machine')
+        _matcher(elm, '空调', info, 'air_condition')
+        _matcher(elm, '热水器', info, 'water_heater')
+        _matcher(elm, '床', info, 'bed')
+        _matcher(elm, '暖气', info, 'heating')
+        _matcher(elm, '宽带', info, 'wifi')
+        _matcher(elm, '衣柜', info, 'closet')
+        _matcher(elm, '天然气', info, 'natural_gas')
+
     return info
+
 
 def get_community_info(driver):
      # 城市
@@ -188,7 +195,6 @@ def get_community_info(driver):
     community_name = driver.find_element_by_xpath(
         "//div[@class='bread__nav w1150 bread__nav--bottom']/h1/a").text[:-2]
 
-    
     # 小区链接
     community_url = driver.find_element_by_xpath(
         "//div[@class='bread__nav w1150 bread__nav--bottom']/h1/a").get_attribute('href')
@@ -200,20 +206,24 @@ def get_community_info(driver):
         'community_url': community_url
     }
 
+
 def get_transportation_info(driver):
-    elms = driver.find_elements_by_xpath("//div[@class='content__article__info4 w1150']/ul/li")
+    elms = driver.find_elements_by_xpath(
+        "//div[@class='content__article__info4 w1150']/ul/li")
     transportations = []
     subway_accessibility = 0
     for elm in elms:
         spans = elm.find_elements_by_xpath('./span')
         if len(spans):
             line_info = [e.text for e in spans if len(spans)]
-            distances = [int(re.findall('\d{1,4}',txt)[0]) for txt in line_info if len(re.findall('^\d{2,4}',txt))]
-            subway_accessibility = subway_accessibility or distances[0] < 1000 if len(distances) else 0
+            distances = [int(re.findall('\d{1,4}', txt)[0]) for txt in line_info if len(
+                re.findall('^\d{2,4}', txt))]
+            subway_accessibility = subway_accessibility or distances[0] < 1000 if len(
+                distances) else 0
             transportations.append(line_info)
     return {
-        'transportations':transportations,
-        'subway_accessibility':int(subway_accessibility)
+        'transportations': transportations,
+        'subway_accessibility': int(subway_accessibility)
     }
 # TODO: 公寓 error
 
@@ -291,18 +301,17 @@ def get_info_of_single_url(driver, url):
         # 户型、面积、朝向
         house_type, area, orient = get_house_type_info_27_nov(driver)
 
-
         content_article_info = get_info_1(driver)
 
         facility_info = get_facility_info(driver)
-    
+
         community_info = get_community_info(driver)
-    
+
         # 地址和交通，地铁便利性
         # TODO:地铁便利性的筛选标准，距任一地铁站的距离有小于1000m的
-        
+
         transportation_info = get_transportation_info(driver)
-        
+
         # 小区最新成交
         try:
             community_deals = driver.find_element_by_xpath(
@@ -326,7 +335,8 @@ def get_info_of_single_url(driver, url):
         # 房源描述
         if len(driver.find_elements_by_xpath("//div[@class='content__article__info3 ']/ul/li/p")) > 2:
             house_description = ''
-            logger.info("请调整子函数get_list_info的房源描述部分，有超过一条评论的情况需要全部考虑。（做成列表而不再是文本）", url)
+            logger.info(
+                f"请调整子函数get_list_info的房源描述部分，有超过一条评论的情况需要全部考虑。（做成列表而不再是文本）{url}")
         else:
             try:
                 house_description = driver.find_element_by_xpath(
@@ -334,19 +344,14 @@ def get_info_of_single_url(driver, url):
             except:
                 house_description = ''
 
-                
-        # 房源链接
-        house_url = url
-
-       
-
         # 每平米房价
         try:
-            price_per_square_meter = round(price/content_article_info.get('area'), 2)
+            price_per_square_meter = round(
+                price/content_article_info.get('area'), 2)
         except:
-            logger.info('无法计算每平米房价：', url)
+            logger.info(f'无法计算每平米房价：{url}',)
             price_per_square_meter = ''
-            
+
         # 上下楼便利性：无障碍性，楼层与电梯的合成项
 
         # 导出所有信息
@@ -360,15 +365,15 @@ def get_info_of_single_url(driver, url):
                        'price': price,
                        'tags': tags,
                        'house_type': house_type,
-                        **content_article_info,
-                        **facility_info,
-                        **transportation_info,
+                       **content_article_info,
+                       **facility_info,
+                       **transportation_info,
                        'community_deals': community_deals,
                        'house_description': house_description,
-                       'house_url': house_url,
-                        **community_info,
+                       'house_url': url,
+                       **community_info,
                        'price_per_square_meter': price_per_square_meter,
-                       'missing_info':len(img_urls) < 2,
+                       'missing_info': len(img_urls) < 2,
                        'version': os.environ.get('VER')
                        }
         return dict_single

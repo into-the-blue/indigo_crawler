@@ -79,14 +79,14 @@ def _filling_missing_geo_info():
             lng = result['location']['lng']
             lat = result['location']['lat']
             if (result['confidence'] < 60):
-                logger.info(district+community_name,
-                            result['confidence'], data['house_id'])
+                logger.info(f'{district}+{community_name},
+                            {result['confidence']}, {data['house_id']}')
             db.update_apartment(data.get('house_id'), {
                 'lng': lng,
                 'lat': lat,
                 'geo_info': result
             })
-        logger.info(lth, 'BATCH DONE')
+        logger.info(f'{lth}, BATCH DONE')
         return _filling_missing_geo_info()
     else:
         logger.info('FILL GEO INFO DONE')

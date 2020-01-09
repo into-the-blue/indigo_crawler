@@ -11,10 +11,14 @@ import re
 import os
 from crawlSingleUrl import get_info_of_single_url
 from proxy_pool import renew_or_create_driver
-from baiduMap.getCoordinates import getGeoInfo
 from db.db import db
 from utils.util import logger
+from hooks import DefaultHooker, HookHandler
+from exceptions import UrlExistsException, ApartmentExpiredException
 # is_ubuntu = os.getenv('PY_ENV', 'mac') == 'ubuntu'
+
+hooks = [DefaultHooker]
+hookHandler = HookHandler(hooks)
 
 
 class GrapPage(object):
@@ -28,11 +32,10 @@ class GrapPage(object):
         return renew_or_create_driver(test_url=test_url)
 
     def check_driver(self, open_last_page=True,  force=False):
-        if(self.driver_period >= 10 or force):
+        if self.driver_period >= 10 or force:
             logger.info('GET NEW PROXY')
 
             current_url = self.driver.current_url
-
             self.driver.close()
 
             self.driver = self.init_driver(current_url)
@@ -51,7 +54,7 @@ class GrapPage(object):
             self.driver.get(url)
             return self.driver
         except Exception as e:
-            logger.error('PROXY BLOCKED', e)
+            logger.error('PROXY BLOCKED {}'.format(e))
             # delete_proxy()
             self.check_driver(force=True, open_last_page=False)
             return self._get(url, times=times + 1)
@@ -98,9 +101,12 @@ class GrapPage(object):
         for i in self.driver.find_elements_by_xpath("//a[@class='content__list--item--aside']"):
             url = i.get_attribute('href')
             if 'apartment' not in url:
-                exist = db.save_url(url, station_info)
-                if exist is False:
+                # HOOK on get url
+                try:
+                    hookHandler('on_get_url', url, station_info)
                     urls.append(url)
+                except UrlExistsException:
+                    pass
         return urls
 
     def get_all_urls(self, station_info=None):
@@ -116,7 +122,8 @@ class GrapPage(object):
                 self.go_to_next_page()
                 urls = self.get_urls_in_page(station_info)
                 all_urls += urls
-                logger.info('URLS SAVED!', len(urls), 'TOTAL:', len(all_urls))
+                logger.info('URLS SAVED! {} TOTAL: {}'.format(
+                    len(urls), len(all_urls)))
         all_urls = list(set(all_urls))
         return all_urls
 
@@ -129,38 +136,35 @@ class GrapPage(object):
                 self.check_driver(force=True)
                 self.click_order_by_time(retry=False)
 
-    def getLocationInfo(self, apartment_info):
-        result = getGeoInfo(apartment_info.get('city'), apartment_info.get(
-            'district'), apartment_info.get('community_name'), apartment_info.get('bizcircle'))
-        lng = result['location']['lng']
-        lat = result['location']['lat']
-        location_info = {
-            'lng': lng,
-            'lat': lat,
-            'geo_info': result
-        }
-        return location_info
-
     def crawl_data_from_urls(self, urls, log=True):
         for url in tqdm(urls):
             driver = self._get(url)
             if log:
-                logger.info('START', url)
+                logger.info(f'START {url}')
             try:
                 time.sleep(2)
                 info = get_info_of_single_url(driver, url)
-                if info is None:
-                    db.delete_apartment_from_url(url)
-                    if log:
-                        logger.info('EXPIRED', url)
-                else:
-                    location_info = self.getLocationInfo(info)
-                    doc = {**info, **location_info}
-                    db.upsert_apartment(info.get('house_code'), doc)
-                    if log:
-                        logger.info("SUCCESS", url)
+                # HOOK on_get_apartment_info
+                hookHandler('on_get_apartment_info', info)
+                if log:
+                    logger.info(f"SUCCESS {url}")
+
+                # DEPRECATED
+                # if info is None:
+                    # db.delete_apartment_from_url(url)
+                    # if log:
+                    #     logger.info('EXPIRED', url)
+                # else:
+                    # location_info = self.getLocationInfo(info)
+                    # doc = {**info, **location_info}
+                    # db.upsert_apartment(info.get('house_code'), doc)
+                    # if log:
+                    #     logger.info("SUCCESS", url)
+            except ApartmentExpiredException:
+                if log:
+                    logger.info(f'EXPIRED {url}')
             except Exception as e:
-                logger.error('ENCOUNTER ERR', url, Exception)
+                logger.error(f'ENCOUNTER ERR {url} ERROR: {e}')
 
     def start_filling_missing_info(self):
         logger.info('START FILLING')
@@ -197,29 +201,29 @@ class GrapPage(object):
                 station_name = station.get('station_name')
                 line_ids = station.get('line_ids')
                 self._get(url)
-                logger.info("START", station_id, station_name)
+                logger.info(f"START {station_id} {station_name}")
                 if latest:
                     self.click_order_by_time()
                 all_urls = self.get_all_urls(station)
-                logger.info(station_id, station_name,
-                            'CRAWL URL BY STATION DONE, START CRAWL INFO')
+                logger.info(
+                    f'{station_id}, {station_name} CRAWL URL BY STATION DONE, START CRAWL INFO')
                 self.crawl_data_from_urls(all_urls, log=False)
-                logger.info(station_id, station_name, 'DONE', count)
+                logger.info(f'{station_id}, {station_name}, DONE, {count}')
             except InvalidSessionIdException:
                 if(error_count >= 10):
                     raise e
                 error_count += 1
-                logger.error('start_by_metro Invalid Session Id', e)
+                logger.error(f'start_by_metro Invalid Session Id',
                 self.check_driver(force=True)
             except Exception as e:
                 if(error_count >= 10):
                     raise e
                 error_count += 1
-                logger.error('start_by_metro', e)
+                logger.error(f'start_by_metro {e}')
         print('DONE')
 
     def quit(self):
         try:
             self.driver.quit()
         except Exception as e:
-            logger.error('QUIT ERROR', e)
+            logger.error(f'QUIT ERROR {e}')

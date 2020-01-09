@@ -79,7 +79,7 @@ def init_driver():
 
 def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0,):
     if times > 9:
-        logger.warning('setup_proxy_for_driver', 'no available proxy')
+        logger.warning('setup_proxy_for_driver no available proxy')
         raise Exception('setup_proxy_for_driver', 'no available proxy')
     try:
         proxy_url = get_proxy().get('proxy')
@@ -99,7 +99,7 @@ def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0,):
 
         return driver
     except Exception as e:
-        logger.error('setup_proxy_for_driver', e)
+        logger.error(f'setup_proxy_for_driver {e}')
         raise e
 
 
