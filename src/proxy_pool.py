@@ -70,6 +70,10 @@ def init_driver():
         # clean cookies
     driver.delete_all_cookies()
     driver.maximize_window()
+
+    global global_driver
+    global_driver = driver
+
     return driver
 
 
@@ -77,21 +81,26 @@ def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0,):
     if times > 9:
         logger.warning('setup_proxy_for_driver', 'no available proxy')
         raise Exception('setup_proxy_for_driver', 'no available proxy')
-    proxy_url = get_proxy().get('proxy')
-    prox = Proxy()
-    prox.proxy_type = ProxyType.MANUAL
-    prox.http_proxy = proxy_url
+    try:
+        proxy_url = get_proxy().get('proxy')
+        prox = Proxy()
+        prox.proxy_type = ProxyType.MANUAL
+        prox.http_proxy = proxy_url
 
-    capabilities = webdriver.DesiredCapabilities.CHROME
-    prox.add_to_capabilities(capabilities)
+        capabilities = webdriver.DesiredCapabilities.CHROME
+        prox.add_to_capabilities(capabilities)
 
-    driver.start_session(capabilities=capabilities)
-    ok = test_proxy(driver, test_url)
-    if not ok:
-        logger.warning('proxy checking failed for {} times'.format(times+1))
-        return setup_proxy_for_driver(driver, test_url, times=times+1)
+        driver.start_session(capabilities=capabilities)
+        ok = test_proxy(driver, test_url)
+        if not ok:
+            logger.warning(
+                'proxy checking failed for {} times'.format(times+1))
+            return setup_proxy_for_driver(driver, test_url, times=times+1)
 
-    return driver
+        return driver
+    except Exception as e:
+        logger.error('setup_proxy_for_driver', e)
+        raise e
 
 
 def renew_or_create_driver(test_url=None):
