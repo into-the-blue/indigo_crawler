@@ -79,8 +79,7 @@ def _filling_missing_geo_info():
             lng = result['location']['lng']
             lat = result['location']['lat']
             if (result['confidence'] < 60):
-                logger.info(f'{district}+{community_name},
-                            {result['confidence']}, {data['house_id']}')
+                logger.info(f'{district}+{community_name},{result['confidence']}, {data['house_id']}')
             db.update_apartment(data.get('house_id'), {
                 'lng': lng,
                 'lat': lat,

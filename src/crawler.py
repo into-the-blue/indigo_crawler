@@ -209,8 +209,7 @@ class GrapPage(object):
                 if latest:
                     self.click_order_by_time()
                 all_urls = self.get_all_urls(station)
-                logger.info(
-                    f'{station_id}, {station_name} CRAWL URL BY STATION DONE, START CRAWL INFO')
+                logger.info(f'{station_id}, {station_name} CRAWL URL BY STATION DONE, START CRAWL INFO')
                 self.crawl_data_from_urls(all_urls, log=False)
                 logger.info(f'{station_id}, {station_name}, DONE, {count}')
             except InvalidSessionIdException:
