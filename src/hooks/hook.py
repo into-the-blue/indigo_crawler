@@ -2,7 +2,7 @@ class Hook():
     def on_get_url(self, url, station_info=None):
         pass
 
-    def on_get_apartment_info(self, info):
+    def on_get_apartment_info(self, info, location_info=None):
         pass
 
     def on_url_expired(self, url):

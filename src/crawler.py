@@ -13,11 +13,11 @@ from crawlSingleUrl import get_info_of_single_url
 from proxy_pool import renew_or_create_driver
 from db.db import db
 from utils.util import logger
-from hooks import DefaultHooker, HookHandler
+from hooks import DefaultHooker, HookHandler, FormatData
 from exceptions import UrlExistsException, ApartmentExpiredException
-# is_ubuntu = os.getenv('PY_ENV', 'mac') == 'ubuntu'
+from baiduMap.getCoordinates import get_location_info_from_apartment_info
 
-hooks = [DefaultHooker]
+hooks = [DefaultHooker, FormatData]
 hookHandler = HookHandler(hooks)
 
 
@@ -36,7 +36,10 @@ class GrapPage(object):
             logger.info('GET NEW PROXY')
 
             current_url = self.driver.current_url
-            self.driver.close()
+            try:
+                self.driver.close()
+            except:
+                pass
 
             self.driver = self.init_driver(current_url)
             if open_last_page:
@@ -145,7 +148,8 @@ class GrapPage(object):
                 time.sleep(2)
                 info = get_info_of_single_url(driver, url)
                 # HOOK on_get_apartment_info
-                hookHandler('on_get_apartment_info', info)
+                hookHandler('on_get_apartment_info', info, get_location_info_from_apartment_info(
+                    info) if info else None)
                 if log:
                     logger.info(f"SUCCESS {url}")
 
