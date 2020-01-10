@@ -3,7 +3,6 @@ from db.db import db
 from exceptions import UrlExistsException, ApartmentExpiredException
 from baiduMap.getCoordinates import getGeoInfo
 
-
 class DefaultHooker(Hook):
 
     def on_get_url(self, url, station_info=None):

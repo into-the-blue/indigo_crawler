@@ -16,6 +16,7 @@ from utils.util import logger
 from hooks import DefaultHooker, HookHandler, FormatData
 from exceptions import UrlExistsException, ApartmentExpiredException
 from baiduMap.getCoordinates import get_location_info_from_apartment_info
+from locateElement import find_next_button
 
 hooks = [DefaultHooker, FormatData]
 hookHandler = HookHandler(hooks)
@@ -27,6 +28,7 @@ class GrapPage(object):
         self.city = city
         self.driver_period = 0
         self.city_url = city_url
+        logger.info('INIT city: {} city url: {}'.format(city, city_url))
 
     def init_driver(self, test_url=None):
         return renew_or_create_driver(test_url=test_url)
@@ -36,10 +38,6 @@ class GrapPage(object):
             logger.info('GET NEW PROXY')
 
             current_url = self.driver.current_url
-            try:
-                self.driver.close()
-            except:
-                pass
 
             self.driver = self.init_driver(current_url)
             if open_last_page:
@@ -65,14 +63,15 @@ class GrapPage(object):
     def go_to_next_page(self):
         driver = self.check_driver()
         try:
-            next_btn = driver.find_element_by_xpath(
-                "//div[@class='content__pg']/div[@class='next']")
+            next_btn = find_next_button(driver)
             next_btn.click()
+            logger.info('Click next button')
         except:
             '''
             next button not found
             '''
             try:
+                logger.warn('Next button not found, try to click page index')
                 current_page_elm = driver.find_element_by_xpath(
                     "//div[@class='content__pg']")
                 current_page = current_page_elm.get_attribute('data-curpage')
@@ -92,6 +91,7 @@ class GrapPage(object):
             elm = self.driver.find_element_by_xpath(
                 "//div[@class='content__pg']")
             page_count = elm.get_attribute('data-totalpage')
+            logger.info('Page read, total: {}'.format(page_count))
             return int(page_count)
         except:
             return 0
@@ -101,11 +101,15 @@ class GrapPage(object):
             get urls in one page
         '''
         urls = []
-        for i in self.driver.find_elements_by_xpath("//a[@class='content__list--item--aside']"):
+        elms = self.driver.find_elements_by_xpath(
+            "//a[@class='content__list--item--aside']")
+        logger.info('elments in page {}'.format(len(elms)))
+        for i in elms:
             url = i.get_attribute('href')
             if 'apartment' not in url:
                 # HOOK on get url
                 try:
+                    # logger.info('HOOK on_get_url')
                     hookHandler('on_get_url', url, station_info)
                     urls.append(url)
                 except UrlExistsException:
@@ -120,8 +124,9 @@ class GrapPage(object):
         all_urls = []
         if(page_count != 0):
             all_urls = self.get_urls_in_page(station_info)
-            for _ in tqdm(range(page_count - 1)):
+            for i in tqdm(range(page_count - 1)):
                 time.sleep(2)
+                logger.info('Get urls in page, currnet {}'.format(i))
                 self.go_to_next_page()
                 urls = self.get_urls_in_page(station_info)
                 all_urls += urls
@@ -175,7 +180,7 @@ class GrapPage(object):
         all_urls = db.find_missing_apartments()
         logger.info('CRAWL URL DONE, START CRAWL INFO')
         self.crawl_data_from_urls(all_urls)
-        logger.info('DONE')
+        logger.info('start_filling_missing_info DONE')
 
     def start(self):
         logger.info('START')
@@ -183,11 +188,14 @@ class GrapPage(object):
         all_urls = self.get_all_urls()
         logger.info('CRAWL URL DONE, START CRAWL INFO')
         self.crawl_data_from_urls(all_urls)
-        logger.info('DONE')
+        logger.info('start DONE')
 
     def start_by_latest(self):
+        logger.info('start_by_latest')
         self.driver.get(self.city_url)
+        logger.info('Url opened')
         self.click_order_by_time()
+        logger.info('Clicked order by time')
         urls = self.get_all_urls()
         self.crawl_data_from_urls(urls)
 
@@ -225,7 +233,7 @@ class GrapPage(object):
                     raise e
                 error_count += 1
                 logger.error(f'start_by_metro {e}')
-        print('DONE')
+        print('start_by_metro DONE')
 
     def quit(self):
         try:

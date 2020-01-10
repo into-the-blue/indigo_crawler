@@ -16,4 +16,4 @@ class HookHandler():
     def __call__(self, hook_name, *args):
         for hook in self.hooks:
             f = getattr(hook, hook_name)
-            f and f(*args)
+            f and f(hook,*args)

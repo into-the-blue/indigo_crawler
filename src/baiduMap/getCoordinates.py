@@ -33,7 +33,7 @@ def getGeoInfo(city, district, community_name, bizcircle):
     return result
 
 
-def get_location_info_from_apartment_info(self, apartment_info):
+def get_location_info_from_apartment_info(apartment_info):
     result = getGeoInfo(apartment_info.get('city'), apartment_info.get(
         'district'), apartment_info.get('community_name'), apartment_info.get('bizcircle'))
     lng = result['location']['lng']

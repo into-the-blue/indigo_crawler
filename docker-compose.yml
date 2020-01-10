@@ -39,6 +39,10 @@ services:
     environment:
       HUB_HOST: hub
       HUB_PORT: 4444
+    ports:
+      - 4444:4444
+    volumes: 
+      - '/dev/shm:/dev/shm'
     entrypoint: bash -c 'SE_OPTS="-host $$HOSTNAME" /opt/bin/entry_point.sh'
     restart: always
     networks:

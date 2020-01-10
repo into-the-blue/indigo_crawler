@@ -33,25 +33,27 @@ def start_by_metro(reverse=False):
     try:
         ins.start_by_metro(reverse=reverse)
         db.update_cron_job(_id)
+        ins.quit()
     except Exception as e:
         db.update_cron_job(_id, 'error', str(e))
         logger.error(e)
-    finally:
         ins.quit()
+        raise e
 
 
 def start_by_latest():
+    logger.info('Cron job start, job name: start_by_latest')
     ins = GrapPage('sh', 'https://sh.zu.ke.com/zufang')
     _id = db.start_cron_job('crawl_by_latest')
     try:
         ins.start_by_latest()
         db.update_cron_job(_id)
+        ins.quit()
     except Exception as e:
         db.update_cron_job(_id, 'error', str(e))
         logger.error(e)
-    finally:
         ins.quit()
-
+        raise e
 
 def start_filling_missing():
     ins = GrapPage('sh', 'https://sh.zu.ke.com/zufang')
@@ -59,11 +61,12 @@ def start_filling_missing():
     try:
         ins.start_filling_missing_info()
         db.update_cron_job(_id)
+        ins.quit()
     except Exception as e:
         db.update_cron_job(_id, 'error', str(e))
         logger.error(e)
-    finally:
         ins.quit()
+        raise e
 
 
 def _filling_missing_geo_info():
@@ -79,7 +82,7 @@ def _filling_missing_geo_info():
             lng = result['location']['lng']
             lat = result['location']['lat']
             if (result['confidence'] < 60):
-                logger.info('{}+{},{}, {}'.format(
+                logger.info('Confidence less than 60 {}+{},{}, {}'.format(
                     district, community_name, result['confidence'], data['house_id']
                 ))
             db.update_apartment(data.get('house_id'), {
@@ -104,16 +107,17 @@ def filling_missing_geo_info():
 
 
 # everyday 11:00, 19:00
-scheduler.add_job(start_by_latest, trigger='cron', hour='3')
-scheduler.add_job(start_by_metro, trigger='cron', hour='11', args=[True])
-scheduler.add_job(start_by_metro, trigger='cron', hour='19')
-# everyday 0:00
-scheduler.add_job(start_filling_missing, trigger='cron', hour='0')
+# scheduler.add_job(start_by_latest, trigger='cron', hour='3')
+# scheduler.add_job(start_by_metro, trigger='cron', hour='11', args=[True])
+# scheduler.add_job(start_by_metro, trigger='cron', hour='19')
+# # everyday 0:00
+# scheduler.add_job(start_filling_missing, trigger='cron', hour='0')
 
-# everyday 3:00
-scheduler.add_job(filling_missing_geo_info, trigger='cron', hour='3')
+# # everyday 3:00
+# scheduler.add_job(filling_missing_geo_info, trigger='cron', hour='3')
 
-scheduler._logger = logger
+# scheduler._logger = logger
 
 if __name__ == '__main__':
-    scheduler.start()
+    start_by_latest()
+    # scheduler.start()
