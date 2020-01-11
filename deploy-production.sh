@@ -1,1 +1,1 @@
-rsync -avzP * --exclude data2/ root@timvel-sh-1:/apps/indigo/indigo-crawler
+rsync -avzP * --exclude data/ root@timvel-sh-1:/apps/indigo/indigo-crawler
