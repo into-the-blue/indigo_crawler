@@ -39,3 +39,4 @@ def find_item(func, li, first=True):
 
 def cleanNoneValue(arr):
     return list(filter(lambda x: bool(x), arr))
+

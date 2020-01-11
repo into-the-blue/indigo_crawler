@@ -55,6 +55,7 @@ def start_by_latest():
         ins.quit()
         raise e
 
+
 def start_filling_missing():
     ins = GrapPage('sh', 'https://sh.zu.ke.com/zufang')
     _id = db.start_cron_job('fill_missing_info')
@@ -107,17 +108,17 @@ def filling_missing_geo_info():
 
 
 # everyday 11:00, 19:00
-# scheduler.add_job(start_by_latest, trigger='cron', hour='3')
-# scheduler.add_job(start_by_metro, trigger='cron', hour='11', args=[True])
-# scheduler.add_job(start_by_metro, trigger='cron', hour='19')
-# # everyday 0:00
-# scheduler.add_job(start_filling_missing, trigger='cron', hour='0')
+scheduler.add_job(start_by_latest, trigger='cron', hour='3')
+scheduler.add_job(start_by_metro, trigger='cron', hour='11', args=[True])
+scheduler.add_job(start_by_metro, trigger='cron', hour='19')
+# everyday 0:00
+scheduler.add_job(start_filling_missing, trigger='cron', hour='0')
 
-# # everyday 3:00
-# scheduler.add_job(filling_missing_geo_info, trigger='cron', hour='3')
+# everyday 3:00
+scheduler.add_job(filling_missing_geo_info, trigger='cron', hour='3')
 
-# scheduler._logger = logger
+scheduler._logger = logger
 
 if __name__ == '__main__':
-    start_by_latest()
-    # scheduler.start()
+    # start_by_latest()
+    scheduler.start()
