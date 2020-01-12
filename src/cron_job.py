@@ -7,6 +7,7 @@ from crawler import GrapPage
 from utils.util import logger
 from db.db import db
 from baiduMap.getCoordinates import getGeoInfo
+from time import sleep
 zh_sh = timezone('Asia/Shanghai')
 
 jobstores = {
@@ -121,5 +122,6 @@ def filling_missing_geo_info():
 # scheduler._logger = logger
 
 if __name__ == '__main__':
+    sleep(5)
     start_by_metro()
     # scheduler.start()

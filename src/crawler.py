@@ -205,6 +205,7 @@ class GrapPage(object):
             stations.reverse()
         count = 0
         error_count = 0
+        logger.info('start_by_metro')
         for station in stations:
             try:
                 count += 1
@@ -212,8 +213,8 @@ class GrapPage(object):
                 station_id = station.get('station_id')
                 station_name = station.get('station_name')
                 line_ids = station.get('line_ids')
-                self._get(url)
                 logger.info(f"START {station_id} {station_name}")
+                self._get(url)
                 if latest:
                     self.click_order_by_time()
                 all_urls = self.get_all_urls(station)

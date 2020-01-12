@@ -127,7 +127,7 @@ class DB(object):
         '''
         line_ids = station_info.get('line_ids')
         station_id = station_info.get('station_id')
-        res = self.find_apartment_by_house_id(house_id, title_exists == exists)
+        res = self.find_apartment_by_house_id(house_id, title_exists=exists)
         _station_ids = res.get('station_ids', [])
         _line_ids = res.get('line_ids', [])
         if (len(list(set(line_ids) - set(_line_ids))) > 0) or (station_id not in _station_ids):
@@ -198,7 +198,7 @@ class DB(object):
         return [x.get('house_url') for x in res]
 
     def find_all_stations(self):
-        return list(self.station_col.find({'city': 'sh', 'line_ids': {'$exists': True}}))
+        return list(self.station_col.find({'city': 'shanghai', 'line_ids': {'$exists': True}}))
 
     def start_cron_job(self, job_type, status='running'):
         return self.cronjob.insert_one({'job_type': job_type, 'start_time': currentDate(), 'status': 'running', 'error': None}).inserted_id
