@@ -23,3 +23,14 @@ def find_elms_of_stations(driver:webdriver):
     1. 打开地铁线路url
     '''
     return driver.find_elements_by_xpath("//div[@class='filter__wrapper w1150']/ul[@data-target='station']/li[@data-type='station']")
+
+def find_paging_elm(driver:webdriver):
+    return driver.find_element_by_xpath(
+                "//div[@class='content__pg']")
+
+def find_apartments_in_list(driver:webdriver):
+    '''
+    列表中的房子
+    '''
+    return driver.find_elements_by_xpath(
+            "//a[@class='content__list--item--aside']")

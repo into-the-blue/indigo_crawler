@@ -83,6 +83,10 @@ def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0,):
         logger.warning('setup_proxy_for_driver no available proxy')
         raise Exception('setup_proxy_for_driver', 'no available proxy')
     try:
+        try:
+            driver.quit()
+        except:
+            pass
         proxy_url = get_proxy().get('proxy')
         logger.info('proxy get {}'.format(proxy_url))
         prox = Proxy()
@@ -92,10 +96,6 @@ def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0,):
         capabilities = webdriver.DesiredCapabilities.CHROME
         prox.add_to_capabilities(capabilities)
         logger.info('start new session')
-        try:
-            driver.quit()
-        except:
-            pass
         driver.start_session(capabilities=capabilities)
         logger.info('start testing proxy')
         ok = test_proxy(driver, test_url)

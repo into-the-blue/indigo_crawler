@@ -16,7 +16,7 @@ from utils.util import logger
 from hooks import DefaultHooker, HookHandler, FormatData
 from exceptions import UrlExistsException, ApartmentExpiredException
 from baiduMap.getCoordinates import get_location_info_from_apartment_info
-from locateElement import find_next_button
+from locateElement import find_next_button,find_paging_elm,find_apartments_in_list
 
 hooks = [DefaultHooker, FormatData]
 hookHandler = HookHandler(hooks)
@@ -72,12 +72,12 @@ class GrapPage(object):
             '''
             try:
                 logger.warn('Next button not found, try to click page index')
-                current_page_elm = driver.find_element_by_xpath(
-                    "//div[@class='content__pg']")
+                current_page_elm = find_paging_elm(driver)
+                total_page = current_page_elm.get_attribute('data-totalpage')
                 current_page = current_page_elm.get_attribute('data-curpage')
+                if total_page == current_page: return logger.warn('Alreay at last page')
                 current_page = int(current_page)
-                elm = driver.find_element_by_xpath(
-                    "//div[@class='content__pg']/a[@data-page='{}']".format(current_page+1))
+                elm = current_page_elm.find_element_by_xpath("./a[@data-page={}]".format(current_page+1))
                 elm.click()
             except:
                 logger.info('BLOCKED, CHANGE PROXY')
@@ -88,8 +88,7 @@ class GrapPage(object):
             read page count of url
         '''
         try:
-            elm = self.driver.find_element_by_xpath(
-                "//div[@class='content__pg']")
+            elm = find_paging_elm(self.driver)
             page_count = elm.get_attribute('data-totalpage')
             logger.info('Page read, total: {}'.format(page_count))
             return int(page_count)
@@ -101,8 +100,8 @@ class GrapPage(object):
             get urls in one page
         '''
         urls = []
-        elms = self.driver.find_elements_by_xpath(
-            "//a[@class='content__list--item--aside']")
+        elms = find_apartments_in_list(self.driver)
+        
         logger.info('elments in page {}'.format(len(elms)))
         for i in elms:
             url = i.get_attribute('href')
@@ -122,7 +121,7 @@ class GrapPage(object):
         '''
         page_count = self.read_page_count()
         all_urls = []
-        if(page_count != 0):
+        if(page_count >= 2):
             all_urls = self.get_urls_in_page(station_info)
             for i in tqdm(range(page_count - 1)):
                 time.sleep(2)

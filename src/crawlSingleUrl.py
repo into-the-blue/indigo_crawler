@@ -225,7 +225,6 @@ def get_transportation_info(driver):
         'transportations': transportations,
         'subway_accessibility': int(subway_accessibility)
     }
-# TODO: 公寓 error
 
 
 def get_info_of_single_url(driver, url):
