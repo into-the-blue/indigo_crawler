@@ -16,7 +16,7 @@ from utils.util import logger
 from hooks import DefaultHooker, HookHandler, FormatData
 from exceptions import UrlExistsException, ApartmentExpiredException
 from baiduMap.getCoordinates import get_location_info_from_apartment_info
-from locateElement import find_next_button,find_paging_elm,find_apartments_in_list
+from locateElement import find_next_button, find_paging_elm, find_apartments_in_list
 
 hooks = [DefaultHooker, FormatData]
 hookHandler = HookHandler(hooks)
@@ -75,9 +75,11 @@ class GrapPage(object):
                 current_page_elm = find_paging_elm(driver)
                 total_page = current_page_elm.get_attribute('data-totalpage')
                 current_page = current_page_elm.get_attribute('data-curpage')
-                if total_page == current_page: return logger.warn('Alreay at last page')
+                if total_page == current_page:
+                    return logger.warn('Alreay at last page')
                 current_page = int(current_page)
-                elm = current_page_elm.find_element_by_xpath("./a[@data-page={}]".format(current_page+1))
+                elm = current_page_elm.find_element_by_xpath(
+                    "./a[@data-page={}]".format(current_page+1))
                 elm.click()
             except:
                 logger.info('BLOCKED, CHANGE PROXY')
@@ -101,7 +103,7 @@ class GrapPage(object):
         '''
         urls = []
         elms = find_apartments_in_list(self.driver)
-        
+
         logger.info('elments in page {}'.format(len(elms)))
         for i in elms:
             url = i.get_attribute('href')
@@ -121,7 +123,7 @@ class GrapPage(object):
         '''
         page_count = self.read_page_count()
         all_urls = []
-        if(page_count >= 2):
+        if page_count > 0:
             all_urls = self.get_urls_in_page(station_info)
             for i in tqdm(range(page_count - 1)):
                 time.sleep(2)
