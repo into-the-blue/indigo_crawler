@@ -95,6 +95,7 @@ class GrapPage(object):
             logger.info('Page read, total: {}'.format(page_count))
             return int(page_count)
         except:
+            logger.info('Page info not found')
             return 0
 
     def get_urls_in_page(self, station_info=None):
@@ -127,7 +128,7 @@ class GrapPage(object):
             all_urls = self.get_urls_in_page(station_info)
             for i in tqdm(range(page_count - 1)):
                 time.sleep(2)
-                logger.info('Get urls in page, currnet {}'.format(i))
+                logger.info('Get urls in page, current {}'.format(i))
                 self.go_to_next_page()
                 urls = self.get_urls_in_page(station_info)
                 all_urls += urls
