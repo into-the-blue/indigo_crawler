@@ -63,6 +63,8 @@ class GrapPage(object):
     def go_to_next_page(self):
         driver = self.check_driver()
         try:
+            driver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight);")
             next_btn = find_next_button(driver)
             next_btn.click()
             logger.info('Click next button')
@@ -71,16 +73,17 @@ class GrapPage(object):
             next button not found
             '''
             try:
-                logger.warn('Next button not found, try to click page index')
+                logger.warning('Next button not found, try to click page index')
                 current_page_elm = find_paging_elm(driver)
                 total_page = current_page_elm.get_attribute('data-totalpage')
                 current_page = current_page_elm.get_attribute('data-curpage')
                 if total_page == current_page:
-                    return logger.warn('Alreay at last page')
+                    return logger.warning('Alreay at last page')
                 current_page = int(current_page)
                 elm = current_page_elm.find_element_by_xpath(
                     "./a[@data-page={}]".format(current_page+1))
                 elm.click()
+                logger.info('Click page index success')
             except:
                 logger.info('BLOCKED, CHANGE PROXY')
                 self.check_driver(force=True)
@@ -222,7 +225,7 @@ class GrapPage(object):
                 all_urls = self.get_all_urls(station)
                 logger.info(
                     f'{station_id}, {station_name} CRAWL URL BY STATION DONE, START CRAWL INFO')
-                self.crawl_data_from_urls(all_urls, log=False)
+                self.crawl_data_from_urls(all_urls, log=True)
                 logger.info(f'{station_id}, {station_name}, DONE, {count}')
             except InvalidSessionIdException:
                 if(error_count >= 10):
