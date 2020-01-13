@@ -16,6 +16,7 @@ from utils.util import logger
 from hooks import DefaultHooker, HookHandler, FormatData
 from exceptions import UrlExistsException, ApartmentExpiredException
 from baiduMap.getCoordinates import get_location_info_from_apartment_info
+from random import shuffle
 from locateElement import find_next_button, find_paging_elm, find_apartments_in_list
 
 hooks = [DefaultHooker, FormatData]
@@ -204,10 +205,9 @@ class GrapPage(object):
         urls = self.get_all_urls()
         self.crawl_data_from_urls(urls)
 
-    def start_by_metro(self, latest=True, reverse=False):
+    def start_by_metro(self, latest=True):
         stations = db.find_all_stations()
-        if(reverse):
-            stations.reverse()
+        shuffle(stations)
         count = 0
         error_count = 0
         logger.info('start_by_metro')

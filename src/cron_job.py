@@ -28,11 +28,11 @@ scheduler = BlockingScheduler(
     jobstores=jobstores, executors=executors, job_defaults=job_defaults, timezone=zh_sh)
 
 
-def start_by_metro(reverse=False):
+def start_by_metro():
     ins = GrapPage('sh', 'https://sh.zu.ke.com/zufang')
     _id = db.start_cron_job('crawl_by_metro')
     try:
-        ins.start_by_metro(reverse=reverse)
+        ins.start_by_metro()
         db.update_cron_job(_id)
         ins.quit()
     except Exception as e:
@@ -111,7 +111,7 @@ def filling_missing_geo_info():
 # # cron job
 # # everyday 11:00, 19:00
 # scheduler.add_job(start_by_latest, trigger='cron', hour='3')
-# scheduler.add_job(start_by_metro, trigger='cron', hour='11', args=[True])
+# scheduler.add_job(start_by_metro, trigger='cron', hour='11')
 # scheduler.add_job(start_by_metro, trigger='cron', hour='19')
 # # everyday 0:00
 # scheduler.add_job(start_filling_missing, trigger='cron', hour='0')
@@ -123,5 +123,5 @@ def filling_missing_geo_info():
 
 if __name__ == '__main__':
     sleep(5)
-    start_by_metro(reverse=True)
+    start_by_metro()
     # scheduler.start()
