@@ -123,5 +123,5 @@ def filling_missing_geo_info():
 
 if __name__ == '__main__':
     sleep(5)
-    start_by_metro()
+    start_by_metro(reverse=True)
     # scheduler.start()
