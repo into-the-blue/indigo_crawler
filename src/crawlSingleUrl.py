@@ -57,7 +57,7 @@ def get_info_1(driver):
         'building_total_floors': None,
         'lease': None,
         'carport': None,
-        'electricity_type': None,
+        'electricity': None,
         'check_in_date': None,
         #         'reservation': None,
         'elevator': None,
@@ -113,7 +113,7 @@ def get_info_1(driver):
         # water type
         _match_text(txt, '用水：', info, 'water')
 
-        # electricity type
+        # electricity
         _match_text(txt, '用电：', info, 'electricity')
 
         # gas
@@ -242,13 +242,6 @@ def get_info_of_single_url(driver, url):
             return None
         except:
             pass
-        # 类型/标题：可能为空，导致标题的爬取报错
-        # try:
-        #     rent_type = driver.find_element_by_xpath("//p[@class='content__title']").text.split(' · ')[0]
-        #     title = driver.find_element_by_xpath("//p[@class='content__title']").text.split(' · ')[1]
-        # except:
-        #     rent_type = '未知'
-        #     title = driver.find_element_by_xpath("//p[@class='content__title']").text
 
         # scroll to end of the page to avoid lazy rendering
         sleep(1)
@@ -257,8 +250,6 @@ def get_info_of_single_url(driver, url):
 
         # get rent type from title
         # eg.合租·瑞和城叁街区(汇臻路815弄) 4居室 南卧
-        # rent_type = driver.find_elements_by_xpath(
-        #     "//p[@class='content__article__table']/span")[0].text
         title = driver.find_element_by_xpath(
             "//p[@class='content__title']").text
         rent_type = title.split('·')[0]
@@ -279,7 +270,6 @@ def get_info_of_single_url(driver, url):
         img_urls = []
         # lazy load return placeholder img
         # get thumbnail img
-#             for i in driver.find_elements_by_xpath("//ul[@class='content__article__slide__wrapper']/div[@class='content__article__slide__item']/img"):
         for i in driver.find_elements_by_xpath("//div[@class='content__thumb--box']/ul[@class='content__article__slide--small content__article__slide_dot']/li/img"):
             img_url = i.get_attribute('src')
             cover_img_size = '780x439'
