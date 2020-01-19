@@ -65,7 +65,7 @@ class GrapPage(object):
         driver = self.check_driver()
         try:
             driver.execute_script(
-            "window.scrollTo(0, document.body.scrollHeight);")
+                "window.scrollTo(0, document.body.scrollHeight);")
             next_btn = find_next_button(driver)
             next_btn.click()
             logger.info('Click next button')
@@ -74,7 +74,8 @@ class GrapPage(object):
             next button not found
             '''
             try:
-                logger.warning('Next button not found, try to click page index')
+                logger.warning(
+                    'Next button not found, try to click page index')
                 current_page_elm = find_paging_elm(driver)
                 total_page = current_page_elm.get_attribute('data-totalpage')
                 current_page = current_page_elm.get_attribute('data-curpage')
@@ -178,6 +179,8 @@ class GrapPage(object):
             except ApartmentExpiredException:
                 if log:
                     logger.info(f'EXPIRED {url}')
+            except InvalidSessionIdException:
+                self.check_driver(force=True)
             except Exception as e:
                 logger.error(f'ENCOUNTER ERR {url} ERROR: {e}')
 
