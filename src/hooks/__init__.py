@@ -15,7 +15,10 @@ class DefaultHooker(Hook):
             db.delete_apartment_from_url(info.get('house_url'))
             raise ApartmentExpiredException()
         else:
-            doc = {**info, **(location_info or {})}
+            doc = {
+                **info,
+                **(location_info or {})
+            }
             db.upsert_apartment(info.get('house_code'), doc)
 
     def on_url_expired(self, url):
@@ -24,5 +27,5 @@ class DefaultHooker(Hook):
 
 class FormatData(Hook):
     def on_get_apartment_info(self, info, location_info=None):
-        if not info: return
-        
+        if not info:
+            return

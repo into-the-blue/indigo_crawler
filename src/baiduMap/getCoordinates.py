@@ -17,12 +17,15 @@ def getCoordinatesFromAddress(address, city=None):
         'level': '地产小区'
         }
     }
+
+    use gcj02ll
     '''
     res = requests.get(BAIDU_API_URL, {
         'address': address,
         'ak': ak,
         'city': city,
-        'output': 'json'
+        'output': 'json',
+        'ret_coordtype': 'gcj02ll'
     })
     return res.json()
 
@@ -41,6 +44,8 @@ def get_location_info_from_apartment_info(apartment_info):
     location_info = {
         'lng': lng,
         'lat': lat,
-        'geo_info': result
+        'geo_info': result,
+        'coordtype': 'gcj02',
+        'coordinates': [lng, lat]
     }
     return location_info
