@@ -6,7 +6,7 @@ from pytz import utc, timezone
 from crawler import GrapPage
 from utils.util import logger
 from db.db import db
-from baiduMap.getCoordinates import getGeoInfo
+from aMap.getCoordinates import getGeoInfo
 from time import sleep
 zh_sh = timezone('Asia/Shanghai')
 

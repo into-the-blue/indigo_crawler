@@ -1,7 +1,7 @@
 from .hook import Hook, HookHandler
 from db.db import db
 from exceptions import UrlExistsException, ApartmentExpiredException
-from baiduMap.getCoordinates import getGeoInfo
+from aMap.getCoordinates import getGeoInfo
 
 class DefaultHooker(Hook):
 

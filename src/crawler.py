@@ -15,7 +15,7 @@ from db.db import db
 from utils.util import logger
 from hooks import DefaultHooker, HookHandler, FormatData
 from exceptions import UrlExistsException, ApartmentExpiredException
-from baiduMap.getCoordinates import get_location_info_from_apartment_info
+from aMap.getCoordinates import get_location_info_from_apartment_info
 from random import shuffle
 from locateElement import find_next_button, find_paging_elm, find_apartments_in_list
 
