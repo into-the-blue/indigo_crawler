@@ -6,14 +6,14 @@ from locateElement import find_elms_of_line,find_elms_of_stations
 def get_line_info_from_elm(elm):
     return  {
         'line_name':elm.text,
-        'line_id':int(elm.get_attribute('data-id')),
+        'line_id': elm.get_attribute('data-id'),
         'url': elm.find_element_by_xpath("./a").get_attribute('href'),
         'city':'shanghai'
     }
 
 def get_station_info_from_elm(elm):
     return {
-        'station_id': int(elm.get_attribute('data-id')),
+        'station_id': elm.get_attribute('data-id'),
         'station_name': elm.text,
         'url': elm.find_element_by_xpath('./a').get_attribute('href'),
         'city': 'shanghai'
