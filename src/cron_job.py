@@ -6,7 +6,7 @@ from pytz import utc, timezone
 from crawler import GrapPage
 from utils.util import logger
 from db.db import db
-from baiduMap.getCoordinates import getGeoInfo
+from aMap.getCoordinates import getGeoInfo
 from time import sleep
 zh_sh = timezone('Asia/Shanghai')
 
@@ -108,20 +108,20 @@ def filling_missing_geo_info():
         logger.error(e)
 
 
-# # cron job
-# # everyday 11:00, 19:00
-# scheduler.add_job(start_by_latest, trigger='cron', hour='3')
-# scheduler.add_job(start_by_metro, trigger='cron', hour='11')
-# scheduler.add_job(start_by_metro, trigger='cron', hour='19')
-# # everyday 0:00
-# scheduler.add_job(start_filling_missing, trigger='cron', hour='0')
+# cron job
+# everyday 11:00, 19:00
+scheduler.add_job(start_by_latest, trigger='cron', hour='3')
+scheduler.add_job(start_by_metro, trigger='cron', hour='11')
+scheduler.add_job(start_by_metro, trigger='cron', hour='19')
+# everyday 0:00
+scheduler.add_job(start_filling_missing, trigger='cron', hour='0')
 
-# # everyday 3:00
-# scheduler.add_job(filling_missing_geo_info, trigger='cron', hour='3')
+# everyday 3:00
+scheduler.add_job(filling_missing_geo_info, trigger='cron', hour='3')
 
-# scheduler._logger = logger
+scheduler._logger = logger
 
 if __name__ == '__main__':
-    sleep(5)
-    start_by_metro()
-    # scheduler.start()
+    # sleep(5)
+    # start_by_metro()
+    scheduler.start()

@@ -15,7 +15,7 @@ from db.db import db
 from utils.util import logger
 from hooks import DefaultHooker, HookHandler, FormatData
 from exceptions import UrlExistsException, ApartmentExpiredException
-from baiduMap.getCoordinates import get_location_info_from_apartment_info
+from aMap.getCoordinates import get_location_info_from_apartment_info
 from random import shuffle
 from locateElement import find_next_button, find_paging_elm, find_apartments_in_list
 
@@ -65,7 +65,7 @@ class GrapPage(object):
         driver = self.check_driver()
         try:
             driver.execute_script(
-            "window.scrollTo(0, document.body.scrollHeight);")
+                "window.scrollTo(0, document.body.scrollHeight);")
             next_btn = find_next_button(driver)
             next_btn.click()
             logger.info('Click next button')
@@ -74,7 +74,8 @@ class GrapPage(object):
             next button not found
             '''
             try:
-                logger.warning('Next button not found, try to click page index')
+                logger.warning(
+                    'Next button not found, try to click page index')
                 current_page_elm = find_paging_elm(driver)
                 total_page = current_page_elm.get_attribute('data-totalpage')
                 current_page = current_page_elm.get_attribute('data-curpage')
@@ -178,6 +179,8 @@ class GrapPage(object):
             except ApartmentExpiredException:
                 if log:
                     logger.info(f'EXPIRED {url}')
+            except InvalidSessionIdException:
+                self.check_driver(force=True)
             except Exception as e:
                 logger.error(f'ENCOUNTER ERR {url} ERROR: {e}')
 
@@ -225,7 +228,7 @@ class GrapPage(object):
                 all_urls = self.get_all_urls(station)
                 logger.info(
                     f'{station_id}, {station_name} CRAWL URL BY STATION DONE, START CRAWL INFO')
-                self.crawl_data_from_urls(all_urls, log=True)
+                self.crawl_data_from_urls(all_urls, log=False)
                 logger.info(f'{station_id}, {station_name}, DONE, {count}')
             except InvalidSessionIdException:
                 if(error_count >= 10):

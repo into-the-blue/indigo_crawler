@@ -2,6 +2,7 @@ import pymongo
 import os
 from utils.util import extract_house_id, extract_house_code_from_url, currentDate, cleanNoneValue
 from datetime import datetime
+from pymongo import IndexModel, ASCENDING, DESCENDING, GEOSPHERE
 db_username = os.getenv('DB_USERNAME')
 db_password = os.getenv('DB_PASSWORD')
 db_host = os.getenv('DB_HOST')
@@ -61,6 +62,20 @@ db_host = os.getenv('DB_HOST')
 '''
 
 
+def ensure_indexes(apartments):
+    indexes = [
+        ('house_code', ASCENDING),
+        ('created_time', DESCENDING),
+        ('coordinates', GEOSPHERE),
+        ('price', ASCENDING),
+        ('price_per_square_meter', DESCENDING),
+        ('area', ASCENDING),
+        ('created_at', DESCENDING)
+    ]
+    indexes = [IndexModel([i]) for i in indexes]
+    apartments.create_indexes(indexes)
+
+
 class DB(object):
     def __init__(self):
         self.initDb()
@@ -73,6 +88,7 @@ class DB(object):
         self.station_col = self.indigo.stations
         self.apartments = self.indigo.apartments
         self.cronjob = self.indigo.cronjob
+        ensure_indexes(self.apartments)
 
     def find_apartment_by_house_id(self, house_id, title_exists=True):
         return self.apartments.find_one(
