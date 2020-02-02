@@ -2,23 +2,24 @@ version: '3.7'
 services:
   crawler:
     volumes:
-      - ./src:/apps/crawler
+      - ./src:/apps/crawler/urlCrawler/src
+      - ../common:/apps/crawler/common
     ports:
       - '5001:5001'
     restart: always
     env_file:
-      - ./prod.env
+      - ../prod.env
     build:
       context: .
     image: meanless/indigo_crawler
-    working_dir: /apps/crawler
-    command: ['python3', '-u', 'cron_job.py']
+    working_dir: /apps/crawler/urlCrawler/src
+    command: ['python3', '-u', 'app.py']
     depends_on:
       - chrome
     networks:
       chrome-network:
         aliases:
-          - crawler
+          - urlCrawler
 
 networks:
   chrome-network:

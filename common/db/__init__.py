@@ -1,0 +1,65 @@
+import pymongo
+import os
+from pymongo import IndexModel, ASCENDING, DESCENDING, GEOSPHERE
+db_username = os.getenv('DB_USERNAME')
+db_password = os.getenv('DB_PASSWORD')
+db_host = os.getenv('DB_HOST')
+
+
+def ensure_indexes_of_apartment(apartments):
+    indexes = [
+        ('house_code', ASCENDING),
+        ('created_time', DESCENDING),
+        ('coordinates', GEOSPHERE),
+        ('price', ASCENDING),
+        ('price_per_square_meter', DESCENDING),
+        ('area', ASCENDING),
+        ('created_at', DESCENDING)
+    ]
+    indexes = [IndexModel([i]) for i in indexes]
+    apartments.create_indexes(indexes)
+
+
+def ensure_indexes_of_station(station):
+    indexes = [
+        ('coordinates', GEOSPHERE),
+    ]
+    indexes = [IndexModel([i]) for i in indexes]
+    station.create_indexes(indexes)
+
+
+class DB(object):
+    def __init__(self):
+        self.initDb()
+
+    def initDb(self):
+        self.client = pymongo.MongoClient(
+            db_host+':27017', username=db_username, password=db_password)
+        self.indigo = self.client.indigo
+
+        self.line_col = self.indigo.lines
+        self.station_col = self.indigo.stations
+        self.apartments = self.indigo.apartments
+        self.cronjob = self.indigo.cronjob
+
+        # tasks
+        # {
+        #   url     string unique
+        #   source  beike
+        #   city    shanghai | string
+        #   status   idle | processing | done
+        #   failed_times number
+        #   source_page: string
+        #   station_info: object
+        #   created_at
+        #   updated_at
+        # }
+        self.tasks = self.indigo.tasks
+        self.apartments_staging = self.indigo.apartmentsStaging
+
+        ensure_indexes_of_station(self.station_col)
+        ensure_indexes_of_apartment(self.apartments)
+        ensure_indexes_of_apartment(self.apartments_staging)
+
+
+# db = DB()

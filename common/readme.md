@@ -1,0 +1,1 @@
+this module contains common resource

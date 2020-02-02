@@ -3,9 +3,6 @@ from selenium.common.exceptions import InvalidSessionIdException
 import pandas as pd
 from tqdm import tqdm
 import time
-import json
-import codecs
-from collections import OrderedDict
 import pymongo
 import re
 import os

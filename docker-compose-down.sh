@@ -1,0 +1,1 @@
+docker-compose -f ./urlCrawler/docker-compose.yml -f ./chromeSelenium/docker-compose.yml down

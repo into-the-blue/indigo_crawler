@@ -1,8 +1,9 @@
-version: '3'
+version: '3.7'
 
 services:
   chrome:
     image: selenium/standalone-chrome
+    container_name: 'chrome-selenium'
     environment:
       HUB_HOST: hub
       HUB_PORT: 4444
