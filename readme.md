@@ -1,3 +1,6 @@
+TODO:
+- refactor crawler
+- build a scalable and robust structure
 
 A crawler to grab data from internet(beike)
 
