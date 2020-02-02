@@ -14,8 +14,6 @@ services:
     image: meanless/indigo_crawler
     working_dir: /apps/crawler/urlCrawler/src
     command: ['python3', '-u', 'app.py']
-    depends_on:
-      - chrome
     networks:
       chrome-network:
         aliases:

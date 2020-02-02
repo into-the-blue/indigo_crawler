@@ -61,5 +61,8 @@ class DB(object):
         ensure_indexes_of_apartment(self.apartments)
         ensure_indexes_of_apartment(self.apartments_staging)
 
+    def find_all_stations(self, city):
+        return list(self.station_col.find({'city': city}))
+
 
 # db = DB()

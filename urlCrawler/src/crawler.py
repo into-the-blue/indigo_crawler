@@ -127,7 +127,7 @@ class UrlCrawler(object):
                     urls = self.get_urls_in_page(station_info)
                     self.on_get_new_urls(urls, station_info)
                     logger.info('URLS SAVED! {} TOTAL: {}'.format(
-                        len(urls), len(all_urls)))
+                        len(urls), len(self.apartment_urls)))
                     if i < page_count - 1:
                         self.go_to_next_page()
 
@@ -147,13 +147,13 @@ class UrlCrawler(object):
         on get url, save them into db
         '''
         for url in urls:
-            db.insert_into_pool({
+            if db.insert_into_pool({
                 'url': url.strip(),
                 'city': self.city,
                 'source': self.source,
                 'station_info': station_info
-            })
-        self.apartment_urls += urls
+            }):
+                self.apartment_urls.append(url)
 
     def on_accomplish(self):
         logger.info('Total url length {}'.format(len(self.apartment_urls)))
@@ -171,14 +171,14 @@ class UrlCrawler(object):
             logger.info('Url opened')
             self.click_order_by_time()
             logger.info('Clicked order by time')
-            all_urls = self.get_all_urls(station_info)
+            self.get_all_urls(station_info)
             self.on_accomplish()
             logger.info('start DONE')
         except Exception as e:
             raise e
 
     def start_by_metro(self):
-        stations = db.find_all_stations()
+        stations = db.find_all_stations(self.city)
         shuffle(stations)
         count = 0
         logger.info('start_by_metro')

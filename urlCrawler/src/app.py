@@ -8,15 +8,15 @@ from time import sleep
 
 def start_task():
     try:
-        sleep(10)
+        sleep(5)
         crawler = UrlCrawler(
             'shanghai',
             'https://sh.zu.ke.com/zufang',
             'beike'
         )
-        crawler.start_by_metro()
-        sleep(10)
         crawler.start()
+        sleep(10)
+        # crawler.start()
     except Exception as e:
         logger.error(e)
         sleep(60)

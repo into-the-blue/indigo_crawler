@@ -1,5 +1,6 @@
 from common.db import DB
 from datetime import datetime
+from common.utils.logger import logger
 
 
 class MyDB(DB):
@@ -21,25 +22,26 @@ class MyDB(DB):
         if self.tasks.find_one({
             'url': metadata.get('url')
         }):
-            return
+            return False
 
         if self.apartments_staging.find_one({
             'house_url': metadata.get('url')
         }):
-            return
+            return False
 
         if self.apartments.find_one({
             'house_url': metadata.get('url')
         }):
-            return
+            return False
 
-        self.apartments.insert_one({
+        self.tasks.insert_one({
             **metadata,
             'status': 'idle',
             'failed_times': 0,
             'created_at': datetime.now(),
             'updated_at': datetime.now()
         })
+        return True
 
 
 db = MyDB()
