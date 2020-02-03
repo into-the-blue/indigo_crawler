@@ -11,7 +11,7 @@ class MyDB(DB):
     def get_one_task(self):
         res = self.tasks.find_one({
             'status': 'idle',
-            'failed_time': {'$lt': 3}
+            'failed_times': {'$lt': 3}
         })
         if res:
             self.tasks.update_one(

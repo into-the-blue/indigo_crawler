@@ -118,7 +118,7 @@ def get_info_1(driver):
     floor_accessibility = 0
     if info.get('elevator') == '有':
         floor_accessibility = 1
-    elif info.get('elevator') == '无' and int(info.get('floor')) <= 3:
+    elif info.get('elevator') == '无' and info.get('floor') <= '3':
         floor_accessibility = 1
     elif info.get('elevator') == 0 and info.get('floor') == '低楼层':
         floor_accessibility = 1

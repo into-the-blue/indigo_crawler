@@ -57,13 +57,17 @@ class DetailCrawler(object):
             raise NoTaskException()
         try:
             self._get(task.get('url'))
+            logger.info('Url opened')
             info = get_info_of_single_url(self.driver, task.get('url'))
-            db.insert_into_staing(info, task)
+            logger.info('Data get')
+            db.insert_into_staing(task, info)
         # except WebDriverException:
         #     self.check_driver()
         except ApartmentExpiredException:
+            logger.info('Url expired')
             db.task_expired(task)
         except Exception as e:
+            logger.error('Unexcepected error {}'.format(e))
             db.update_failure(task, self.driver.page_source)
 
     def start(self):
@@ -72,6 +76,7 @@ class DetailCrawler(object):
             sleep(2)
             self.start()
         except NoTaskException:
+            logger.info('No task found')
             sleep(60*5)
             self.start()
 
