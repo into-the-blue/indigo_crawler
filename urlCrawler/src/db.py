@@ -12,7 +12,7 @@ class MyDB(DB):
         url     string unique
         source  beike
         city    shanghai | string
-        status   idle | processing | done | error
+        status   idle | processing | done | error | expired
         failed_times number
         page_source: string
         station_info: object

@@ -43,6 +43,12 @@ class MyDB(DB):
             {'$set': {**toupdate, 'updated_at': datetime.now()}}
         )
 
+    def task_expired(self, task):
+        self.tasks.update_one(
+            {'_id': task.get('_id')},
+            {'$set': {'status': 'expired', 'updated_at': datetime.now()}}
+        )
+
     def insert_into_staing(self, task, apartment_doc):
         '''
         insert apartment info into staging

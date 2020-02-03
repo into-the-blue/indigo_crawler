@@ -16,3 +16,8 @@ class ProxyBlockedException(Exception):
 class ElementNotFoundException(Exception):
     def __init__(self, *args, **kwargs):
         super().__init__('Element not found', *args, **kwargs)
+
+
+class NoTaskException(Exception):
+    def __init__(self, *args, **kwargs):
+        super().__init__('No Task', *args, **kwargs)

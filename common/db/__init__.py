@@ -47,7 +47,7 @@ class DB(object):
         #   url     string unique
         #   source  beike
         #   city    shanghai | string
-        #   status   idle | processing | done
+        #   status   idle | processing | done | expired
         #   failed_times number
         #   page_source: string
         #   station_info: object
