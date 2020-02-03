@@ -1,0 +1,25 @@
+version: '3.7'
+services:
+  crawler:
+    volumes:
+      - ./src:/apps/crawler/detailCrawler/src
+      - ../common:/apps/crawler/common
+    ports:
+      - '5002:5001'
+    restart: always
+    env_file:
+      - ../prod.env
+    build:
+      context: .
+    image: meanless/indigo_crawler
+    working_dir: /apps/crawler/detailCrawler/src
+    command: ['python3', '-u', 'app.py']
+    networks:
+      chrome-network:
+        aliases:
+          - detailCrawler
+
+networks:
+  chrome-network:
+    external: true
+    name: 'chrome-network'

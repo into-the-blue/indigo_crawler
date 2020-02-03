@@ -49,7 +49,7 @@ class DB(object):
         #   city    shanghai | string
         #   status   idle | processing | done
         #   failed_times number
-        #   source_page: string
+        #   page_source: string
         #   station_info: object
         #   created_at
         #   updated_at

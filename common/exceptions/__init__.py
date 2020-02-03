@@ -11,3 +11,8 @@ class ApartmentExpiredException(Exception):
 class ProxyBlockedException(Exception):
     def __init__(self, *args, **kwargs):
         super().__init__('Proxy blocked', *args, **kwargs)
+
+
+class ElementNotFoundException(Exception):
+    def __init__(self, *args, **kwargs):
+        super().__init__('Element not found', *args, **kwargs)
