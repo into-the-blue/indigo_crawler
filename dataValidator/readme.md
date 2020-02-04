@@ -1,0 +1,3 @@
+- check if data is valid
+- clean abnormal tasks (if status stays `processing` for more than 3 minutes)
+- check if apartments are expired

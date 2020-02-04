@@ -42,6 +42,7 @@ class DB(object):
         self.apartments = self.indigo.apartments
         self.cronjob = self.indigo.cronjob
 
+        self.errors = self.indigo.errors
         # tasks
         # {
         #   url     string unique
@@ -64,5 +65,5 @@ class DB(object):
     def find_all_stations(self, city):
         return list(self.station_col.find({'city': city}))
 
-
-# db = DB()
+    def insert_into_errors(self, doc):
+        self.errors.insert_one({**doc})
