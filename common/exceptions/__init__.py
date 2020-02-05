@@ -21,3 +21,8 @@ class ElementNotFoundException(Exception):
 class NoTaskException(Exception):
     def __init__(self, *args, **kwargs):
         super().__init__('No Task', *args, **kwargs)
+
+
+class ValidatorInvalidValue(Exception):
+    def __init__(self, *args, **kwargs):
+        super().__init__('Invalid Value', *args, **kwargs)

@@ -3,71 +3,78 @@ from datetime import datetime
 from common.utils.logger import logger
 
 
+def rm_useless_values(apartment):
+    keys_to_rm = [
+        '_id',
+        'failed_times'
+    ]
+    for key in keys_to_rm:
+        try:
+            del apartment[key]
+        except:
+            pass
+    return apartment
+
+
 class MyDB(DB):
     def __init__(self):
         super().__init__()
 
-    def insert_into_pool(self, metadata):
-        '''
-        url     string unique
-        source  beike
-        city    shanghai | string
-        status   idle | processing | done | error | expired
-        failed_times number
-        page_source: string
-        station_info: object
-        created_at  
-        updated_at
-        '''
-        if self.tasks.find_one({
-            'url': metadata.get('url')
-        }):
-            return False
-
-        staging = self.apartments_staging.find_one({
-            'house_url': metadata.get('url')
+    def get_unchecked(self):
+        res = self.apartments_staging.find_one({
+            '$or': [
+                {'failed_times': {'$exists': False}, 'missing_info': False},
+                {'failed_times': {'$lt': 1}, 'missing_info': False}
+            ]
         })
-        if staging:
-            if metadata.get('station_info'):
-                self._update_station_info_for_apartment(
-                    self.apartments_staging, staging, metadata.get('station_info'))
-            return False
+        return res
 
-        apartment = self.apartments.find_one({
-            'house_url': metadata.get('url')
-        }):
-        if apartment:
-            if metadata.get('station_info'):
-                self._update_station_info_for_apartment(
-                    self.apartments, apartment, metadata.get('station_info'))
-            return False
-
-        self.tasks.insert_one({
-            **metadata,
-            'status': 'idle',
-            'failed_times': 0,
-            'created_at': datetime.now(),
-            'updated_at': datetime.now()
+    def get_missing_info(self):
+        res = self.apartments_staging.find_one({
+            'missing_info': True
         })
-        return True
+        return res
 
-    def _update_station_info_for_apartment(self, col, apartment, station_info):
-        '''
-        update station info 
-        check if station id and line ids exist in apartment info
-        if not, add it
-        '''
-        line_ids = station_info.get('line_ids')
-        station_id = station_info.get('station_id')
-        _station_ids = apartment.get('station_ids', [])
-        _line_ids = apartment.get('line_ids', [])
-        if (len(list(set(line_ids) - set(_line_ids))) > 0) or (station_id not in _station_ids):
-            _station_ids.append(station_id)
-            _station_ids = list(set(_station_ids))
-            _line_ids += line_ids
-            _line_ids = list(set(_line_ids))
-            col.update_one(
-                {'_id', apartment.get('_id')}, {'line_ids': _line_ids, 'station_ids': _station_ids})
+    def update_missing_info(self, apartment, updated):
+        self.apartments_staging.update_one({
+            {'_id': apartment.get('_id')},
+            {'$set': {
+                **updated,
+                'updated_time': datetime.now()
+            }}
+        })
+
+    def on_pass_validation(self, apartment):
+        self.apartments_staging.delete_one({
+            '_id': apartment.get('_id')
+        })
+
+        apartment = rm_useless_values(apartment)
+
+        self.apartments.insert_one({
+            **apartment,
+            'updated_time': datetime.now()
+        })
+
+    def report_error(self, message, payload):
+        return super().report_error({
+            'error_type': 'validator',
+            'message': message,
+            'payload': payload
+        })
+
+    def report_invalid_value(self, apartment, invalid_value):
+        self.apartments_staging.update_one(
+            {'_id': apartment.get('_id')},
+            {'$set': {
+                'failed_times': 1,
+                'updated_time': datetime.now()
+            }}
+        )
+        self.report_error('invalid_value', {
+            'apartment_url': apartment.get('house_url'),
+            'invalid_value': invalid_value
+        })
 
 
 db = MyDB()

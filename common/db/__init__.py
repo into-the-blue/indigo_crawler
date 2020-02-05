@@ -1,6 +1,7 @@
 import pymongo
 import os
 from pymongo import IndexModel, ASCENDING, DESCENDING, GEOSPHERE
+from datetime import datetime
 db_username = os.getenv('DB_USERNAME')
 db_password = os.getenv('DB_PASSWORD')
 db_host = os.getenv('DB_HOST')
@@ -65,5 +66,17 @@ class DB(object):
     def find_all_stations(self, city):
         return list(self.station_col.find({'city': city}))
 
-    def insert_into_errors(self, doc):
-        self.errors.insert_one({**doc})
+    def report_error(self, doc):
+        '''
+        error_type: 'validator' | 'url_crawler' | 'detail_crawler'
+        message: 'elm_not_found' | 'invalid_value' | ''
+        checked: true | false
+        ...payload: {
+            ....
+        }
+        '''
+        self.errors.insert_one(
+            {**doc,
+            'checked': False,
+            'created_at': datetime.now(),
+            'updated_at': datetime.now()})

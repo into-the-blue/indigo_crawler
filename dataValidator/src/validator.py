@@ -1,5 +1,6 @@
 import re
 from citySpecificData import SH_BIZCIRCLES, SH_DISTRICTS
+from common.exceptions import ValidatorInvalidValue
 
 
 def list_validator(arr):
@@ -71,6 +72,21 @@ validator = {
 }
 
 sh_validator = {
+    **validator,
     'district': list_validator(SH_DISTRICTS),
     'bizcircle': list_validator(SH_BIZCIRCLES),
 }
+
+
+def get_validator(city_abbreviation):
+    if city_abbreviation == 'sh':
+        return sh_validator
+
+
+def examine_apartment(apartment):
+    _validator = get_validator(apartment.get('city_abbreviation'))
+    invalid_data = [{'{}'.format(k): apartment.get(k)}
+                    for k, v in _validator.items()
+                    if not v(apartment.get(k))]
+    if len(invalid_data) > 0:
+        raise ValidatorInvalidValue(invalid_data)
