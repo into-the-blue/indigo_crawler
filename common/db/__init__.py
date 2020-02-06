@@ -68,7 +68,7 @@ class DB(object):
 
     def report_error(self, doc):
         '''
-        error_type: 'validator' | 'url_crawler' | 'detail_crawler'
+        error_source: 'validator' | 'url_crawler' | 'detail_crawler'
         message: 'elm_not_found' | 'invalid_value' | ''
         checked: true | false
         ...payload: {
@@ -77,6 +77,25 @@ class DB(object):
         '''
         self.errors.insert_one(
             {**doc,
-            'checked': False,
-            'created_at': datetime.now(),
-            'updated_at': datetime.now()})
+             'checked': False,
+             'created_at': datetime.now(),
+             'updated_at': datetime.now()})
+
+    def report_unexpected_error(self, error_source, error_message, error_stack):
+        self.report_error({
+            'error_source': error_source,
+            'message': 'unexpected_error',
+            'payload': {
+                'error_message': error_message,
+                'error_stack': error_stack
+            }
+        })
+
+    def unable_to_locate_elm_error(self, error_source, elm_xpath):
+        self.report_error({
+            'error_source': error_source,
+            'message': 'unable_to_locate_element',
+            'payload': {
+                'elm_xpath': elm_xpath
+            }
+        })

@@ -23,6 +23,11 @@ class NoTaskException(Exception):
         super().__init__('No Task', *args, **kwargs)
 
 
-class ValidatorInvalidValue(Exception):
+class ValidatorInvalidValueException(Exception):
     def __init__(self, *args, **kwargs):
         super().__init__('Invalid Value', *args, **kwargs)
+
+
+class UrlCrawlerNoMoreNewUrlsException(Exception):
+    def __init__(self, *args, **kwargs):
+        super().__init__('No more new urls', *args, **kwargs)
