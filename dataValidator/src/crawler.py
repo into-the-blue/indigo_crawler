@@ -3,8 +3,9 @@ from tqdm import tqdm
 from time import sleep
 from db import db
 from common.utils.logger import logger
+from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME
 from common.proxy import connect_to_driver, setup_proxy_for_driver
-from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException, ValidatorInvalidValue
+from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException, ValidatorInvalidValueException
 from random import shuffle
 from common.locateElms import find_next_button, find_paging_elm, find_apartments_in_list
 from validator import examine_apartment
@@ -54,6 +55,14 @@ class DataValidator(object):
 
             return self._get(url, times=times + 1)
 
+    def on_change_proxy(self, opened_times):
+        db.report_error(
+            'proxy_opened_urls',
+            {
+                'count': opened_times
+            }
+        )
+
     def start(self):
         logger.info('START')
         try:
@@ -61,27 +70,27 @@ class DataValidator(object):
             if not staging_apartment:
                 raise NoTaskException()
             examine_apartment(staging_apartment)
+            db.on_pass_validation(staging_apartment)
+            logger.info('pass validation')
             self.start()
 
         except NoTaskException:
             logger.info('No task to run, sleep for 5 min')
-            sleep(60*5)
+            sleep(AWAIT_TIME)
             self.start()
 
-        except ValidatorInvalidValue as e1:
+        except ValidatorInvalidValueException as e1:
             logger.info('Found invalid value')
             invalid_values = e1.args[1]
             db.report_invalid_value(staging_apartment, invalid_values)
             self.start()
+
         except Exception as e:
             stack_info = traceback.format_exc()
             logger.error(e)
             logger.error(stack_info)
-            db.report_error('unexpected_error', {
-                'error_message': e,
-                'stack_info': stack_info
-            })
-            sleep(60*5)
+            db.report_unexpected_error(e, stack_info)
+            sleep(ERROR_AWAIT_TIME)
             self.start()
 
     def quit(self):

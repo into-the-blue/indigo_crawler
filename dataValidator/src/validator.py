@@ -1,6 +1,6 @@
 import re
 from citySpecificData import SH_BIZCIRCLES, SH_DISTRICTS
-from common.exceptions import ValidatorInvalidValue
+from common.exceptions import ValidatorInvalidValueException
 
 
 def list_validator(arr):
@@ -89,4 +89,4 @@ def examine_apartment(apartment):
                     for k, v in _validator.items()
                     if not v(apartment.get(k))]
     if len(invalid_data) > 0:
-        raise ValidatorInvalidValue(invalid_data)
+        raise ValidatorInvalidValueException(invalid_data)

@@ -43,6 +43,31 @@ class MyDB(DB):
             {'$set': {**toupdate, 'updated_at': datetime.now()}}
         )
 
+    def get_missing_info(self):
+        res = self.apartments_staging.find_one({
+            'missing_info': True
+        })
+        return res
+
+    def update_missing_info(self, apartment, updated):
+        self.apartments_staging.update_one({
+            {'_id': apartment.get('_id')},
+            {'$set': {
+                **updated,
+                'updated_time': datetime.now()
+            }}
+        })
+
+    def report_error(self, message, payload):
+        return super().report_error({
+            'error_source': 'detail_crawler',
+            'message': message,
+            'payload': payload
+        })
+
+    def report_unexpected_error(self, error_message, error_stack):
+        return super().report_unexpected_error('detail_crawler', error_message, error_stack)
+
     def task_expired(self, task):
         self.tasks.update_one(
             {'_id': task.get('_id')},

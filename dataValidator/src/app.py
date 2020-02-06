@@ -9,7 +9,6 @@ import traceback
 
 
 def start_task():
-    # try:
     sleep(3)
     crawler = DataValidator(
         os.environ.get('CITY'),
@@ -17,14 +16,7 @@ def start_task():
         os.environ.get('SOURCE')
     )
     crawler.start()
-        # crawler.start()
-    # except Exception as e:
-    #     logger.error(e)
-    #     logger.error(traceback.format_exc())
-    #     sleep(60*5)
-    #     start_task()
 
 
 if __name__ == '__main__':
     start_task()
-    # sleep(600)

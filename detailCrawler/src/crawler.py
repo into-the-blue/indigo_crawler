@@ -3,6 +3,7 @@ from tqdm import tqdm
 from time import sleep
 from db import db
 from common.utils.logger import logger
+from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME
 from common.proxy import connect_to_driver, setup_proxy_for_driver
 from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException
 from random import shuffle
@@ -51,6 +52,14 @@ class DetailCrawler(object):
 
             return self._get(url, times=times + 1)
 
+    def on_change_proxy(self, opened_times):
+        db.report_error(
+            'proxy_opened_urls',
+            {
+                'count': opened_times
+            }
+        )
+
     def start_one_url(self):
         task = db.get_one_task()
         if not task:
@@ -67,7 +76,7 @@ class DetailCrawler(object):
             logger.info('Url expired')
             db.task_expired(task)
         except Exception as e:
-            logger.error('Unexcepected error {}'.format(e))
+            logger.exception('Unexcepected error {}'.format(e))
             db.update_failure(task, self.driver.page_source)
 
     def start(self):
@@ -77,8 +86,11 @@ class DetailCrawler(object):
             self.start()
         except NoTaskException:
             logger.info('No task found')
-            sleep(60*5)
+            sleep(AWAIT_TIME)
             self.start()
+        except Exception as e:
+            logger.exception(e)
+            sleep(ERROR_AWAIT_TIME)
 
     def quit(self):
         try:

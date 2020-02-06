@@ -8,18 +8,13 @@ from time import sleep
 
 
 def start_task():
-    try:
-        sleep(3)
-        crawler = DetailCrawler(
-            os.environ.get('CITY'),
-            os.environ.get('CITY_URL'),
-            os.environ.get('SOURCE')
-        )
-        crawler.start()
-        # crawler.start()
-    except Exception as e:
-        logger.error(e)
-        sleep(60)
+    sleep(3)
+    crawler = DetailCrawler(
+        os.environ.get('CITY'),
+        os.environ.get('CITY_URL'),
+        os.environ.get('SOURCE')
+    )
+    crawler.start()
 
 
 if __name__ == '__main__':

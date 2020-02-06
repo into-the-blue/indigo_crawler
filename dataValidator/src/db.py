@@ -29,21 +29,6 @@ class MyDB(DB):
         })
         return res
 
-    def get_missing_info(self):
-        res = self.apartments_staging.find_one({
-            'missing_info': True
-        })
-        return res
-
-    def update_missing_info(self, apartment, updated):
-        self.apartments_staging.update_one({
-            {'_id': apartment.get('_id')},
-            {'$set': {
-                **updated,
-                'updated_time': datetime.now()
-            }}
-        })
-
     def on_pass_validation(self, apartment):
         self.apartments_staging.delete_one({
             '_id': apartment.get('_id')
@@ -58,10 +43,13 @@ class MyDB(DB):
 
     def report_error(self, message, payload):
         return super().report_error({
-            'error_type': 'validator',
+            'error_source': 'data_validator',
             'message': message,
             'payload': payload
         })
+
+    def report_unexpected_error(self, error_message, error_stack):
+        return super().report_unexpected_error('data_validator', error_message, error_stack)
 
     def report_invalid_value(self, apartment, invalid_value):
         self.apartments_staging.update_one(
