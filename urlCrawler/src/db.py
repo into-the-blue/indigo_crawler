@@ -69,5 +69,14 @@ class MyDB(DB):
             col.update_one(
                 {'_id', apartment.get('_id')}, {'line_ids': _line_ids, 'station_ids': _station_ids})
 
+    def report_error(self, message, payload):
+        return super().report_error({
+            'error_source': 'url_crawler',
+            'message': message,
+            'payload': payload
+        })
+
+    def report_unexpected_error(self, error_message, error_stack):
+        return super().report_unexpected_error('url_crawler', error_message, error_stack)
 
 db = MyDB()

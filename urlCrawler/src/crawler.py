@@ -1,12 +1,13 @@
-from selenium.common.exceptions import InvalidSessionIdException, WebDriverException
+from selenium.common.exceptions import InvalidSessionIdException, WebDriverException, NoSuchElementException
 from tqdm import tqdm
 from time import sleep
 from db import db
 from common.utils.logger import logger
 from common.proxy import connect_to_driver, setup_proxy_for_driver
-from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException
+from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, UrlCrawlerNoMoreNewUrlsException
 from random import shuffle
-from common.locateElms import find_next_button, find_paging_elm, find_apartments_in_list
+from common.locateElms import find_next_button, find_paging_elm, find_apartments_in_list, find_paging_elm_index, find_elm_of_latest_btn
+from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME
 
 
 class UrlCrawler(object):
@@ -74,8 +75,7 @@ class UrlCrawler(object):
                 if total_page == current_page:
                     return logger.warning('Alreay at last page')
                 current_page = int(current_page)
-                elm = current_page_elm.find_element_by_xpath(
-                    "./a[@data-page={}]".format(current_page+1))
+                elm = find_paging_elm_index(current_page+1)
                 elm.click()
                 logger.info('Click page index success')
             except:
@@ -91,7 +91,7 @@ class UrlCrawler(object):
             page_count = elm.get_attribute('data-totalpage')
             logger.info('Page read, total: {}'.format(page_count))
             return int(page_count)
-        except:
+        except NoSuchElementException:
             logger.info('Page info not found')
             return 0
 
@@ -125,7 +125,9 @@ class UrlCrawler(object):
                     sleep(2)
                     logger.info('Get urls in page, current {}'.format(i+1))
                     urls = self.get_urls_in_page(station_info)
-                    self.on_get_new_urls(urls, station_info)
+                    url_saved = self.on_get_new_urls(urls, station_info)
+                    if not url_saved:
+                        raise UrlCrawlerNoMoreNewUrlsException()
                     logger.info('URLS SAVED! {} TOTAL: {}'.format(
                         len(urls), len(self.apartment_urls)))
                     if i < page_count - 1:
@@ -140,12 +142,18 @@ class UrlCrawler(object):
         return self.apartment_urls
 
     def on_change_proxy(self, opened_times):
-        pass
+        db.report_error(
+            'proxy_opened_urls',
+            {
+                'count': opened_times
+            }
+        )
 
     def on_get_new_urls(self, urls, station_info):
         '''
         on get url, save them into db
         '''
+        saved_count = 0
         for url in urls:
             if db.insert_into_pool({
                 'url': url.strip(),
@@ -154,28 +162,64 @@ class UrlCrawler(object):
                 'station_info': station_info
             }):
                 self.apartment_urls.append(url)
+                saved_count += 1
+
+        return saved_count
 
     def on_accomplish(self):
         logger.info('Total url length {}'.format(len(self.apartment_urls)))
+        self.apartment_urls = []
 
     def click_order_by_time(self, retry=True):
         try:
-            self.driver.find_element_by_link_text('最新上架').click()
-        except Exception as e:
+            find_elm_of_latest_btn(self.driver).click()
+        except NoSuchElementException as e:
             logger.info('UNABLE TO LOCATE 最新上架')
 
-    def start(self, url=None, station_info=None):
-        logger.info('START')
+    def start_by_url(self, url=None, station_info=None):
         try:
+            logger.info('START')
             self._get(url or self.city_url)
             logger.info('Url opened')
             self.click_order_by_time()
             logger.info('Clicked order by time')
             self.get_all_urls(station_info)
-            self.on_accomplish()
             logger.info('start DONE')
+        except UrlCrawlerNoMoreNewUrlsException:
+            logger.info('No more new urls, start next')
+        finally:
+            self.on_accomplish()
+
+    def start(self):
+        all_tasks = [
+            {
+                'name': 'by city'
+                'func': self.start_by_url,
+                'args': [self.city_url]
+            },
+            {
+                'name': 'by metro'
+                'func': self.start_by_metro,
+                'args': []
+            },
+            {
+                'name': 'by district'
+                'func': self.start_by_district,
+                'args': []
+            },
+        ]
+        shuffle(all_tasks)
+        try:
+            for task in all_tasks:
+                logger.info('START {}'.format(task['name']))
+                task['func'](*task['args'])
+                sleep(AWAIT_TIME)
         except Exception as e:
-            raise e
+            logger.exception(e)
+            sleep(ERROR_AWAIT_TIME)
+
+    def start_by_district(self):
+        pass
 
     def start_by_metro(self):
         stations = db.find_all_stations(self.city)
@@ -183,27 +227,14 @@ class UrlCrawler(object):
         count = 0
         logger.info('start_by_metro')
         for station in stations:
-            # try:
             count += 1
             url = station.get('url')
             station_id = station.get('station_id')
             station_name = station.get('station_name')
             line_ids = station.get('line_ids')
             logger.info(f"START {station_id} {station_name}")
-            self.start(url, station)
+            self.start_by_url(url, station)
             logger.info(f'{station_id}, {station_name}, DONE, {count}')
-            # except InvalidSessionIdException:
-            #     if(error_count >= 10):
-            #         raise e
-            #     error_count += 1
-            #     logger.error(f'start_by_metro Invalid Session Id')
-            #     self.check_driver()
-
-            # except Exception as e:
-            #     if(error_count >= 10):
-            #         raise e
-            #     error_count += 1
-            #     logger.error(f'start_by_metro {e}')
 
     def quit(self):
         try:

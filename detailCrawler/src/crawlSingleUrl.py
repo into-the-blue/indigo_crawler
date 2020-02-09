@@ -4,29 +4,22 @@ from bs4 import BeautifulSoup
 from common.utils.logger import logger
 from time import sleep
 import os
+from selenium.common.exceptions import NoSuchElementException
 from common.locateElms import find_apartments_in_list
 from common.exceptions import ApartmentExpiredException
+from common.locateElms import find_elm_of_house_type, find_elm_of_basic_detail, find_elm_of_facility_detail, find_city_elm, find_district_elm, find_community_elm, find_bizcircle_elm, locate_elm_of_offline_text, locate_apartment_title, locate_updated_at, locate_house_code, locate_img_list, locate_price, locate_tags, locate_house_desc, locate_transportation
 
 
 def get_house_type_info_27_nov(driver):
-    def get_text(_elms, idx): return _elms[idx].text.replace(
-        _elms[idx].find_element_by_xpath('./span').text, '')
-    try:
-        elms = driver.find_elements_by_xpath(
-            "//ul[@class='content__aside__list']/li")
-        type_area_text = get_text(elms, 1)
-        house_type = type_area_text.split(' ')[0]
-        area = int(re.findall('\d+', type_area_text.split(' ')[1])[0])
-        orient = get_text(elms, 2).split(' ')[0]
-        return house_type, area, orient
-    except Exception as e:
-        print(e)
-        return None, None, None
+    type_area_text = find_elm_of_house_type(driver, 1)
+    house_type = type_area_text.split(' ')[0]
+    area = int(re.findall('\d+', type_area_text.split(' ')[1])[0])
+    orient = find_elm_of_house_type(2)
+    return house_type, area, orient
 
 
 def get_info_1(driver):
-    info_elms = driver.find_elements_by_xpath(
-        "//div[@class='content__article__info']/ul/li")
+    info_elms = find_elm_of_basic_detail(driver)
     all_texts = [elm.text for elm in info_elms if len(elm.text.strip())]
 
     def _match_text(txt, keyword, obj=None, obj_key=None):
@@ -131,8 +124,7 @@ def get_info_1(driver):
 
 
 def get_facility_info(driver):
-    elms = driver.find_elements_by_xpath(
-        "//ul[@class='content__article__info2']/li")
+    elms = find_elm_of_facility_detail(driver)
     info = {
         'television': 0,
         'fridge': 0,
@@ -167,24 +159,21 @@ def get_facility_info(driver):
 
 def get_community_info(driver):
      # 城市
-    city = driver.find_element_by_xpath(
-        "//div[@class='bread__nav w1150 bread__nav--bottom']/p/a[1]").text[:-3]
+    city = find_city_elm(driver).text[:-3]
 
     # 城区
-    district = driver.find_element_by_xpath(
-        "//div[@class='bread__nav w1150 bread__nav--bottom']/p/a[2]").text[:-2]
+    district = find_district_elm(driver).text[:-2]
 
     # 商圈
-    bizcircle = driver.find_element_by_xpath(
-        "//div[@class='bread__nav w1150 bread__nav--bottom']/p/a[3]").text[:-2]
+    bizcircle = find_bizcircle_elm(driver).text[:-2]
 
+    community_elm = find_community_elm(driver)
     # 小区名称
-    community_name = driver.find_element_by_xpath(
-        "//div[@class='bread__nav w1150 bread__nav--bottom']/h1/a").text[:-2]
+    community_name = community_elm.text[:-2]
 
     # 小区链接
-    community_url = driver.find_element_by_xpath(
-        "//div[@class='bread__nav w1150 bread__nav--bottom']/h1/a").get_attribute('href')
+    community_url = community_elm.get_attribute('href')
+
     return {
         'city': city,
         'district': district,
@@ -195,8 +184,7 @@ def get_community_info(driver):
 
 
 def get_transportation_info(driver):
-    elms = driver.find_elements_by_xpath(
-        "//div[@class='content__article__info4 w1150']/ul/li")
+    elms = locate_transportation(driver)
     transportations = []
     subway_accessibility = 0
     for elm in elms:
@@ -224,10 +212,9 @@ def get_info_of_single_url(driver, url):
     else:
         try:
             # url expired
-            driver.find_element_by_xpath(
-                "//p[@class='offline__title']").text == '你访问的房源已失效'
+            locate_elm_of_offline_text(driver).text == '你访问的房源已失效'
             raise ApartmentExpiredException()
-        except:
+        except NoSuchElementException:
             pass
 
         # scroll to end of the page to avoid lazy rendering
@@ -237,19 +224,16 @@ def get_info_of_single_url(driver, url):
 
         # get rent type from title
         # eg.合租·瑞和城叁街区(汇臻路815弄) 4居室 南卧
-        title = driver.find_element_by_xpath(
-            "//p[@class='content__title']").text
+        title = locate_apartment_title(driver).text
         rent_type = title.split('·')[0]
         if '未知' in rent_type:
             rent_type = '未知'
 
         # 上架时间
-        time_listed = driver.find_element_by_xpath(
-            "//div[@class='content__subtitle']").text[7:17]
+        time_listed = locate_updated_at(driver).text[7:17]
 
         # 编号
-        house_code = driver.find_element_by_xpath(
-            "//div[@class='content__subtitle']/i[@class='house_code']").text[5:]
+        house_code = locate_house_code(driver).text[5:]
         house_id = re.findall('[0-9]+', house_code)[0]
         city_abbreviation = re.findall('[a-zA-Z]+', house_code)[0].lower()
 
@@ -257,7 +241,7 @@ def get_info_of_single_url(driver, url):
         img_urls = []
         # lazy load return placeholder img
         # get thumbnail img
-        for i in driver.find_elements_by_xpath("//div[@class='content__thumb--box']/ul[@class='content__article__slide--small content__article__slide_dot']/li/img"):
+        for i in locate_img_list(driver):
             img_url = i.get_attribute('src')
             cover_img_size = '780x439'
             img_url = re.sub('\d{2,3}x\d{2,3}', cover_img_size, img_url)
@@ -265,12 +249,11 @@ def get_info_of_single_url(driver, url):
 #             json_house_imgs = json.dumps(json_house_imgs, ensure_ascii=False)
 
         # 价格
-        price = int(driver.find_element_by_xpath(
-            "//div[@class='content__aside--title']/span").text)
+        price = int(locate_price(driver).text)
 
         # 特色标签列表
         tags = []
-        for i in driver.find_elements_by_xpath("//p[@class='content__aside--tags']/i"):
+        for i in locate_tags(driver):
             tags.append(i.text)
         # json_house_tags = json.dumps(json_house_tags, ensure_ascii=False)
 
@@ -309,16 +292,24 @@ def get_info_of_single_url(driver, url):
             community_deals = ''
 
         # 房源描述
-        if len(driver.find_elements_by_xpath("//div[@class='content__article__info3 ']/ul/li/p")) > 2:
-            house_description = ''
-            logger.info(
-                f"请调整子函数get_list_info的房源描述部分，有超过一条评论的情况需要全部考虑。（做成列表而不再是文本）{url}")
-        else:
-            try:
-                house_description = driver.find_element_by_xpath(
-                    "//div[@class='content__article__info3 ']/ul/li/p[1]").text
-            except:
-                house_description = ''
+        house_description = ''
+        try:
+            desc = locate_house_desc(
+                driver).get_attribute('data-desc')
+            if desc:
+                house_description = desc
+        except:
+            pass
+        # if len(driver.find_elements_by_xpath("//div[@class='content__article__info3 ']/ul/li/p")) > 2:
+        #     house_description = ''
+        #     logger.info(
+        #         f"请调整子函数get_list_info的房源描述部分，有超过一条评论的情况需要全部考虑。（做成列表而不再是文本）{url}")
+        # else:
+        #     try:
+        #         house_description = driver.find_element_by_xpath(
+        #             "//div[@class='content__article__info3 ']/ul/li/p[1]").text
+        #     except:
+        #         house_description = ''
 
         # 每平米房价
         try:
@@ -345,7 +336,7 @@ def get_info_of_single_url(driver, url):
                        **facility_info,
                        **transportation_info,
                        'community_deals': community_deals,
-                       'house_description': house_description,
+                       #    'house_description': house_description,
                        'house_url': url,
                        **community_info,
                        'price_per_square_meter': price_per_square_meter,
