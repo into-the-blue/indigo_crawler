@@ -8,7 +8,19 @@ from common.proxy import connect_to_driver, setup_proxy_for_driver
 from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, UrlCrawlerNoMoreNewUrlsException, TooManyTimesException
 from random import shuffle
 from common.locateElms import find_next_button, find_paging_elm, find_apartments_in_list, find_paging_elm_index, find_elm_of_latest_btn, get_num_of_apartment
-from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME, TASK_DONE_AWAIT_TIME
+from common.utils.constants import ERROR_AWAIT_TIME, URL_CRAWLER_TASK_DOWN_AWAIT_TIME, URL_CRAWLER_AWAIT_TIME
+from datetime import datetime
+
+
+def get_task_done_await_time():
+    hour = datetime.now().hour
+    if 0 <= hour <= 7:
+        return (8-hour)*60*60
+
+    if 20 <= hour <= 23:
+        return (24-hour+8)*60*60
+
+    return URL_CRAWLER_TASK_DOWN_AWAIT_TIME
 
 
 class UrlCrawler(object):
@@ -237,9 +249,13 @@ class UrlCrawler(object):
             for task in all_tasks:
                 logger.info('START {}'.format(task['name']))
                 task['func'](*task['args'])
-                logger.info('DONE {}'.format(task['name']))
-                sleep(AWAIT_TIME)
-            sleep(TASK_DONE_AWAIT_TIME)
+                logger.info('DONE {}, sleep {} min'.format(
+                    task['name'], URL_CRAWLER_AWAIT_TIME/60))
+                sleep(URL_CRAWLER_AWAIT_TIME)
+            sleep_time = get_task_done_await_time()
+            logger.info(
+                'round done, sleep for {} hour'.format(sleep_time/3600))
+            sleep(sleep_time)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(

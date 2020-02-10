@@ -4,7 +4,7 @@ from time import sleep
 from db import db
 from common.utils.logger import logger
 from common.utils.util import safely_get_url_from_driver
-from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME, TASK_DONE_AWAIT_TIME
+from common.utils.constants import DETAIL_CRAWLER_AWAIT_TIME, ERROR_AWAIT_TIME, TASK_DONE_AWAIT_TIME
 from common.proxy import connect_to_driver, setup_proxy_for_driver
 from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException, TooManyTimesException
 from random import shuffle
@@ -110,10 +110,10 @@ class DetailCrawler(object):
         try:
             self.start_one_url()
             self.start_fill_missing()
-            sleep(60*5)
+            sleep(DETAIL_CRAWLER_AWAIT_TIME)
         except NoTaskException:
             logger.info('No task found')
-            sleep(AWAIT_TIME)
+            sleep(TASK_DONE_AWAIT_TIME)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(

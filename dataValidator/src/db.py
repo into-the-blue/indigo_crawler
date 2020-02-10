@@ -53,7 +53,7 @@ class MyDB(DB):
     def clean_tasks_stuck_on_processing(self):
         self.tasks.update_many(
             {'status': 'processing', 'updated_at': {
-                '$lte':  datetime.now()-timedelta(minutes=5)}}
+                '$lte':  datetime.now()-timedelta(minutes=5)}},
             {'$set': {
                 'status': 'idle',
                 'updated_at': datetime.now()

@@ -3,7 +3,7 @@ from tqdm import tqdm
 from time import sleep
 from db import db
 from common.utils.logger import logger
-from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME
+from common.utils.constants import ERROR_AWAIT_TIME, DATA_VALIDATOR_AWAIT_TIME
 from common.proxy import connect_to_driver, setup_proxy_for_driver
 from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException, ValidatorInvalidValueException, TooManyTimesException
 from random import shuffle
@@ -75,8 +75,9 @@ class DataValidator(object):
             self.start()
 
         except NoTaskException:
-            logger.info('No task to run, sleep for 5 min')
-            sleep(AWAIT_TIME)
+            logger.info('No task to run, sleep for {} min'.format(
+                DATA_VALIDATOR_AWAIT_TIME/60))
+            sleep(DATA_VALIDATOR_AWAIT_TIME)
             self.start()
 
         except ValidatorInvalidValueException as e1:
