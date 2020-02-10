@@ -44,6 +44,7 @@ class DB(object):
         self.apartments = self.indigo.apartments
         self.cronjob = self.indigo.cronjob
 
+        self.bizcircles_col = self.indigo.bizcircles
         self.errors = self.indigo.errors
         # tasks
         # {
@@ -65,7 +66,32 @@ class DB(object):
         ensure_indexes_of_apartment(self.apartments_staging)
 
     def find_all_stations(self, city):
-        return list(self.station_col.find({'city': city}))
+        return list(self.station_col.find({
+            '$query': {'city': city},
+            '$orderby': {'priority': -1}
+        }))
+
+    def find_all_bizcircles(self, city):
+        return list(self.bizcircles_col.find({
+            '$query': {'city': city},
+            '$orderby': {'priority': -1}
+        }))
+
+    def update_priority_of_station(self, station_info, priority):
+        self.station_col.update_one(
+            {'_id': station_info.get('_id')},
+            {'$set': {
+                'priority': priority
+            }}
+        )
+
+     def update_priority_of_bizcircle(self,bizcircle_info,priority):
+        self.bizcircles_col.update_one(
+            {'_id':bizcircle_info.get('_id')},
+            {'$set':{
+                'priority':priority
+            }}
+        )
 
     def report_error(self, doc):
         '''

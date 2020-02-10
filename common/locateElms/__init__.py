@@ -268,12 +268,32 @@ def locate_transportation(driver):
                               "//div[@class='content__article__info4 w1150']/ul/li", no_empty=False)
 
 
+def locate_num_of_apartment(driver):
+    '''
+    房屋总数
+    requirement:
+    1. 列表页面
+    '''
+    return find_elm_by_xpath(driver,
+                             "//p[@class='content__title']/span[@class='content__title--hl']")
+
+
+def get_num_of_apartment(driver):
+    '''
+    房屋总数
+    requirement:
+    1. 列表页面
+    '''
+    return int(locate_num_of_apartment(driver).text)
+
+
 list_page = [
     {'func': find_next_button, 'args': []},
     {'func': find_paging_elm, 'args': []},
     {'func': find_paging_elm_index, 'args': [2]},
     {'func': find_apartments_in_list, 'args': []},
     {'func': find_elm_of_latest_btn, 'args': []}
+    {'func': locate_num_of_apartment, 'args': []}
 ]
 
 detail_page = [

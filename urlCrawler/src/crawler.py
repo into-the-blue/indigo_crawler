@@ -6,7 +6,7 @@ from common.utils.logger import logger
 from common.proxy import connect_to_driver, setup_proxy_for_driver
 from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, UrlCrawlerNoMoreNewUrlsException, TooManyTimesException
 from random import shuffle
-from common.locateElms import find_next_button, find_paging_elm, find_apartments_in_list, find_paging_elm_index, find_elm_of_latest_btn
+from common.locateElms import find_next_button, find_paging_elm, find_apartments_in_list, find_paging_elm_index, find_elm_of_latest_btn, get_num_of_apartment
 from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME, TASK_DONE_AWAIT_TIME
 
 
@@ -176,11 +176,31 @@ class UrlCrawler(object):
         except NoSuchElementException as e:
             logger.info('UNABLE TO LOCATE 最新上架')
 
-    def start_by_url(self, url=None, station_info=None):
+    def on_open_station(self, station_info):
+        try:
+            priority = get_num_of_apartment(self.driver)
+            db.update_priority_of_station(station_info, priority)
+        except Exception as e:
+            logger.exception(e)
+            db.report_unexpected_error(e)
+
+    def on_open_bizcircle(self, bizcircle_info):
+        try:
+            priority = get_num_of_apartment(self.driver)
+            db.update_priority_of_bizcircle(bizcircle_info, priority)
+        except Exception as e:
+            logger.exception(e)
+            db.report_unexpected_error(e)
+
+    def start_by_url(self, url=None, station_info=None, bizcircle_info=None):
         try:
             logger.info('START')
             self._get(url or self.city_url)
             logger.info('Url opened')
+            if station_info:
+                self.on_open_station(station_info)
+            if bizcircle_info:
+                self.on_open_bizcircle(bizcircle_info)
             self.click_order_by_time()
             logger.info('Clicked order by time')
             self.get_all_urls(station_info)
@@ -224,14 +244,22 @@ class UrlCrawler(object):
             sleep(ERROR_AWAIT_TIME)
 
     def start_by_district(self):
-        pass
+        bizcircles = db.find_all_bizcircles(self.city)
+        count = 0
+        logger.info('start_by_district')
+        for bizcircle in bizcircles:
+            count += 1
+            url = bizcircle.get('bizcircle_url')
+            bizcircle_name = bizcircle.get('bizcircle_name')
+            logger.info(f"START {bizcircle_name}")
+            self.start_by_url(url, bizcircle_info=bizcircle)
+            logger.info(f'{bizcircle_name}, DONE, {count}')
 
     def start_by_metro(self):
         '''
         by metro station
         '''
         stations = db.find_all_stations(self.city)
-        shuffle(stations)
         count = 0
         logger.info('start_by_metro')
         for station in stations:
@@ -239,9 +267,9 @@ class UrlCrawler(object):
             url = station.get('url')
             station_id = station.get('station_id')
             station_name = station.get('station_name')
-            line_ids = station.get('line_ids')
+            # line_ids = station.get('line_ids')
             logger.info(f"START {station_id} {station_name}")
-            self.start_by_url(url, station)
+            self.start_by_url(url, station_info=station)
             logger.info(f'{station_id}, {station_name}, DONE, {count}')
 
     def quit(self):
