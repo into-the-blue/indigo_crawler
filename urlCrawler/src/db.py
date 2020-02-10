@@ -76,7 +76,7 @@ class MyDB(DB):
             'payload': payload
         })
 
-    def report_unexpected_error(self, error_message, error_stack):
-        return super().report_unexpected_error('url_crawler', error_message, error_stack)
+    def report_unexpected_error(self, err):
+        return super().report_unexpected_error('url_crawler', err)
 
 db = MyDB()

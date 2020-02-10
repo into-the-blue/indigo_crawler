@@ -48,8 +48,8 @@ class MyDB(DB):
             'payload': payload
         })
 
-    def report_unexpected_error(self, error_message, error_stack):
-        return super().report_unexpected_error('data_validator', error_message, error_stack)
+    def report_unexpected_error(self, err):
+        return super().report_unexpected_error('data_validator', err)
 
     def report_invalid_value(self, apartment, invalid_value):
         self.apartments_staging.update_one(

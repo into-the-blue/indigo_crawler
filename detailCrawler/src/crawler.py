@@ -1,11 +1,11 @@
-from selenium.common.exceptions import InvalidSessionIdException, WebDriverException
+from selenium.common.exceptions import InvalidSessionIdException, WebDriverException, TimeoutException
 from tqdm import tqdm
 from time import sleep
 from db import db
 from common.utils.logger import logger
 from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME
 from common.proxy import connect_to_driver, setup_proxy_for_driver
-from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException
+from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException, TooManyTimesException
 from random import shuffle
 from common.locateElms import find_next_button, find_paging_elm, find_apartments_in_list
 from crawlSingleUrl import get_info_of_single_url
@@ -37,13 +37,13 @@ class DetailCrawler(object):
 
     def _get(self, url, times=0):
         if(times > 5):
-            raise Exception('TOO MANY TIMES')
+            raise TooManyTimesException()
         try:
             self.driver.set_page_load_timeout(10)
             self.driver.get(url)
             self.opened_url_count += 1
             return self.driver
-        except Exception as e:
+        except (TimeoutException, TooManyTimesException):
             logger.error('PROXY BLOCKED {}'.format(e))
             self.on_change_proxy(self.opened_url_count)
 
@@ -76,8 +76,9 @@ class DetailCrawler(object):
             logger.info('Url expired')
             db.task_expired(task)
         except Exception as e:
-            logger.exception('Unexcepected error {}'.format(e))
-            db.update_failure(task, self.driver.page_source)
+            logger.exception(e)
+            db.update_failure(task, e, self.driver.page_source)
+            raise e
 
     def start(self):
         try:
@@ -90,6 +91,7 @@ class DetailCrawler(object):
             self.start()
         except Exception as e:
             logger.exception(e)
+            db.report_unexpected_error(e)
             sleep(ERROR_AWAIT_TIME)
 
     def quit(self):

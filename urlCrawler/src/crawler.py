@@ -1,13 +1,13 @@
-from selenium.common.exceptions import InvalidSessionIdException, WebDriverException, NoSuchElementException
+from selenium.common.exceptions import InvalidSessionIdException, WebDriverException, NoSuchElementException, TimeoutException
 from tqdm import tqdm
 from time import sleep
 from db import db
 from common.utils.logger import logger
 from common.proxy import connect_to_driver, setup_proxy_for_driver
-from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, UrlCrawlerNoMoreNewUrlsException
+from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, UrlCrawlerNoMoreNewUrlsException, TooManyTimesException
 from random import shuffle
 from common.locateElms import find_next_button, find_paging_elm, find_apartments_in_list, find_paging_elm_index, find_elm_of_latest_btn
-from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME
+from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME, TASK_DONE_AWAIT_TIME
 
 
 class UrlCrawler(object):
@@ -38,13 +38,13 @@ class UrlCrawler(object):
 
     def _get(self, url, times=0):
         if(times > 5):
-            raise Exception('TOO MANY TIMES')
+            raise TooManyTimesException()
         try:
             self.driver.set_page_load_timeout(10)
             self.driver.get(url)
             self.opened_url_count += 1
             return self.driver
-        except Exception as e:
+        except (TooManyTimesException, TimeoutException) as e:
             logger.error('PROXY BLOCKED {}'.format(e))
             self.on_change_proxy(self.opened_url_count)
 
@@ -107,8 +107,6 @@ class UrlCrawler(object):
             url = i.get_attribute('href')
             if 'apartment' not in url:
                 try:
-                    # logger.info('HOOK on_get_url')
-                    # hookHandler('on_get_url', url, station_info)
                     urls.append(url)
                 except UrlExistsException:
                     pass
@@ -119,6 +117,7 @@ class UrlCrawler(object):
         loop all pages, get all urls
         '''
         page_count = self.read_page_count()
+        logger.info('total pages {}'.format(page_count))
         if page_count > 0:
             for i in range(page_count):
                 try:
@@ -173,6 +172,7 @@ class UrlCrawler(object):
     def click_order_by_time(self, retry=True):
         try:
             find_elm_of_latest_btn(self.driver).click()
+            logger.info('Clicked 最新上架')
         except NoSuchElementException as e:
             logger.info('UNABLE TO LOCATE 最新上架')
 
@@ -191,6 +191,9 @@ class UrlCrawler(object):
             self.on_accomplish()
 
     def start(self):
+        '''
+        loop 3 tasks
+        '''
         all_tasks = [
             {
                 'name': 'by city'
@@ -214,14 +217,19 @@ class UrlCrawler(object):
                 logger.info('START {}'.format(task['name']))
                 task['func'](*task['args'])
                 sleep(AWAIT_TIME)
+            sleep(TASK_DONE_AWAIT_TIME)
         except Exception as e:
             logger.exception(e)
+            db.report_unexpected_error(e)
             sleep(ERROR_AWAIT_TIME)
 
     def start_by_district(self):
         pass
 
     def start_by_metro(self):
+        '''
+        by metro station
+        '''
         stations = db.find_all_stations(self.city)
         shuffle(stations)
         count = 0

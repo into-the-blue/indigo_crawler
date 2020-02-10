@@ -230,10 +230,11 @@ def get_info_of_single_url(driver, url):
             rent_type = '未知'
 
         # 上架时间
-        time_listed = locate_updated_at(driver).text[7:17]
+        time_listed = re.findall(
+            '\d{4}-\d{2}-\d{2}', locate_updated_at(driver).text)[0]
 
         # 编号
-        house_code = locate_house_code(driver).text[5:]
+        house_code = re.findall('[A-Z]+\d+', locate_house_code(driver).text)[0]
         house_id = re.findall('[0-9]+', house_code)[0]
         city_abbreviation = re.findall('[a-zA-Z]+', house_code)[0].lower()
 
@@ -336,7 +337,7 @@ def get_info_of_single_url(driver, url):
                        **facility_info,
                        **transportation_info,
                        'community_deals': community_deals,
-                       #    'house_description': house_description,
+                       'house_description': house_description,
                        'house_url': url,
                        **community_info,
                        'price_per_square_meter': price_per_square_meter,

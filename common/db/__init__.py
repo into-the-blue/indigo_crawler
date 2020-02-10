@@ -2,6 +2,7 @@ import pymongo
 import os
 from pymongo import IndexModel, ASCENDING, DESCENDING, GEOSPHERE
 from datetime import datetime
+import traceback
 db_username = os.getenv('DB_USERNAME')
 db_password = os.getenv('DB_PASSWORD')
 db_host = os.getenv('DB_HOST')
@@ -58,7 +59,7 @@ class DB(object):
         # }
         self.tasks = self.indigo.tasks
         self.apartments_staging = self.indigo.apartmentsStaging
-
+        self.page_source = self.indigo.pageSource
         ensure_indexes_of_station(self.station_col)
         ensure_indexes_of_apartment(self.apartments)
         ensure_indexes_of_apartment(self.apartments_staging)
@@ -68,9 +69,10 @@ class DB(object):
 
     def report_error(self, doc):
         '''
-        error_source: 'validator' | 'url_crawler' | 'detail_crawler'
+        error_source: 'validator' | 'url_crawler' | 'detail_crawler' | 'locate_element'
         message: 'elm_not_found' | 'invalid_value' | ''
         checked: true | false
+        page_source_id: null | object_id
         ...payload: {
             ....
         }
@@ -81,13 +83,28 @@ class DB(object):
              'created_at': datetime.now(),
              'updated_at': datetime.now()})
 
-    def report_unexpected_error(self, error_source, error_message, error_stack):
+    def report_unexpected_error(self, error_source, err):
         self.report_error({
             'error_source': error_source,
             'message': 'unexpected_error',
             'payload': {
-                'error_message': error_message,
-                'error_stack': error_stack
+                'error_message': err,
+                'error_stack': traceback.format_exc(err)
+            }
+        })
+
+    def report_no_such_elm_error(self, method_name, path, url, page_source):
+        inserted_id = self.page_source.insert_one({
+            'source': page_source
+        }).inserted_id
+        self.report_error({
+            'error_source': 'locate_element',
+            'message': 'elm_not_found',
+            'page_source_id': inserted_id,
+            'payload': {
+                'method_name': method_name,
+                'path': path,
+                'url': url
             }
         })
 

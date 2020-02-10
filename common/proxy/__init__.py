@@ -4,6 +4,7 @@ from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import InvalidSessionIdException, TimeoutException, SessionNotCreatedException, WebDriverException
+from ..exceptions import TooManyTimesException
 from ..utils.logger import logger
 
 proxy_server = os.getenv('PROXY_SERVER')
@@ -20,9 +21,6 @@ def test_proxy(driver, test_url=None):
         driver.get(test_url)
         return True
     except TimeoutException:
-        return False
-    except Exception as e:
-        logger.error('test_proxy', e)
         return False
 
 
@@ -82,7 +80,7 @@ def create_capabilities_with_proxy(proxy_url: str):
 def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0):
     if times > 9:
         logger.warning('setup_proxy_for_driver no available proxy')
-        raise Exception('setup_proxy_for_driver', 'no available proxy')
+        raise TooManyTimesException('setup_proxy_for_driver')
     try:
         try:
             driver.quit()

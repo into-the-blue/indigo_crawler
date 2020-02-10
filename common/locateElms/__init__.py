@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-from .utils.logger import logger
+from ..utils.logger import logger
+from ..db import db
 
 
 def noSuchElement(method_name: str):
@@ -18,7 +19,9 @@ def noSuchElement(method_name: str):
                     page_source = driver.page_source
                     logger.error('{},{},{}'.format(
                         method_name, path, driver.current_url))
-                    raise e
+                    db.report_no_such_elm_error(
+                        method_name, path, url, page_source)
+                raise e
         return __internal
     return _internal
 

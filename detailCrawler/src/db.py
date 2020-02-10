@@ -23,7 +23,7 @@ class MyDB(DB):
             )
         return res
 
-    def update_failure(self, task, page_source=None):
+    def update_failure(self, task,  err, page_source):
         '''
         if failed,
         increase `failed_times`,
@@ -37,7 +37,11 @@ class MyDB(DB):
         }
         if toupdate['failed_times'] >= 3:
             toupdate['stauts'] = 'error'
-            toupdate['page_source'] = page_source
+            page_source_id = self.page_source.insert_one({
+                'source': page_source
+            }).inserted_id
+            toupdate['page_source_id'] = page_source_id
+
         self.tasks.update_one(
             {'_id': task.get('_id')},
             {'$set': {**toupdate, 'updated_at': datetime.now()}}
@@ -65,8 +69,8 @@ class MyDB(DB):
             'payload': payload
         })
 
-    def report_unexpected_error(self, error_message, error_stack):
-        return super().report_unexpected_error('detail_crawler', error_message, error_stack)
+    def report_unexpected_error(self, err):
+        return super().report_unexpected_error('detail_crawler', err)
 
     def task_expired(self, task):
         self.tasks.update_one(

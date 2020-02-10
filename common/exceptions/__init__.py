@@ -31,3 +31,7 @@ class ValidatorInvalidValueException(Exception):
 class UrlCrawlerNoMoreNewUrlsException(Exception):
     def __init__(self, *args, **kwargs):
         super().__init__('No more new urls', *args, **kwargs)
+
+class TooManyTimesException(Exception):
+    def __init__(self, *args, **kwargs):
+        super().__init__('Too many times', *args, **kwargs)
