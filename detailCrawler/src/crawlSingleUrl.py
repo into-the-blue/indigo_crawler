@@ -14,7 +14,7 @@ def get_house_type_info_27_nov(driver):
     type_area_text = find_elm_of_house_type(driver, 1)
     house_type = type_area_text.split(' ')[0]
     area = int(re.findall('\d+', type_area_text.split(' ')[1])[0])
-    orient = find_elm_of_house_type(2)
+    orient = find_elm_of_house_type(driver, 2)
     return house_type, area, orient
 
 
@@ -219,6 +219,9 @@ def get_info_of_single_url(driver, url):
 
         # scroll to end of the page to avoid lazy rendering
         sleep(1)
+
+        missing_info = False
+
         driver.execute_script(
             "window.scrollTo(0, document.body.scrollHeight);")
 
@@ -249,13 +252,17 @@ def get_info_of_single_url(driver, url):
             img_urls.append(img_url)
 #             json_house_imgs = json.dumps(json_house_imgs, ensure_ascii=False)
 
+        missing_info = missing_info or len(img_urls) < 2
         # 价格
         price = int(locate_price(driver).text)
 
         # 特色标签列表
         tags = []
-        for i in locate_tags(driver):
-            tags.append(i.text)
+        try:
+            for i in locate_tags(driver):
+                tags.append(i.text)
+        except NoSuchElementException:
+            missing_info = True
         # json_house_tags = json.dumps(json_house_tags, ensure_ascii=False)
 
         # 户型、面积、朝向

@@ -12,6 +12,7 @@ services:
     build:
       context: .
     image: meanless/indigo_crawler
+    container_name: 'sh-url-crawler'
     working_dir: /apps/crawler/urlCrawler/src
     command: ['python3', '-u', 'app.py']
     networks:

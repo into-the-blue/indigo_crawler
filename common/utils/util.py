@@ -1,5 +1,6 @@
 import re
 
+
 def extract_house_id(house_code):
     return re.findall('[0-9]+', house_code)[0]
 
@@ -10,8 +11,6 @@ def extract_house_code_from_url(url):
 
 def normal_msg(args):
     return ' '.join(map(lambda x: str(x), args))
-
-
 
 
 def currentDate():
@@ -32,3 +31,9 @@ def find_item(func, li, first=True):
 def cleanNoneValue(arr):
     return list(filter(lambda x: bool(x), arr))
 
+
+def safely_get_url_from_driver(driver, fallback=None):
+    try:
+        return driver.current_url
+    except:
+        return fallback

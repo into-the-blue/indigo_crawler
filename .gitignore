@@ -7,3 +7,6 @@ dev.env
 prod.env
 notebooks/
 common/logs/
+dataValidator/logs/
+detailCrawler/logs/
+urlCrawler/logs/

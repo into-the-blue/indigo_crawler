@@ -3,6 +3,7 @@ from tqdm import tqdm
 from time import sleep
 from db import db
 from common.utils.logger import logger
+from common.utils.util import safely_get_url_from_driver
 from common.proxy import connect_to_driver, setup_proxy_for_driver
 from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, UrlCrawlerNoMoreNewUrlsException, TooManyTimesException
 from random import shuffle
@@ -216,17 +217,17 @@ class UrlCrawler(object):
         '''
         all_tasks = [
             {
-                'name': 'by city'
+                'name': 'by city',
                 'func': self.start_by_url,
                 'args': [self.city_url]
             },
             {
-                'name': 'by metro'
+                'name': 'by metro',
                 'func': self.start_by_metro,
                 'args': []
             },
             {
-                'name': 'by district'
+                'name': 'by district',
                 'func': self.start_by_district,
                 'args': []
             },
@@ -236,11 +237,13 @@ class UrlCrawler(object):
             for task in all_tasks:
                 logger.info('START {}'.format(task['name']))
                 task['func'](*task['args'])
+                logger.info('DONE {}'.format(task['name']))
                 sleep(AWAIT_TIME)
             sleep(TASK_DONE_AWAIT_TIME)
         except Exception as e:
             logger.exception(e)
-            db.report_unexpected_error(e)
+            db.report_unexpected_error(
+                e, safely_get_url_from_driver(self.driver))
             sleep(ERROR_AWAIT_TIME)
 
     def start_by_district(self):
@@ -265,12 +268,10 @@ class UrlCrawler(object):
         for station in stations:
             count += 1
             url = station.get('url')
-            station_id = station.get('station_id')
             station_name = station.get('station_name')
-            # line_ids = station.get('line_ids')
-            logger.info(f"START {station_id} {station_name}")
+            logger.info(f"START {station_name}")
             self.start_by_url(url, station_info=station)
-            logger.info(f'{station_id}, {station_name}, DONE, {count}')
+            logger.info(f'{station_name}, DONE, {count}')
 
     def quit(self):
         try:

@@ -242,11 +242,12 @@ def locate_price(driver):
 
 def locate_tags(driver):
     '''
+    可能为null
     标签
     requirement:
     1. 详情页面
     '''
-    return find_elms_by_xpath(driver, "//p[@class='content__aside--tags']/i")
+    return find_elms_by_xpath(driver, "//p[@class='content__aside--tags']/i", report=False)
 
 
 def locate_house_desc(driver):
@@ -292,7 +293,7 @@ list_page = [
     {'func': find_paging_elm, 'args': []},
     {'func': find_paging_elm_index, 'args': [2]},
     {'func': find_apartments_in_list, 'args': []},
-    {'func': find_elm_of_latest_btn, 'args': []}
+    {'func': find_elm_of_latest_btn, 'args': []},
     {'func': locate_num_of_apartment, 'args': []}
 ]
 

@@ -4,6 +4,7 @@ services:
     volumes:
       - ./src:/apps/crawler/detailCrawler/src
       - ../common:/apps/crawler/common
+      - ./logs:/apps/crawler/detailCrawler/logs
     ports:
       - '5002:5001'
     restart: always
@@ -12,6 +13,7 @@ services:
     build:
       context: .
     image: meanless/indigo_crawler
+    container_name: 'sh-detail-crawler'
     working_dir: /apps/crawler/detailCrawler/src
     command: ['python3', '-u', 'app.py']
     networks:

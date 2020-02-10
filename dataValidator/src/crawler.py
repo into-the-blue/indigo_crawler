@@ -65,8 +65,8 @@ class DataValidator(object):
 
     def start(self):
         logger.info('START')
+        staging_apartment = db.get_unchecked()
         try:
-            staging_apartment = db.get_unchecked()
             if not staging_apartment:
                 raise NoTaskException()
             examine_apartment(staging_apartment)
@@ -87,7 +87,8 @@ class DataValidator(object):
 
         except Exception as e:
             logger.exception(e)
-            db.report_unexpected_error(e)
+            db.report_unexpected_error(e, staging_apartment.get(
+                'house_url') if staging_apartment else None)
             sleep(ERROR_AWAIT_TIME)
             self.start()
 

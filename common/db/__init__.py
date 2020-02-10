@@ -85,11 +85,11 @@ class DB(object):
             }}
         )
 
-     def update_priority_of_bizcircle(self,bizcircle_info,priority):
+    def update_priority_of_bizcircle(self, bizcircle_info, priority):
         self.bizcircles_col.update_one(
-            {'_id':bizcircle_info.get('_id')},
-            {'$set':{
-                'priority':priority
+            {'_id': bizcircle_info.get('_id')},
+            {'$set': {
+                'priority': priority
             }}
         )
 
@@ -99,6 +99,7 @@ class DB(object):
         message: 'elm_not_found' | 'invalid_value' | ''
         checked: true | false
         page_source_id: null | object_id
+        url: string
         ...payload: {
             ....
         }
@@ -109,24 +110,35 @@ class DB(object):
              'created_at': datetime.now(),
              'updated_at': datetime.now()})
 
-    def report_unexpected_error(self, error_source, err):
+    def report_unexpected_error(self, error_source, err, url=None):
         self.report_error({
             'error_source': error_source,
             'message': 'unexpected_error',
+            'url': url,
             'payload': {
                 'error_message': err,
-                'error_stack': traceback.format_exc(err)
+                'error_stack': traceback.format_exc()
             }
         })
 
-    def report_no_such_elm_error(self, method_name, path, url, page_source):
-        inserted_id = self.page_source.insert_one({
-            'source': page_source
+    def insert_page_source(self, url, page_source):
+        res = self.page_source.find_one({
+            'url': url
+        })
+        if res:
+            return res['_id']
+        return self.page_source.insert_one({
+            'source': page_source,
+            'url': url
         }).inserted_id
+
+    def report_no_such_elm_error(self, method_name, path, url, page_source):
+        inserted_id = self.insert_page_source(url, page_source)
         self.report_error({
             'error_source': 'locate_element',
             'message': 'elm_not_found',
             'page_source_id': inserted_id,
+            'url': url,
             'payload': {
                 'method_name': method_name,
                 'path': path,
@@ -134,11 +146,5 @@ class DB(object):
             }
         })
 
-    def unable_to_locate_elm_error(self, error_source, elm_xpath):
-        self.report_error({
-            'error_source': error_source,
-            'message': 'unable_to_locate_element',
-            'payload': {
-                'elm_xpath': elm_xpath
-            }
-        })
+
+db = DB()

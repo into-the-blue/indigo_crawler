@@ -36,16 +36,16 @@ class MyDB(DB):
             'status': 'idle'
         }
         if toupdate['failed_times'] >= 3:
-            toupdate['stauts'] = 'error'
-            page_source_id = self.page_source.insert_one({
-                'source': page_source
-            }).inserted_id
+            toupdate['status'] = 'error'
+            page_source_id = self.insert_page_source(
+                task.get('url'), page_source)
             toupdate['page_source_id'] = page_source_id
 
         self.tasks.update_one(
             {'_id': task.get('_id')},
             {'$set': {**toupdate, 'updated_at': datetime.now()}}
         )
+        self.report_unexpected_error(err, task.get('url'))
 
     def get_missing_info(self):
         res = self.apartments_staging.find_one({
@@ -65,15 +65,16 @@ class MyDB(DB):
             }}
         })
 
-    def report_error(self, message, payload):
+    def report_error(self, message, url, payload):
         return super().report_error({
             'error_source': 'detail_crawler',
+            'url', url,
             'message': message,
             'payload': payload
         })
 
-    def report_unexpected_error(self, err):
-        return super().report_unexpected_error('detail_crawler', err)
+    def report_unexpected_error(self, *args):
+        return super().report_unexpected_error('detail_crawler', *args)
 
     def task_expired(self, task):
         self.tasks.update_one(

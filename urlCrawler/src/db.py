@@ -35,7 +35,7 @@ class MyDB(DB):
 
         apartment = self.apartments.find_one({
             'house_url': metadata.get('url')
-        }):
+        })
         if apartment:
             if metadata.get('station_info'):
                 self._update_station_info_for_apartment(
@@ -76,7 +76,8 @@ class MyDB(DB):
             'payload': payload
         })
 
-    def report_unexpected_error(self, err):
-        return super().report_unexpected_error('url_crawler', err)
+    def report_unexpected_error(self, *args):
+        return super().report_unexpected_error('url_crawler', *args)
+
 
 db = MyDB()
