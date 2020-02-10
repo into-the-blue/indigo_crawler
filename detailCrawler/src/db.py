@@ -49,7 +49,10 @@ class MyDB(DB):
 
     def get_missing_info(self):
         res = self.apartments_staging.find_one({
-            'missing_info': True
+            '$or': [
+                {'failed_times': {'$exists': False}, 'missing_info': True},
+                {'failed_times': {'$lt': 1}, 'missing_info': True}
+            ]
         })
         return res
 

@@ -3,7 +3,7 @@ from tqdm import tqdm
 from time import sleep
 from db import db
 from common.utils.logger import logger
-from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME
+from common.utils.constants import AWAIT_TIME, ERROR_AWAIT_TIME, TASK_DONE_AWAIT_TIME
 from common.proxy import connect_to_driver, setup_proxy_for_driver
 from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException, TooManyTimesException
 from random import shuffle
@@ -70,29 +70,55 @@ class DetailCrawler(object):
             info = get_info_of_single_url(self.driver, task.get('url'))
             logger.info('Data get')
             db.insert_into_staing(task, info)
-        # except WebDriverException:
-        #     self.check_driver()
+            sleep(2)
+            self.start_one_url()
         except ApartmentExpiredException:
             logger.info('Url expired')
             db.task_expired(task)
+            self.start_one_url()
         except Exception as e:
             logger.exception(e)
             db.update_failure(task, e, self.driver.page_source)
             raise e
 
+    def start_fill_missing(self):
+        apartment = db.get_missing_info()
+        if not apartment:
+            raise NoTaskException()
+        try:
+            self._get(apartment.get('house_url'))
+            logger.info('Url opened')
+            info = get_info_of_single_url(
+                self.driver, apartment.get('house_url'))
+            logger.info('Data get')
+            db.update_missing_info(apartment, info)
+            sleep(2)
+            self.start_fill_missing()
+        except ApartmentExpiredException:
+            logger.info('Url expired')
+            db.update_missing_info(apartment, {
+                'expired': True,
+            })
+            sleep(2)
+            self.start_fill_missing()
+        except Exception as e:
+            logger.exception(e)
+            raise e
+
     def start(self):
         try:
             self.start_one_url()
-            sleep(2)
-            self.start()
+            self.start_fill_missing()
+            sleep(TASK_DONE_AWAIT_TIME)
         except NoTaskException:
             logger.info('No task found')
             sleep(AWAIT_TIME)
-            self.start()
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(e)
             sleep(ERROR_AWAIT_TIME)
+        finally:
+            self.start()
 
     def quit(self):
         try:
