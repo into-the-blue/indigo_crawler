@@ -1,0 +1,8 @@
+selenium 
+pandas 
+tqdm 
+pymongo 
+bs4 
+requests
+apscheduler
+pytz
