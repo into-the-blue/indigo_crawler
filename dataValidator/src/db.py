@@ -24,6 +24,7 @@ class MyDB(DB):
         self.clean_tasks_stuck_on_processing()
         res = self.apartments_staging.find_one({
             '$or': [
+                {'check_times': {'$gte': 3}, 'missing_info': True},
                 {'failed_times': {'$exists': False}, 'missing_info': False},
                 {'failed_times': {'$lt': 1}, 'missing_info': False}
             ]
@@ -36,7 +37,8 @@ class MyDB(DB):
         })
 
         apartment = rm_useless_values(apartment)
-
+        if not apartment.get('missing_info'):
+            apartment['force_pass'] = True
         self.apartments.insert_one({
             **apartment,
             'updated_time': datetime.now()
