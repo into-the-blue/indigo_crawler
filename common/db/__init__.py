@@ -116,7 +116,7 @@ class DB(object):
             'message': 'unexpected_error',
             'url': url,
             'payload': {
-                'error_message': err,
+                'error_message': str(err),
                 'error_stack': traceback.format_exc()
             }
         })

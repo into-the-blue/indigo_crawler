@@ -42,12 +42,12 @@ class DataValidator(object):
         if(times > 5):
             raise TooManyTimesException()
         try:
-            self.driver.set_page_load_timeout(10)
+            self.driver.set_page_load_timeout(20)
             self.driver.get(url)
             self.opened_url_count += 1
             return self.driver
         except (TooManyTimesException, TimeoutException) as e:
-            logger.error('PROXY BLOCKED {}'.format(e))
+            logger.error('timeout tried times{} {}'.format(times, e))
             self.on_change_proxy(self.opened_url_count)
 
             self.opened_url_count = 0
