@@ -57,13 +57,13 @@ class MyDB(DB):
         return res
 
     def update_missing_info(self, apartment, updated):
-        self.apartments_staging.update_one({
+        self.apartments_staging.update_one(
             {'_id': apartment.get('_id')},
             {'$set': {
                 **updated,
                 'updated_time': datetime.now()
             }}
-        })
+        )
 
     def report_error(self, message, url, payload):
         return super()._report_error({
