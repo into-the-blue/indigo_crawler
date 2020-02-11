@@ -53,7 +53,7 @@ class UrlCrawler(object):
         if(times > 5):
             raise TooManyTimesException()
         try:
-            self.driver.set_page_load_timeout(10)
+            self.driver.set_page_load_timeout(20)
             self.driver.get(url)
             self.opened_url_count += 1
             return self.driver
