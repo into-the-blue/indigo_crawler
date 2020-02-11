@@ -73,8 +73,8 @@ class MyDB(DB):
             'payload': payload
         })
 
-    def report_unexpected_error(self, *args):
-        return super().report_unexpected_error('detail_crawler', *args)
+    def report_unexpected_error(self, *args, **kwargs):
+        return super().report_unexpected_error('detail_crawler', *args, **kwargs)
 
     def task_expired(self, task):
         self.tasks.update_one(

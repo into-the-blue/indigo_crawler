@@ -45,7 +45,7 @@ class DetailCrawler(object):
             self.opened_url_count += 1
             return self.driver
         except (TimeoutException, TooManyTimesException):
-            logger.error('PROXY BLOCKED {}'.format(e))
+            logger.error('PROXY BLOCKED')
             self.on_change_proxy(self.opened_url_count)
 
             self.opened_url_count = 0
@@ -56,6 +56,7 @@ class DetailCrawler(object):
     def on_change_proxy(self, opened_times):
         db.report_error(
             'proxy_opened_urls',
+            None,
             {
                 'count': opened_times
             }
