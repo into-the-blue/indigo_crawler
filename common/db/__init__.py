@@ -129,7 +129,9 @@ class DB(object):
             return res['_id']
         return self.page_source.insert_one({
             'source': page_source,
-            'url': url
+            'url': url,
+            'created_at': datetime.now(),
+            'updated_at': datetime.now()
         }).inserted_id
 
     def report_no_such_elm_error(self, method_name, path, url, page_source):
