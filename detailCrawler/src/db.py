@@ -1,5 +1,5 @@
 from common.db import DB
-from datetime import datetime
+from datetime import datetime, timedelta
 from common.utils.logger import logger
 from common.aMap.getCoordinates import get_location_info_from_apartment_info
 
@@ -50,10 +50,23 @@ class MyDB(DB):
     def get_missing_info(self):
         res = self.apartments_staging.find_one({
             '$or': [
-                {'failed_times': {'$exists': False}, 'missing_info': True},
-                {'failed_times': {'$lt': 1}, 'missing_info': True}
+                {'failed_times': {'$exists': False}, 'missing_info': True,
+                    'updated_time': {'$lte': datetime.now()-timedelta(hours=8)}},
+                {'failed_times': {'$lt': 1}, 'missing_info': True,
+                    'updated_time': {'$lte': datetime.now()-timedelta(hours=8)}}
             ]
         })
+
+        if res:
+            self.apartments_staging.update_one(
+                {'_id': res.get('_id')},
+                {
+                    '$set': {
+                        'updated_time': datetime.now(),
+                        'checked_times': res.get('checked_times', 0)+1
+                    }
+                }
+            )
         return res
 
     def update_missing_info(self, apartment, updated):
