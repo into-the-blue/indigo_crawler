@@ -4,8 +4,6 @@ services:
     volumes:
       - ./src:/apps/crawler/urlCrawler/src
       - ../common:/apps/crawler/common
-    ports:
-      - '5001:5001'
     restart: always
     env_file:
       - ../prod.env

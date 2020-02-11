@@ -5,8 +5,6 @@ services:
       - ./src:/apps/crawler/detailCrawler/src
       - ../common:/apps/crawler/common
       - ./logs:/apps/crawler/detailCrawler/logs
-    ports:
-      - '5002:5001'
     restart: always
     env_file:
       - ../prod.env
