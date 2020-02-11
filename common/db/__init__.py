@@ -81,7 +81,8 @@ class DB(object):
         self.station_col.update_one(
             {'_id': station_info.get('_id')},
             {'$set': {
-                'priority': priority
+                'priority': priority,
+                'updated_at': datetime.now()
             }}
         )
 
@@ -89,7 +90,8 @@ class DB(object):
         self.bizcircles_col.update_one(
             {'_id': bizcircle_info.get('_id')},
             {'$set': {
-                'priority': priority
+                'priority': priority,
+                'updated_at': datetime.now()
             }}
         )
 
