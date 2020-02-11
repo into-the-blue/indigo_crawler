@@ -93,7 +93,7 @@ class DB(object):
             }}
         )
 
-    def report_error(self, doc):
+    def _report_error(self, doc):
         '''
         error_source: 'validator' | 'url_crawler' | 'detail_crawler' | 'locate_element'
         message: 'elm_not_found' | 'invalid_value' | ''
@@ -111,7 +111,7 @@ class DB(object):
              'updated_at': datetime.now()})
 
     def report_unexpected_error(self, error_source, err, url=None):
-        self.report_error({
+        self._report_error({
             'error_source': error_source,
             'message': 'unexpected_error',
             'url': url,
@@ -136,7 +136,7 @@ class DB(object):
 
     def report_no_such_elm_error(self, method_name, path, url, page_source):
         inserted_id = self.insert_page_source(url, page_source)
-        self.report_error({
+        self._report_error({
             'error_source': 'locate_element',
             'message': 'elm_not_found',
             'page_source_id': inserted_id,

@@ -2,7 +2,6 @@ from common.db import DB
 from datetime import datetime
 from common.utils.logger import logger
 
-
 class MyDB(DB):
     def __init__(self):
         super().__init__()
@@ -70,7 +69,7 @@ class MyDB(DB):
                 {'_id', apartment.get('_id')}, {'line_ids': _line_ids, 'station_ids': _station_ids})
 
     def report_error(self, message, payload):
-        return super().report_error({
+        return super()._report_error({
             'error_source': 'url_crawler',
             'message': message,
             'payload': payload

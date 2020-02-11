@@ -66,7 +66,7 @@ class MyDB(DB):
         })
 
     def report_error(self, message, url, payload):
-        return super().report_error({
+        return super()._report_error({
             'error_source': 'detail_crawler',
             'url': url,
             'message': message,

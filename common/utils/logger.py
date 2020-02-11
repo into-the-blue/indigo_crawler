@@ -3,7 +3,11 @@ import logging
 from logging import handlers
 from datetime import datetime, timezone, timedelta, date
 from pathlib import Path
+import os
 LOG_FILE_DIR = str((Path(__file__)/'..'/'..'/'logs').resolve())
+
+if not os.path.exists(LOG_FILE_DIR):
+    os.mkdir(LOG_FILE_DIR)
 
 
 def get_logger():
