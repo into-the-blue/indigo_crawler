@@ -44,8 +44,8 @@ class DetailCrawler(object):
             self.driver.get(url)
             self.opened_url_count += 1
             return self.driver
-        except (TimeoutException, TooManyTimesException):
-            logger.error('PROXY BLOCKED')
+        except (TimeoutException, TooManyTimesException) as e:
+            logger.error('PROXY BLOCKED {}'.format(e))
             self.on_change_proxy(self.opened_url_count)
 
             self.opened_url_count = 0
