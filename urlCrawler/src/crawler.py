@@ -221,6 +221,9 @@ class UrlCrawler(object):
             logger.info('start DONE')
         except UrlCrawlerNoMoreNewUrlsException:
             logger.info('No more new urls, start next')
+        except TimeoutException:
+            logger.info('Session timeout')
+            self.check_driver(open_last_page=False)
         finally:
             self.on_accomplish()
 

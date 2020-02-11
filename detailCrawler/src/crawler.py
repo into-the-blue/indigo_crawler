@@ -79,6 +79,9 @@ class DetailCrawler(object):
             logger.info('Url expired')
             db.task_expired(task)
             self.start_one_url()
+        except TimeoutException:
+            logger.info('Session timeout')
+            self.start_one_url()
         except Exception as e:
             logger.exception(e)
             db.update_failure(task, e, self.driver.page_source)
