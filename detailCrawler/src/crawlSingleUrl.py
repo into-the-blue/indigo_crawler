@@ -270,6 +270,9 @@ def get_info_of_single_url(driver, url):
 
         content_article_info = get_info_1(driver)
 
+        content_article_info['area'] = content_article_info['area'] or area
+        missing_info = missing_info or not content_article_info['area']
+
         facility_info = get_facility_info(driver)
 
         community_info = get_community_info(driver)
@@ -325,7 +328,7 @@ def get_info_of_single_url(driver, url):
                 price/content_article_info.get('area'), 2)
         except:
             logger.info(f'无法计算每平米房价：{url}',)
-            price_per_square_meter = ''
+            price_per_square_meter = price
 
         # 上下楼便利性：无障碍性，楼层与电梯的合成项
 
