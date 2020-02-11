@@ -4,8 +4,9 @@ from selenium.webdriver.common.proxy import Proxy, ProxyType
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import InvalidSessionIdException, TimeoutException, SessionNotCreatedException, WebDriverException
-from ..exceptions import TooManyTimesException
+from ..exceptions import TooManyTimesException, NoProxyAvailableException
 from ..utils.logger import logger
+from ..db import db
 
 proxy_server = os.getenv('PROXY_SERVER')
 
@@ -35,7 +36,10 @@ def get_proxy():
     'last_status': 1,
     'last_time': '2019-09-21 11:47:09'}
     '''
-    return requests.get(f"{proxy_server}/get/").json()
+    res = requests.get(f"{proxy_server}/get/").json()
+    if res.get('code') == 0:
+        raise NoProxyAvailableException()
+    return res
 
 
 # def delete_proxy(proxy=None):
@@ -115,6 +119,17 @@ def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0):
 
     except WebDriverException as e3:
         logger.error('No active session with ID')
+        return setup_proxy_for_driver(driver, test_url, times=times+1)
+
+    except NoProxyAvailableException:
+        logger.error('No proxy')
+        db._report_error({
+            'error_source': 'proxy',
+            'message': 'no_proxy_available',
+            'url': None,
+            'payload': {
+            }
+        })
         return setup_proxy_for_driver(driver, test_url, times=times+1)
 
     except Exception as e:

@@ -154,12 +154,13 @@ class UrlCrawler(object):
         return self.apartment_urls
 
     def on_change_proxy(self, opened_times):
-        db.report_error(
-            'proxy_opened_urls',
-            {
-                'count': opened_times
-            }
-        )
+        pass
+        # db.report_error(
+        #     'proxy_opened_urls',
+        #     {
+        #         'count': opened_times
+        #     }
+        # )
 
     def on_get_new_urls(self, urls, station_info):
         '''

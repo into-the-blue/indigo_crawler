@@ -54,13 +54,14 @@ class DetailCrawler(object):
             return self._get(url, times=times + 1)
 
     def on_change_proxy(self, opened_times):
-        db.report_error(
-            'proxy_opened_urls',
-            None,
-            {
-                'count': opened_times
-            }
-        )
+        pass
+        # db.report_error(
+        #     'proxy_opened_urls',
+        #     None,
+        #     {
+        #         'count': opened_times
+        #     }
+        # )
 
     def start_one_url(self):
         task = db.get_one_task()
