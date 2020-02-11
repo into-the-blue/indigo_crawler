@@ -2,6 +2,7 @@ from common.db import DB
 from datetime import datetime
 from common.utils.logger import logger
 
+
 class MyDB(DB):
     def __init__(self):
         super().__init__()
@@ -66,7 +67,7 @@ class MyDB(DB):
             _line_ids += line_ids
             _line_ids = list(set(_line_ids))
             col.update_one(
-                {'_id', apartment.get('_id')}, {'line_ids': _line_ids, 'station_ids': _station_ids})
+                {'_id', apartment.get('_id')}, {'$set': {'line_ids': _line_ids, 'station_ids': _station_ids}})
 
     def report_error(self, message, payload):
         return super()._report_error({

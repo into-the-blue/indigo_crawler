@@ -253,6 +253,7 @@ class UrlCrawler(object):
                 logger.info('DONE {}, sleep {} min'.format(
                     task['name'], URL_CRAWLER_AWAIT_TIME/60))
                 sleep(URL_CRAWLER_AWAIT_TIME)
+                
             sleep_time = get_task_done_await_time()
             logger.info(
                 'round done, sleep for {} hour'.format(sleep_time/3600))
