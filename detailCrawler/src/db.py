@@ -49,12 +49,13 @@ class MyDB(DB):
 
     def get_missing_info(self):
         res = self.apartments_staging.find_one({
+            'missing_info': True, 'updated_time': {'$lte': datetime.now()-timedelta(hours=8)},
             '$or': [
-                {'failed_times': {'$exists': False}, 'missing_info': True,
-                    'updated_time': {'$lte': datetime.now()-timedelta(hours=8)}},
-                {'failed_times': {'$lt': 1}, 'missing_info': True,
-                    'updated_time': {'$lte': datetime.now()-timedelta(hours=8)}}
-            ]
+                {'failed_times': {'$exists': False}},
+                {'failed_times': {'$lt': 1}},
+                {'check_times': {'$exists': False}},
+                {'check_times': {'$lt': 3}}
+            ],
         })
 
         if res:
