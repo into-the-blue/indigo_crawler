@@ -79,9 +79,9 @@ class DetailCrawler(object):
             logger.info('Url expired')
             db.task_expired(task)
             self.start_one_url()
-        except NoSuchElementException:
+        except NoSuchElementException as e1:
             logger.info('Elm not found')
-            db.update_failure(task, e, self.driver.page_source)
+            db.update_failure(task, e1, self.driver.page_source)
             self.start_one_url()
         except TimeoutException:
             logger.info('Session timeout')
