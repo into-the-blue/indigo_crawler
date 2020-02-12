@@ -1,6 +1,7 @@
 import re
-from citySpecificData import SH_BIZCIRCLES, SH_DISTRICTS
+# from citySpecificData import SH_BIZCIRCLES, SH_DISTRICTS
 from common.exceptions import ValidatorInvalidValueException
+from .db import db
 
 
 def list_validator(arr):
@@ -70,6 +71,8 @@ validator = {
     'title': type_validator(str),
     'transportations': iterable_validator(lambda x: len(x) == 2)
 }
+
+SH_BIZCIRCLES, SH_DISTRICTS = db.get_bizcircles_and_districts('shanghai')
 
 sh_validator = {
     **validator,

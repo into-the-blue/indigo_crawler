@@ -78,5 +78,18 @@ class MyDB(DB):
             'invalid_value': invalid_value
         })
 
+    def get_bizcircles_and_districts(self, city):
+        biz = [d['_id'] for d in self.bizcircles_col.aggregate([
+            {'$match': {'city': city}},
+            {'$project': {'bizcircle_name': 1}},
+            {'$group': {'_id': '$bizcircle_name'}},
+        ])]
+        dis = [d['_id'] for d in self.bizcircles_col.aggregate([
+            {'$match': {'city': city}},
+            {'$project': {'district_name': 1}},
+            {'$group': {'_id': '$district_name'}},
+        ])]
+        return biz, dis
+
 
 db = MyDB()
