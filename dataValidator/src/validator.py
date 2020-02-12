@@ -1,7 +1,7 @@
 import re
 # from citySpecificData import SH_BIZCIRCLES, SH_DISTRICTS
 from common.exceptions import ValidatorInvalidValueException
-from .db import db
+from db import db
 
 
 def list_validator(arr):
