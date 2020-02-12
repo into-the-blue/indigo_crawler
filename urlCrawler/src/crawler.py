@@ -267,7 +267,7 @@ class UrlCrawler(object):
                 'round done, sleep for {} hour'.format(sleep_time/3600))
             sleep(sleep_time)
         except RecursionError:
-            exit(0)
+            exit(2)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(

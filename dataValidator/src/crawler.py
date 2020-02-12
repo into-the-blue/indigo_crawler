@@ -87,7 +87,7 @@ class DataValidator(object):
             db.report_invalid_value(staging_apartment, invalid_values)
             self.start()
         except RecursionError:
-            exit(0)
+            exit(2)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(e, staging_apartment.get(

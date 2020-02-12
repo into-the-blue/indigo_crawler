@@ -128,7 +128,7 @@ class DetailCrawler(object):
             sleep(TASK_DONE_AWAIT_TIME)
         except RecursionError:
             sleep(ERROR_AWAIT_TIME)
-            exit(0)
+            exit(2)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(
