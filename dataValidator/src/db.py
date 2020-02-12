@@ -22,7 +22,7 @@ class MyDB(DB):
 
     def get_unchecked(self):
         self.clean_tasks_stuck_on_processing()
-        res = self.apartments_staging.find_one({
+        res = self.apartments_staging.find({
             '$or': [
                 {'check_times': {'$gte': 3}, 'missing_info': True},
                 {'failed_times': {'$exists': False}, 'missing_info': False},

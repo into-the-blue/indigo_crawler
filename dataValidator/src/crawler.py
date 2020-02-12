@@ -64,15 +64,27 @@ class DataValidator(object):
         #     }
         # )
 
+    def examine_single_apartment(self, apartment):
+        try:
+            examine_apartment(apartment)
+            db.on_pass_validation(apartment)
+            logger.info('pass validation')
+        except ValidatorInvalidValueException as e1:
+            logger.info('Found invalid value')
+            invalid_values = e1.args[1]
+            db.report_invalid_value(apartment, invalid_values)
+
     def start(self):
         logger.info('START')
-        staging_apartment = db.get_unchecked()
+        staging_apartments = db.get_unchecked()
         try:
-            if not staging_apartment:
+            if not len(staging_apartments):
                 raise NoTaskException()
-            examine_apartment(staging_apartment)
-            db.on_pass_validation(staging_apartment)
-            logger.info('pass validation')
+            for apartment in staging_apartments:
+                self.examine_single_apartment(apartment)
+            logger.info('Task done, sleep for {} min'.format(
+                DATA_VALIDATOR_AWAIT_TIME/60))
+            sleep(DATA_VALIDATOR_AWAIT_TIME)
             self.start()
 
         except NoTaskException:
@@ -80,12 +92,7 @@ class DataValidator(object):
                 DATA_VALIDATOR_AWAIT_TIME/60))
             sleep(DATA_VALIDATOR_AWAIT_TIME)
             self.start()
-
-        except ValidatorInvalidValueException as e1:
-            logger.info('Found invalid value')
-            invalid_values = e1.args[1]
-            db.report_invalid_value(staging_apartment, invalid_values)
-            self.start()
+            
         except RecursionError:
             exit(2)
         except Exception as e:
