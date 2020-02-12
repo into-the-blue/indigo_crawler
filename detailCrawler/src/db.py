@@ -10,8 +10,13 @@ class MyDB(DB):
 
     def get_one_task(self):
         res = self.tasks.find_one({
-            'status': 'idle',
-            'failed_times': {'$lt': 3}
+            '$query':{
+                'status': 'idle',
+                'failed_times': {'$lt': 3}
+            },
+            '$orderby':{
+                'updated_at':1
+            }
         })
         if res:
             self.tasks.update_one(
