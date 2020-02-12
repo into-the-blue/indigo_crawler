@@ -80,8 +80,10 @@ class DetailCrawler(object):
             db.task_expired(task)
             self.start_one_url()
         except NoSuchElementException as e1:
+            # probably proxy blocked
             logger.info('Elm not found')
-            db.update_failure(task, e1, self.driver.page_source)
+            # db.update_failure(task)
+            self.check_driver(open_last_page=False)
             self.start_one_url()
         except TimeoutException:
             logger.info('Session timeout')
