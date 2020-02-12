@@ -73,6 +73,10 @@ class DataValidator(object):
             logger.info('Found invalid value')
             invalid_values = e1.args[1]
             db.report_invalid_value(apartment, invalid_values)
+        except Exception as e:
+            logger.exception(e)
+            db.report_unexpected_error(e, apartment.get(
+                'house_url') if apartment else None)
 
     def start(self):
         logger.info('START')
@@ -92,13 +96,11 @@ class DataValidator(object):
                 DATA_VALIDATOR_AWAIT_TIME/60))
             sleep(DATA_VALIDATOR_AWAIT_TIME)
             self.start()
-            
+
         except RecursionError:
             exit(2)
         except Exception as e:
             logger.exception(e)
-            db.report_unexpected_error(e, staging_apartment.get(
-                'house_url') if staging_apartment else None)
             sleep(ERROR_AWAIT_TIME)
             self.start()
 
