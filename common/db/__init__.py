@@ -111,7 +111,7 @@ class DB(object):
         try:
             if doc.get('message') == 'elm_not_found':
                 self._check_if_error_exists({
-                    'message': doc.get('message')
+                    'message': doc.get('message'),
                     'payload.path': doc.get('payload').get('path')
                 })
 
