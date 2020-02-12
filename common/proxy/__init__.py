@@ -18,7 +18,7 @@ TEST_URL = 'https://sh.zu.ke.com/zufang'
 def test_proxy(driver, test_url=None):
     test_url = test_url or TEST_URL
     try:
-        driver.set_page_load_timeout(20)
+        driver.set_page_load_timeout(13)
         driver.get(test_url)
         return True
     except TimeoutException:
