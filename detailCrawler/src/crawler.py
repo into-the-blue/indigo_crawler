@@ -111,7 +111,7 @@ class DetailCrawler(object):
             })
             sleep(2)
             self.start_fill_missing()
-         except NoSuchElementException:
+        except NoSuchElementException:
             logger.info('Elm not found')
             self.start_fill_missing()
         except Exception as e:
