@@ -10,12 +10,12 @@ class MyDB(DB):
 
     def get_one_task(self):
         res = self.tasks.find_one({
-            '$query':{
+            '$query': {
                 'status': 'idle',
                 'failed_times': {'$lt': 3}
             },
-            '$orderby':{
-                'updated_at':1
+            '$orderby': {
+                'updated_at': 1
             }
         })
         if res:
@@ -28,7 +28,7 @@ class MyDB(DB):
             )
         return res
 
-    def update_failure(self, task,  err, page_source=None):
+    def update_failure(self, task,  err=None, page_source=None):
         '''
         if failed,
         increase `failed_times`,
@@ -42,15 +42,18 @@ class MyDB(DB):
         }
         if toupdate['failed_times'] >= 3:
             toupdate['status'] = 'error'
-            page_source_id = self.insert_page_source(
-                task.get('url'), page_source)
-            toupdate['page_source_id'] = page_source_id
+            if page_source:
+                page_source_id = self.insert_page_source(
+                    task.get('url'), page_source)
+                toupdate['page_source_id'] = page_source_id
 
         self.tasks.update_one(
             {'_id': task.get('_id')},
             {'$set': {**toupdate, 'updated_at': datetime.now()}}
         )
-        self.report_unexpected_error(err, task.get('url'))
+        
+        if err:
+            self.report_unexpected_error(err, task.get('url'))
 
     def get_missing_info(self):
         res = self.apartments_staging.find_one({

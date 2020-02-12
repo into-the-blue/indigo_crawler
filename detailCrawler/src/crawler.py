@@ -114,6 +114,8 @@ class DetailCrawler(object):
         except NoSuchElementException:
             logger.info('Elm not found')
             self.start_fill_missing()
+        except RecursionError:
+            exit(2)
         except Exception as e:
             logger.exception(e)
             raise e
@@ -126,9 +128,6 @@ class DetailCrawler(object):
         except NoTaskException:
             logger.info('No task found')
             sleep(TASK_DONE_AWAIT_TIME)
-        except RecursionError:
-            sleep(ERROR_AWAIT_TIME)
-            exit(2)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(
