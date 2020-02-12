@@ -44,10 +44,11 @@ def find_elm_by_link_text(driver: webdriver, text: str):
 def find_next_button(driver: webdriver):
     '''
     下一页
+    可能找不到
     requirement:
     1. 列表页面
     '''
-    return find_elm_by_xpath(driver, "//div[@class='content__pg']/a[@class='next']")
+    return find_elm_by_xpath(driver, "//div[@class='content__pg']/a[@class='next']", report=False)
 
 
 def find_elms_of_line(driver: webdriver):
@@ -141,7 +142,7 @@ def find_elm_of_facility_detail(driver: webdriver):
 def find_city_elm(driver: webdriver):
     '''
     城市名字
-
+    可能为空
     requirement:
     1. 详情页面
     '''

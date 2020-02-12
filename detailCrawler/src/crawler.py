@@ -1,4 +1,4 @@
-from selenium.common.exceptions import InvalidSessionIdException, WebDriverException, TimeoutException
+from selenium.common.exceptions import InvalidSessionIdException, WebDriverException, TimeoutException, NoSuchElementException
 from tqdm import tqdm
 from time import sleep
 from db import db
@@ -8,7 +8,7 @@ from common.utils.constants import DETAIL_CRAWLER_AWAIT_TIME, ERROR_AWAIT_TIME, 
 from common.proxy import connect_to_driver, setup_proxy_for_driver
 from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException, TooManyTimesException
 from random import shuffle
-from common.locateElms import find_next_button, find_paging_elm, find_apartments_in_list
+from common.locateElms import find_apartments_in_list
 from crawlSingleUrl import get_info_of_single_url
 
 
@@ -79,6 +79,10 @@ class DetailCrawler(object):
             logger.info('Url expired')
             db.task_expired(task)
             self.start_one_url()
+        except NoSuchElementException:
+            logger.info('Elm not found')
+            db.update_failure(task, e, self.driver.page_source)
+            self.start_one_url()
         except TimeoutException:
             logger.info('Session timeout')
             self.start_one_url()
@@ -107,6 +111,9 @@ class DetailCrawler(object):
             })
             sleep(2)
             self.start_fill_missing()
+         except NoSuchElementException:
+            logger.info('Elm not found')
+            self.start_fill_missing()
         except Exception as e:
             logger.exception(e)
             raise e
@@ -119,6 +126,9 @@ class DetailCrawler(object):
         except NoTaskException:
             logger.info('No task found')
             sleep(TASK_DONE_AWAIT_TIME)
+        except RecursionError:
+            sleep(ERROR_AWAIT_TIME)
+            exit(0)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(

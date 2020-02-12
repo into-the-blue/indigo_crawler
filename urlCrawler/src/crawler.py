@@ -100,6 +100,9 @@ class UrlCrawler(object):
             read page count of url
         '''
         try:
+            num = get_num_of_apartment(self.driver)
+            if not num:
+                return 0
             elm = find_paging_elm(self.driver)
             page_count = elm.get_attribute('data-totalpage')
             logger.info('Page read, total: {}'.format(page_count))
@@ -224,6 +227,8 @@ class UrlCrawler(object):
         except TimeoutException:
             logger.info('Session timeout')
             self.check_driver(open_last_page=False)
+        except NoSuchElementException:
+            logger.info('Elm not found')
         finally:
             self.on_accomplish()
 
@@ -256,11 +261,13 @@ class UrlCrawler(object):
                 logger.info('DONE {}, sleep {} min'.format(
                     task['name'], URL_CRAWLER_AWAIT_TIME/60))
                 sleep(URL_CRAWLER_AWAIT_TIME)
-                
+
             sleep_time = get_task_done_await_time()
             logger.info(
                 'round done, sleep for {} hour'.format(sleep_time/3600))
             sleep(sleep_time)
+        except RecursionError:
+            exit(0)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(

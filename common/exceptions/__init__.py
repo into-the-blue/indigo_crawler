@@ -41,3 +41,8 @@ class TooManyTimesException(Exception):
 class NoProxyAvailableException(Exception):
     def __init__(self, *args, **kwargs):
         super().__init__('No proxy available', *args, **kwargs)
+
+
+class ErrorExistsException(Exception):
+    def __init__(self, *args, **kwargs):
+        super().__init__('Error already reported', *args, **kwargs)

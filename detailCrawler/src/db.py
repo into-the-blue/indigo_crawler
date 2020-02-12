@@ -23,7 +23,7 @@ class MyDB(DB):
             )
         return res
 
-    def update_failure(self, task,  err, page_source):
+    def update_failure(self, task,  err, page_source=None):
         '''
         if failed,
         increase `failed_times`,

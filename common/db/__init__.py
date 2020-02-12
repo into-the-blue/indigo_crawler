@@ -3,6 +3,8 @@ import os
 from pymongo import IndexModel, ASCENDING, DESCENDING, GEOSPHERE
 from datetime import datetime
 import traceback
+from ..exceptions import ErrorExistsException
+
 db_username = os.getenv('DB_USERNAME')
 db_password = os.getenv('DB_PASSWORD')
 db_host = os.getenv('DB_HOST')
@@ -98,7 +100,7 @@ class DB(object):
     def _report_error(self, doc):
         '''
         error_source: 'validator' | 'url_crawler' | 'detail_crawler' | 'locate_element'
-        message: 'elm_not_found' | 'invalid_value' | ''
+        message: 'elm_not_found' | 'invalid_value' | 'unexpected_error' | 'invalid_value
         checked: true | false
         page_source_id: null | object_id
         url: string
@@ -106,11 +108,41 @@ class DB(object):
             ....
         }
         '''
-        self.errors.insert_one(
-            {**doc,
-             'checked': False,
-             'created_at': datetime.now(),
-             'updated_at': datetime.now()})
+        try:
+            if doc.get('message') == 'elm_not_found':
+                self._check_if_error_exists({
+                    'message': doc.get('message')
+                    'payload.path': doc.get('payload').get('path')
+                })
+
+            if doc.get('message') == 'unexpected_error':
+                self._check_if_error_exists({
+                    'error_source': doc.get('error_source'),
+                    'message': doc.get('message'),
+                    'payload.error_message': doc.get('payload').get('error_message')
+                })
+
+            if doc.get('message') == 'invalid_value':
+                self._check_if_error_exists({
+                    'error_source': doc.get('error_source'),
+                    'message': doc.get('message'),
+                    'url': doc.get('url')
+                })
+
+            self.errors.insert_one(
+                {**doc,
+                 'checked': False,
+                 'created_at': datetime.now(),
+                 'updated_at': datetime.now()})
+
+        except ErrorExistsException:
+            pass
+
+    def _check_if_error_exists(self, doc):
+        if self.errors.find_one({
+            **doc
+        }):
+            raise ErrorExistsException()
 
     def report_unexpected_error(self, error_source, err, url=None):
         self._report_error({

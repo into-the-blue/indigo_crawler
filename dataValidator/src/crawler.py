@@ -7,7 +7,7 @@ from common.utils.constants import ERROR_AWAIT_TIME, DATA_VALIDATOR_AWAIT_TIME
 from common.proxy import connect_to_driver, setup_proxy_for_driver
 from common.exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException, ValidatorInvalidValueException, TooManyTimesException
 from random import shuffle
-from common.locateElms import find_next_button, find_paging_elm, find_apartments_in_list
+from common.locateElms import find_apartments_in_list
 from validator import examine_apartment
 import traceback
 
@@ -86,7 +86,8 @@ class DataValidator(object):
             invalid_values = e1.args[1]
             db.report_invalid_value(staging_apartment, invalid_values)
             self.start()
-
+        except RecursionError:
+            exit(0)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(e, staging_apartment.get(
