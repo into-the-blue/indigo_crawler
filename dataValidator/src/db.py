@@ -29,7 +29,7 @@ class MyDB(DB):
                 {'failed_times': {'$lt': 1}, 'missing_info': False}
             ]
         })
-        return res
+        return list(res)
 
     def on_pass_validation(self, apartment):
         self.apartments_staging.delete_one({
