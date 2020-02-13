@@ -141,6 +141,9 @@ class DetailCrawler(object):
             sleep(TASK_DONE_AWAIT_TIME)
         except RecursionError:
             exit(2)
+        except TooManyTimesException:
+            logger.info("No proxy available now")
+            sleep(ERROR_AWAIT_TIME)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(

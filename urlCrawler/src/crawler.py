@@ -270,6 +270,8 @@ class UrlCrawler(object):
             sleep(sleep_time)
         except RecursionError:
             exit(2)
+        except TooManyTimesException:
+            sleep(ERROR_AWAIT_TIME)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(
