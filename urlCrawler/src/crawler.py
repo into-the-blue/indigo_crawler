@@ -57,7 +57,7 @@ class UrlCrawler(object):
             self.driver.get(url)
             self.opened_url_count += 1
             return self.driver
-        except (TooManyTimesException, TimeoutException) as e:
+        except (TooManyTimesException, TimeoutException, WebDriverException) as e:
             logger.error('timeout tried times{} {}'.format(times, e))
             self.on_change_proxy(self.opened_url_count)
 
@@ -151,7 +151,7 @@ class UrlCrawler(object):
                 except ProxyBlockedException:
                     self.check_driver()
 
-                except WebDriverException:
+                except (InvalidSessionIdException, WebDriverException):
                     self.check_driver()
 
         return self.apartment_urls
@@ -224,7 +224,7 @@ class UrlCrawler(object):
             logger.info('start DONE')
         except UrlCrawlerNoMoreNewUrlsException:
             logger.info('No more new urls, start next')
-        except TimeoutException:
+        except (TimeoutException, WebDriverException, InvalidSessionIdException):
             logger.info('Session timeout')
             self.check_driver(open_last_page=False)
         except NoSuchElementException:

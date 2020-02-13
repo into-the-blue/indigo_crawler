@@ -139,9 +139,16 @@ class DB(object):
             pass
 
     def _check_if_error_exists(self, doc):
-        if self.errors.find_one({
+        res = self.errors.find_one({
             **doc
-        }):
+        })
+        if res:
+            self.errors.update_one(
+                {'_id': res.get('_id')},
+                {'$set': {
+                    'times': res.get('times', 0)+1
+                }}
+            )
             raise ErrorExistsException()
 
     def report_unexpected_error(self, error_source, err, url=None):

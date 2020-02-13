@@ -9,15 +9,18 @@ class MyDB(DB):
         super().__init__()
 
     def get_one_task(self):
-        res = self.tasks.find_one({
-            '$query': {
-                'status': 'idle',
-                'failed_times': {'$lt': 3}
+        arr = list(self.tasks.aggregate([
+            {
+                '$match': {
+                    'status': 'idle',
+                    'failed_times': {'$lt': 3}
+                }
             },
-            '$orderby': {
-                'updated_at': 1
+            {
+                '$sample': {'size': 1}
             }
-        })
+        ]))
+        res = arr[0] if len(arr) else None
         if res:
             self.tasks.update_one(
                 {'_id': res.get('_id'), },
@@ -51,7 +54,7 @@ class MyDB(DB):
             {'_id': task.get('_id')},
             {'$set': {**toupdate, 'updated_at': datetime.now()}}
         )
-        
+
         if err:
             self.report_unexpected_error(err, task.get('url'))
 
@@ -113,6 +116,10 @@ class MyDB(DB):
             {'_id': task.get('_id')},
             {'$set': {'status': 'done', 'updated_at': datetime.now()}}
         )
+        if self.apartments_staging.find_one({
+            'house_url': apartment_doc.get('house_url')
+        }):
+            return
         apartment = {
             **apartment_doc,
             'created_time': datetime.now(),

@@ -44,7 +44,7 @@ class DetailCrawler(object):
             self.driver.get(url)
             self.opened_url_count += 1
             return self.driver
-        except (TimeoutException, TooManyTimesException) as e:
+        except (TimeoutException, TooManyTimesException, WebDriverException) as e:
             logger.error('timeout tried times {} {}'.format(times, e))
             self.on_change_proxy(self.opened_url_count)
 
@@ -79,15 +79,18 @@ class DetailCrawler(object):
             logger.info('Url expired')
             db.task_expired(task)
             self.start_one_url()
-        except NoSuchElementException as e1:
+        except NoSuchElementException:
             # probably proxy blocked
             logger.info('Elm not found')
             # db.update_failure(task)
             self.check_driver(open_last_page=False)
             self.start_one_url()
-        except TimeoutException:
+        except (TimeoutException, WebDriverException, InvalidSessionIdException):
             logger.info('Session timeout')
+            self.check_driver(open_last_page=False)
             self.start_one_url()
+        except (RecursionError, NoTaskException):
+            raise
         except Exception as e:
             logger.exception(e)
             db.update_failure(task, e, self.driver.page_source)
@@ -116,8 +119,12 @@ class DetailCrawler(object):
         except NoSuchElementException:
             logger.info('Elm not found')
             self.start_fill_missing()
-        except RecursionError:
-            exit(2)
+        except (TimeoutException, WebDriverException, InvalidSessionIdException):
+            logger.info('Session timeout')
+            self.check_driver(open_last_page=False)
+            self.start_fill_missing()
+        except (RecursionError, NoTaskException):
+            raise
         except Exception as e:
             logger.exception(e)
             raise e
@@ -130,6 +137,8 @@ class DetailCrawler(object):
         except NoTaskException:
             logger.info('No task found')
             sleep(TASK_DONE_AWAIT_TIME)
+        except RecursionError:
+            exit(2)
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(
