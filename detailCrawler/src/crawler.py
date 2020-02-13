@@ -30,7 +30,9 @@ class DetailCrawler(object):
 
     def check_driver(self, open_last_page=True):
         logger.info('GET NEW PROXY')
-        current_url = self.driver.current_url
+        current_url = None
+        if open_last_page:
+            current_url = self.driver.current_url
         self.driver = self.init_driver(current_url)
         if open_last_page:
             self.driver.get(current_url)
