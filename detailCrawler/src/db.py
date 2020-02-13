@@ -2,6 +2,7 @@ from common.db import DB
 from datetime import datetime, timedelta
 from common.utils.logger import logger
 from common.aMap.getCoordinates import get_location_info_from_apartment_info
+import os
 
 
 class MyDB(DB):
@@ -13,7 +14,8 @@ class MyDB(DB):
             {
                 '$match': {
                     'status': 'idle',
-                    'failed_times': {'$lt': 3}
+                    'failed_times': {'$lt': 3},
+                    'city': os.environ.get('CITY')
                 }
             },
             {
