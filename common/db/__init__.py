@@ -128,6 +128,10 @@ class DB(object):
                     'message': doc.get('message'),
                     'url': doc.get('url')
                 })
+            if doc.get('message') == 'no_proxy_available':
+                self._check_if_error_exists({
+                    'message': 'no_proxy_available'
+                })
 
             self.errors.insert_one(
                 {**doc,
