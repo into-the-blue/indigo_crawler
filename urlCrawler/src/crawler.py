@@ -273,6 +273,8 @@ class UrlCrawler(object):
             db.report_unexpected_error(
                 e, safely_get_url_from_driver(self.driver))
             sleep(ERROR_AWAIT_TIME)
+        finally:
+            self.start()
 
     def start_by_district(self):
         bizcircles = db.find_all_bizcircles(self.city)
