@@ -328,7 +328,7 @@ def get_info_of_single_url(driver, url):
                 price/content_article_info.get('area'), 2)
         except:
             logger.info(f'无法计算每平米房价：{url}',)
-            price_per_square_meter = price
+            price_per_square_meter = float(price)
 
         # 上下楼便利性：无障碍性，楼层与电梯的合成项
 

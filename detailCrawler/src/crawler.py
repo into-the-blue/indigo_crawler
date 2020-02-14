@@ -92,7 +92,7 @@ class DetailCrawler(object):
             logger.info('Session timeout')
             self.check_driver(open_last_page=False)
             self.start_one_url()
-        except (RecursionError, NoTaskException):
+        except (RecursionError, NoTaskException, TooManyTimesException):
             raise
         except Exception as e:
             logger.exception(e)
@@ -127,7 +127,7 @@ class DetailCrawler(object):
             logger.info('Session timeout')
             self.check_driver(open_last_page=False)
             self.start_fill_missing()
-        except (RecursionError, NoTaskException):
+        except (RecursionError, NoTaskException, TooManyTimesException):
             raise
         except Exception as e:
             logger.exception(e)

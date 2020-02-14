@@ -141,7 +141,7 @@ class UrlCrawler(object):
                 try:
                     sleep(2)
                     logger.info('Get urls in page, current {}'.format(i+1))
-                    driver.execute_script(
+                    self.driver.execute_script(
                         "window.scrollTo(0, document.body.scrollHeight);")
                     urls = self.get_urls_in_page(station_info)
                     url_saved = self.on_get_new_urls(urls, station_info)
