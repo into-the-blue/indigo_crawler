@@ -70,6 +70,7 @@ class DetailCrawler(object):
         if not task:
             raise NoTaskException()
         try:
+            logger.info('Start crawl new link')
             self._get(task.get('url'))
             logger.info('Url opened')
             info = get_info_of_single_url(self.driver, task.get('url'))
@@ -103,6 +104,7 @@ class DetailCrawler(object):
         if not apartment:
             raise NoTaskException()
         try:
+            logger.info('Start fill in missing info')
             self._get(apartment.get('house_url'))
             logger.info('Url opened')
             info = get_info_of_single_url(
