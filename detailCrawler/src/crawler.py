@@ -133,8 +133,14 @@ class DetailCrawler(object):
 
     def start(self):
         try:
-            self.start_one_url()
-            self.start_fill_missing()
+            try:
+                self.start_one_url()
+            except NoTaskException:
+                pass
+            try:
+                self.start_fill_missing()
+            except NoTaskException:
+                raise
             sleep(DETAIL_CRAWLER_AWAIT_TIME)
         except NoTaskException:
             logger.info('No task found')
