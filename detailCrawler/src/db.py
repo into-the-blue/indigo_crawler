@@ -61,16 +61,20 @@ class MyDB(DB):
             self.report_unexpected_error(err, task.get('url'))
 
     def get_missing_info(self):
-        res = self.apartments_staging.find_one({
-            'missing_info': True, 'updated_time': {'$lte': datetime.now()-timedelta(hours=8)},
-            '$or': [
-                {'failed_times': {'$exists': False}},
-                {'failed_times': {'$lt': 1}},
-                {'check_times': {'$exists': False}},
-                {'check_times': {'$lt': 3}}
-            ],
-        })
-
+        arr = list(self.apartments_staging.aggregate([
+            {'$match': {
+                'missing_info': True, 'updated_time': {'$lte': datetime.now()-timedelta(hours=8)},
+                '$or': [
+                    {'failed_times': {'$exists': False}},
+                    {'failed_times': {'$lt': 1}},
+                    {'check_times': {'$exists': False}},
+                    {'check_times': {'$lt': 3}}
+                ],
+            }
+            },
+            {'$sample': {'size': 1}}
+        ]))
+        res = arr[0] if len(arr) else None
         if res:
             self.apartments_staging.update_one(
                 {'_id': res.get('_id')},
