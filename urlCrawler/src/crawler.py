@@ -201,6 +201,9 @@ class UrlCrawler(object):
         try:
             priority = get_num_of_apartment(self.driver)
             db.update_priority_of_station(station_info, priority)
+        except NoSuchElementException:
+            logger.info('Unable to get apartment count')
+            raise
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(e)
@@ -209,6 +212,9 @@ class UrlCrawler(object):
         try:
             priority = get_num_of_apartment(self.driver)
             db.update_priority_of_bizcircle(bizcircle_info, priority)
+        except NoSuchElementException:
+            logger.info('Unable to get apartment count')
+            raise
         except Exception as e:
             logger.exception(e)
             db.report_unexpected_error(e)
@@ -233,6 +239,7 @@ class UrlCrawler(object):
             self.check_driver(open_last_page=False)
         except NoSuchElementException:
             logger.info('Elm not found')
+            sleep(ERROR_AWAIT_TIME)
         finally:
             self.on_accomplish()
 
