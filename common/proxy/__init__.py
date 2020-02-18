@@ -87,6 +87,7 @@ def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0):
         raise TooManyTimesException('setup_proxy_for_driver')
     try:
         try:
+            driver.delete_all_cookies()
             driver.quit()
         except:
             pass
