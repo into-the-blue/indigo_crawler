@@ -113,25 +113,25 @@ class DB(object):
                 self._check_if_error_exists({
                     'message': doc.get('message'),
                     'payload.path': doc.get('payload').get('path')
-                })
+                }, doc)
 
             if doc.get('message') == 'unexpected_error':
                 self._check_if_error_exists({
                     'error_source': doc.get('error_source'),
                     'message': doc.get('message'),
                     'payload.error_message': doc.get('payload').get('error_message')
-                })
+                }, doc)
 
             if doc.get('message') == 'invalid_value':
                 self._check_if_error_exists({
                     'error_source': doc.get('error_source'),
                     'message': doc.get('message'),
                     'url': doc.get('url')
-                })
+                }, doc)
             if doc.get('message') == 'no_proxy_available':
                 self._check_if_error_exists({
                     'message': 'no_proxy_available'
-                })
+                }, doc)
 
             self.errors.insert_one(
                 {**doc,
@@ -142,7 +142,7 @@ class DB(object):
         except ErrorExistsException:
             pass
 
-    def _check_if_error_exists(self, doc):
+    def _check_if_error_exists(self, doc, origin):
         res = self.errors.find_one({
             **doc
         })
@@ -150,7 +150,9 @@ class DB(object):
             self.errors.update_one(
                 {'_id': res.get('_id')},
                 {'$set': {
-                    'times': res.get('times', 0)+1
+                    **origin,
+                    'times': res.get('times', 0)+1,
+                    'updated_at': datetime.now()
                 }}
             )
             raise ErrorExistsException()
