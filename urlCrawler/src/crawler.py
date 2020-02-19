@@ -123,11 +123,8 @@ class UrlCrawler(object):
         logger.info('elments in page {}'.format(len(elms)))
         for i in elms:
             url = i.get_attribute('href')
-            if 'apartment' not in url:
-                try:
-                    urls.append(url)
-                except UrlExistsException:
-                    pass
+            if 'apartment' not in url and '广告' not in i.text:
+                urls.append(url)
         return urls
 
     def get_all_urls(self, station_info=None):
