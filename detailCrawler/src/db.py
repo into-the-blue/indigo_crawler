@@ -63,7 +63,7 @@ class MyDB(DB):
     def get_missing_info(self):
         arr = list(self.apartments_staging.aggregate([
             {'$match': {
-                'missing_info': True, 'updated_time': {'$lte': datetime.now()-timedelta(hours=8)},
+                'missing_info': True, 'updated_time': {'$lte': datetime.now()-timedelta(hours=24)},
                 '$or': [
                     {'failed_times': {'$exists': False}},
                     {'failed_times': {'$lt': 1}},

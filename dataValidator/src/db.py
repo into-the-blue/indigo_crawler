@@ -24,7 +24,7 @@ class MyDB(DB):
         self.clean_tasks_stuck_on_processing()
         res = self.apartments_staging.find({
             '$or': [
-                {'check_times': {'$gte': 3}, 'missing_info': True},
+                {'checked_times': {'$gte': 5}, 'missing_info': True},
                 {'failed_times': {'$exists': False}, 'missing_info': False},
                 {'failed_times': {'$lt': 1}, 'missing_info': False}
             ]
