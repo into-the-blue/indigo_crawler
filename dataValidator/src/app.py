@@ -6,7 +6,7 @@ from crawler import DataValidator
 from common.utils.logger import logger
 import os
 import traceback
-
+os.environ['TZ'] = 'Asia/Shanghai'
 
 def start_task():
     sleep(3)
