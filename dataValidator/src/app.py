@@ -1,12 +1,12 @@
+import os
+os.environ['TZ'] = 'Asia/Shanghai'
 from utils.util import get_root_pth
 import sys
 sys.path.append(str(get_root_pth()))
 from time import sleep
 from crawler import DataValidator
 from common.utils.logger import logger
-import os
 import traceback
-os.environ['TZ'] = 'Asia/Shanghai'
 
 def start_task():
     sleep(3)

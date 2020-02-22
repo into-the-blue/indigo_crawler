@@ -1,6 +1,7 @@
+import os
+os.environ['TZ'] = 'Asia/Shanghai'
 from utils.util import get_root_pth
 import sys
-import os
 sys.path.append(str(get_root_pth()))
 from common.utils.logger import logger
 from crawler import UrlCrawler
