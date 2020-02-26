@@ -76,8 +76,8 @@ SH_BIZCIRCLES, SH_DISTRICTS = db.get_bizcircles_and_districts('shanghai')
 
 sh_validator = {
     **validator,
-    'district': list_validator(SH_DISTRICTS),
-    'bizcircle': list_validator(SH_BIZCIRCLES),
+    'district': list_validator(['上海周边', *SH_DISTRICTS]),
+    'bizcircle': list_validator(['昆山', *SH_BIZCIRCLES]),
 }
 
 
