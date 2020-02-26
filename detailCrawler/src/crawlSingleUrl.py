@@ -70,7 +70,7 @@ def get_info_1(driver):
                     floor_full_info.split('/')[1].replace('层', ''))
             else:
                 # 所在楼层
-                res = re.findall('\w+(?=\d)', floor_full_info)
+                res = re.findall('\D+(?=\d)', floor_full_info)
                 if(len(res) > 0):
                     floor = res[0]
                 else:
