@@ -3,7 +3,6 @@ import re
 from common.exceptions import ValidatorInvalidValueException
 from db import db
 
-
 def list_validator(arr):
     return lambda x: x in arr
 
@@ -13,7 +12,7 @@ def or_validator(*args):
 
 
 def regex_validator(reg):
-    return lambda x: bool(re.match(reg, x))
+    return lambda x: False if not isinstance(x, str) else bool(re.match(reg, x))
 
 
 def func_validator(func):
