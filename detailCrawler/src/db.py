@@ -47,10 +47,10 @@ class MyDB(DB):
         }
         if toupdate['failed_times'] >= 3:
             toupdate['status'] = 'error'
-            if page_source:
-                page_source_id = self.insert_page_source(
-                    task.get('url'), page_source)
-                toupdate['page_source_id'] = page_source_id
+            # if page_source:
+            # page_source_id = self.insert_page_source(
+            #     task.get('url'), page_source)
+            # toupdate['page_source_id'] = page_source_id
 
         self.tasks.update_one(
             {'_id': task.get('_id')},
