@@ -3,6 +3,7 @@ import re
 from common.exceptions import ValidatorInvalidValueException
 from db import db
 
+
 def list_validator(arr):
     return lambda x: x in arr
 
@@ -76,7 +77,7 @@ SH_BIZCIRCLES, SH_DISTRICTS = db.get_bizcircles_and_districts('shanghai')
 sh_validator = {
     **validator,
     'district': list_validator(['上海周边', *SH_DISTRICTS]),
-    'bizcircle': list_validator(['昆山', '嘉兴', *SH_BIZCIRCLES]),
+    'bizcircle': list_validator(['昆山', '嘉兴', '启东', *SH_BIZCIRCLES]),
 }
 
 
