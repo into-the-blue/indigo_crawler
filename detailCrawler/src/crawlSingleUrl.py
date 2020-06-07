@@ -229,6 +229,9 @@ def get_info_of_single_url(driver, url):
         # eg.合租·瑞和城叁街区(汇臻路815弄) 4居室 南卧
         title = locate_apartment_title(driver).text
         rent_type = title.split('·')[0]
+        rent_type_fallback = find_elm_of_house_type(driver, 0)
+        rent_type = rent_type if len(rent_type) <= len(
+            rent_type_fallback) else rent_type_fallback
         if '未知' in rent_type:
             rent_type = '未知'
 
@@ -351,7 +354,7 @@ def get_info_of_single_url(driver, url):
                        'house_url': url,
                        **community_info,
                        'price_per_square_meter': price_per_square_meter,
-                       'missing_info': len(img_urls) < 2,
+                       'missing_info': (len(img_urls) < 2) or (len(rent_type) < 2),
                        'version': os.environ.get('VER')
                        }
         return dict_single
