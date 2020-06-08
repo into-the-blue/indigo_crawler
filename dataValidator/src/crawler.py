@@ -90,7 +90,7 @@ class DataValidator(object):
         headers = {
             'Authorization': 'Bearer {}'.format(INDIGO_ACCESS_TOKEN)
         }
-        res = requests.post('http://{}/api/v1/subscription/notify'.format(API_DOMAIN),
+        res = requests.post('{}/api/v1/subscription/notify'.format(API_DOMAIN),
                             headers=headers,
                             data={
                                 'apartment_id': str(inserted_id)
