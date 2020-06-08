@@ -10,6 +10,11 @@ from random import shuffle
 from common.locateElms import find_apartments_in_list
 from validator import examine_apartment
 import traceback
+import requests
+import os
+
+INDIGO_ACCESS_TOKEN = os.environ.get('INDIGO_ACCESS_TOKEN')
+API_DOMAIN = os.environ.get('API_DOMAIN')
 
 
 class DataValidator(object):
@@ -69,7 +74,8 @@ class DataValidator(object):
     def examine_single_apartment(self, apartment):
         try:
             examine_apartment(apartment)
-            db.on_pass_validation(apartment)
+            inserted_id = db.on_pass_validation(apartment)
+            self.notify(inserted_id)
             logger.info('pass validation')
         except ValidatorInvalidValueException as e1:
             logger.info('Found invalid value')
@@ -79,6 +85,17 @@ class DataValidator(object):
             logger.exception(e)
             db.report_unexpected_error(e, apartment.get(
                 'house_url') if apartment else None)
+
+    def notify(self, inserted_id):
+        headers = {
+            'Authorization': 'Bearer {}'.format(INDIGO_ACCESS_TOKEN)
+        }
+        res = requests.post('http://{}/api/v1/subscription/notify'.format(API_DOMAIN),
+                            headers=headers,
+                            data={
+                                'apartment_id': str(inserted_id)
+                            }
+        )
 
     def start(self):
         logger.info('START')

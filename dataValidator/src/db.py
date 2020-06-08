@@ -39,10 +39,12 @@ class MyDB(DB):
         apartment = rm_useless_values(apartment)
         if not apartment.get('missing_info'):
             apartment['force_pass'] = True
-        self.apartments.insert_one({
+        del apartment['_id']
+        res = self.apartments.insert_one({
             **apartment,
             'updated_time': datetime.now()
         })
+        return res.inserted_id
 
     def report_error(self, message, url, payload):
         return super()._report_error({
