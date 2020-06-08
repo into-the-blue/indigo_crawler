@@ -39,7 +39,6 @@ class MyDB(DB):
         apartment = rm_useless_values(apartment)
         if not apartment.get('missing_info'):
             apartment['force_pass'] = True
-        del apartment['_id']
         res = self.apartments.insert_one({
             **apartment,
             'updated_time': datetime.now()
