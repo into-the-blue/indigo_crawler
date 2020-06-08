@@ -17,7 +17,7 @@ def regex_validator(reg):
 
 
 def func_validator(func):
-    return bool(func(x))
+    return bool(lambda x: func(x))
 
 
 def type_validator(*ts):
