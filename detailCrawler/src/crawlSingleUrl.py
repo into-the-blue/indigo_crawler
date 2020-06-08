@@ -212,8 +212,9 @@ def get_info_of_single_url(driver, url):
     else:
         try:
             # url expired
-            locate_elm_of_offline_text(driver).text == '你访问的房源已失效'
-            raise ApartmentExpiredException()
+            offline_texts = ['你访问的房源已失效', '你访问的房源已下架/成交']
+            if locate_elm_of_offline_text(driver).text in offline_texts:
+                raise ApartmentExpiredException()
         except NoSuchElementException:
             pass
 
