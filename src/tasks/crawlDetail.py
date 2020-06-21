@@ -38,7 +38,9 @@ class DetailCrawler(BaseWebDriver):
             pass
         except Exception as e:
             logger.exception(e)
-            mongo.update_failure(task, e, self.driver.page_source)
+            mongo.update_failure_task(task, e, self.driver.page_source)
+        finally:
+            self.quit()
 
     def start_fill_missing(self, apartment):
         '''
@@ -67,3 +69,5 @@ class DetailCrawler(BaseWebDriver):
             pass
         except Exception as e:
             logger.exception(e)
+        finally:
+            self.quit()

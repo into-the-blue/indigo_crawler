@@ -28,8 +28,6 @@ class BaseWebDriver(object):
             return self.driver
         except (TooManyTimesException, TimeoutException, WebDriverException) as e:
             logger.error('timeout tried times{} {}'.format(times, e))
-            self.on_change_proxy(self.opened_url_count)
-
             self.opened_url_count = 0
             self.renew_driver()
 
@@ -40,8 +38,3 @@ class BaseWebDriver(object):
             self.driver.quit()
         except Exception as e:
             logger.error(f'QUIT DRIVER ERROR {e}')
-
-    def on_round_done(self):
-        num = self.opened_url_count
-        self.opened_url_count = 0
-        return num
