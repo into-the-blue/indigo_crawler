@@ -93,13 +93,21 @@ class DB(object):
             '$orderby': {'priority': -1}
         }))
 
-    
     def find_idle_tasks(self):
         tasks = self.tasks.find({
             'status': 'idle',
             'failed_times': {'$lt': 3},
         })
         return list(tasks)
+
+    def update_apartment(self, apt_id, doc):
+        self.apartments.update_one(
+            {'_id': apt_id},
+            {'$set': {
+                **doc,
+                'updated_time': datetime.now()
+            }}
+        )
 
     def update_priority_of_station(self, station_info, priority):
         self.station_col.update_one(
