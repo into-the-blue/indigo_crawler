@@ -273,6 +273,8 @@ def get_info_of_single_url(driver, url):
         # 户型、面积、朝向
         house_type, area, orient = get_house_type_info_27_nov(driver)
 
+        if '未知' in orient:
+            missing_info = True
         content_article_info = get_info_1(driver)
 
         content_article_info['area'] = content_article_info['area'] or area

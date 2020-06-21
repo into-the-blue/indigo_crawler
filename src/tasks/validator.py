@@ -51,7 +51,7 @@ validator = {
     'elevator': list_validator(['无', '有', '暂无数据']),
     'gas': list_validator(['有', '无', '暂无数据']),
     'house_type': regex_validator('[\d未知]{1,2}室[\d未知]{1,2}厅[\d未知]{1,2}卫'),
-    'orient': or_validator(regex_validator('^[东南西北\s]+$'), list_validator(['暂无数据', '--'])),
+    'orient': or_validator(regex_validator('(未知)?[东南西北\s]*$'), list_validator(['暂无数据', '--'])),
     'type': list_validator(['合租', '整租']),
     'water': list_validator(['民水', '商水', '暂无数据']),
     'area': type_validator(int),
