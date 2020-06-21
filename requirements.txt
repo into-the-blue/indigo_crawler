@@ -6,3 +6,5 @@ bs4
 requests
 apscheduler
 pytz
+rq
+redis

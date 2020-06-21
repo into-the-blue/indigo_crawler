@@ -1,0 +1,156 @@
+2020-06-21 15:14:29,485 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
+2020-06-21 15:14:29,709 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
+2020-06-21 15:14:29,927 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
+2020-06-21 15:14:30,134 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
+2020-06-21 15:14:30,337 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
+2020-06-21 15:14:30,554 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
+2020-06-21 15:14:30,813 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
+2020-06-21 15:14:31,076 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
+2020-06-21 15:14:31,319 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
+2020-06-21 15:14:31,593 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
+2020-06-21 15:14:31,860 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
+2020-06-21 15:14:32,078 INDIGO ERROR: 'DB' object has no attribute 'bizcircle_col'
+Traceback (most recent call last):
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validateData.py", line 25, in examine_single_apartment
+    examine_apartment(apartment)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 101, in examine_apartment
+    for k, v in _validator.items()
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 102, in <listcomp>
+    if not v(apartment.get(k))]
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/tasks/validator.py", line 78, in district_validator
+    return mongo.is_valid_district(district)
+  File "/Users/origami/Desktop/indigo/indigo_crawler/src/db/mongo.py", line 385, in is_valid_district
+    return bool(self.bizcircle_col.find_one({
+AttributeError: 'DB' object has no attribute 'bizcircle_col'
