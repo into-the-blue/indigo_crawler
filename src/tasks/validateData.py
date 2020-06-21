@@ -25,12 +25,13 @@ class DataValidator(object):
             examine_apartment(apartment)
             inserted_id = mongo.on_pass_validation(apartment)
             self.notify(inserted_id)
-            logger.info('pass validation')
+            logger.info('[{}] [Validator] pass validation'.format(apartment.get('city',None)))
         except ValidatorInvalidValueException as e1:
-            logger.info('Found invalid value')
+            logger.info('[{} ]Found invalid value'.format(apartment.get('city')))
             invalid_values = e1.args[1]
             mongo.report_invalid_value(apartment, invalid_values)
         except Exception as e:
+            logger.error('[{}] [Validator] [examine_single_apartment] err'.format(apartment.get('city')))
             logger.exception(e)
             mongo.report_unexpected_error('data_validator', e, apartment.get(
                 'house_url') if apartment else None)
@@ -55,8 +56,9 @@ class DataValidator(object):
             })
 
     def validate(self, apartment):
-        logger.info('START')
+        logger.info('[{}] [Validator] START'.format(apartment.get('city')))
         try:
             self.examine_single_apartment(apartment)
         except Exception as e:
+            logger.error('[{}] [Validator] [validate] err'.format(apartment.get('city')))
             logger.exception(e)

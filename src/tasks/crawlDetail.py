@@ -18,21 +18,21 @@ class DetailCrawler(BaseWebDriver):
 
     def start_one_url(self, task):
         try:
-            logger.info('Start crawl new link')
+            logger.info('[{}] [DetailCrawler] Start crawl new link'.format(task.get('city')))
             self.get(task.get('url'))
-            logger.info('Url opened')
+            logger.info('[{}] [DetailCrawler] Url opened'.format(task.get('city')))
             info = get_info_of_single_url(self.driver, task.get('url'))
-            logger.info('Data get')
+            logger.info('[{}] [DetailCrawler] Data get'.format(task.get('city')))
             mongo.insert_into_staing(task, info)
         except ApartmentExpiredException:
-            logger.info('Url expired')
+            logger.info('[{}] [DetailCrawler] Url expired'.format(task.get('city')))
             mongo.task_expired(task)
         except NoSuchElementException:
             # probably proxy blocked
-            logger.info('Elm not found')
+            logger.info('[{}] [DetailCrawler] Elm not found'.format(task.get('city')))
             self.renew_driver()
         except (TimeoutException, WebDriverException, InvalidSessionIdException):
-            logger.info('Session timeout')
+            logger.info('[{}] [DetailCrawler] Session timeout'.format(task.get('city')))
             self.renew_driver()
         except (TooManyTimesException):
             pass
@@ -47,27 +47,28 @@ class DetailCrawler(BaseWebDriver):
         fill in missing info
         '''
         try:
-            logger.info('Start fill in missing info')
+            logger.info('[{}] [DetailCrawler] Start fill in missing info'.format(apartment.get('city')))
             self.get(apartment.get('house_url'))
-            logger.info('Url opened')
+            logger.info('[{}] [DetailCrawler] Url opened'.format(apartment.get('city')))
             info = get_info_of_single_url(
                 self.driver, apartment.get('house_url'))
-            logger.info('Data get')
+            logger.info('[{}] [DetailCrawler] Data get'.format(apartment.get('city')))
             mongo.update_missing_info(apartment, info)
             sleep(2)
         except ApartmentExpiredException:
-            logger.info('Url expired')
+            logger.info('[{}] [DetailCrawler] Url expired'.format(apartment.get('city')))
             mongo.update_missing_info(apartment, {
                 'expired': True,
             })
         except NoSuchElementException:
-            logger.info('Elm not found')
+            logger.info('[{}] [DetailCrawler] Elm not found'.format(apartment.get('city')))
         except (TimeoutException, WebDriverException, InvalidSessionIdException):
-            logger.info('Session timeout')
+            logger.info('[{}] [DetailCrawler] Session timeout'.format(apartment.get('city')))
             self.renew_driver()
         except (TooManyTimesException):
             pass
         except Exception as e:
+            logger.error('[{}] [DetailCrawler] [start_fill_missing] err'.format(apartment.get('city')))
             logger.exception(e)
         finally:
             self.quit()
