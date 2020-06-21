@@ -31,7 +31,7 @@ class BaseWebDriver(object):
             self.on_change_proxy(self.opened_url_count)
 
             self.opened_url_count = 0
-            self.check_driver(open_last_page=False)
+            self.renew_driver(open_last_page=False)
 
             return self.get(url, times=times + 1)
 
