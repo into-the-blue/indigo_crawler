@@ -30,10 +30,10 @@ class DetailCrawler(BaseWebDriver):
         except NoSuchElementException:
             # probably proxy blocked
             logger.info('Elm not found')
-            self.renew_driver(open_last_page=False)
+            self.renew_driver()
         except (TimeoutException, WebDriverException, InvalidSessionIdException):
             logger.info('Session timeout')
-            self.renew_driver(open_last_page=False)
+            self.renew_driver()
         except (TooManyTimesException):
             pass
         except Exception as e:
@@ -62,7 +62,7 @@ class DetailCrawler(BaseWebDriver):
             logger.info('Elm not found')
         except (TimeoutException, WebDriverException, InvalidSessionIdException):
             logger.info('Session timeout')
-            self.renew_driver(open_last_page=False)
+            self.renew_driver()
         except (TooManyTimesException):
             pass
         except Exception as e:

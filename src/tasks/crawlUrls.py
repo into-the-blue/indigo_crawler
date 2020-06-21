@@ -215,7 +215,7 @@ class UrlCrawler(BaseWebDriver):
             sleep(ERROR_AWAIT_TIME)
         except (TimeoutException, WebDriverException, InvalidSessionIdException):
             logger.info('Session timeout')
-            self.renew_driver(open_last_page=False)
+            self.renew_driver()
         finally:
             self.on_accomplish(taskname)
 
