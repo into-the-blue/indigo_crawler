@@ -34,7 +34,7 @@ def on_exit():
 
 
 def main():
-    # enqueue_url_crawler()
+    enqueue_url_crawler()
     try:
         sched.start()
         cpu_num = max(4, cpu_count())
