@@ -4,7 +4,7 @@ import atexit
 from db import DB
 import os
 from multiprocessing import Pool, cpu_count
-from jobs import crawl_by_district, crawl_by_metro_station, validate_data, fill_missing_info, enqueue_url_crawler
+from jobs import crawl_by_district, crawl_by_metro_station, validate_data, fill_missing_info, enqueue_url_crawler, crawl_detail
 from utils.logger import logger
 from scheduler import sched
 
@@ -21,6 +21,12 @@ sched.add_job(validate_data, 'interval', minutes=15)
 # every 6 hour
 sched.add_job(fill_missing_info, 'interval', hours=6)
 
+# every 30 minutes
+sched.add_job(crawl_detail, 'interval', minutes=30)
+
+# run now
+sched.add_job(crawl_detail, 'date')
+
 
 @atexit.register
 def on_exit():
@@ -28,7 +34,7 @@ def on_exit():
 
 
 def main():
-    enqueue_url_crawler()
+    # enqueue_url_crawler()
     try:
         sched.start()
         cpu_num = max(4, cpu_count())
