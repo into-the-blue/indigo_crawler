@@ -7,6 +7,8 @@ from utils.constants import URL_CRAWLER_TASK_BY_LATEST
 from datetime import timedelta
 import os
 from multiprocessing import Pool
+from scheduler import sched
+from datetime import datetime
 
 CITIES = [
     {
@@ -47,11 +49,14 @@ CITIES = [
 ]
 
 db_ins = DB()
+
+
 def crawl_by_district():
     for city in CITIES:
         ins = UrlCrawler()
         ins.setup_city_and_source(city.get('city'), city.get('source'))
-        q_url_crawler.enqueue(ins.start_by_district, args=[city.get('city')])
+        q_url_crawler.enqueue(ins.start_by_district, args=[
+                              city.get('city')], timeout='5h')
         logger.info('crawl by districtjobs enqueued')
 
 
@@ -59,7 +64,8 @@ def crawl_by_metro_station():
     for city in CITIES:
         ins = UrlCrawler()
         ins.setup_city_and_source(city.get('city'), city.get('source'))
-        q_url_crawler.enqueue(ins.start_by_metro, args=[city.get('city')])
+        q_url_crawler.enqueue(ins.start_by_metro, args=[
+                              city.get('city')], timeout='5h')
         logger.info('crawl by metro jobs enqueued')
 
 
@@ -94,23 +100,25 @@ def on_finish_url_crawling(taskname, url_count):
         crawl_detail()
     if taskname == URL_CRAWLER_TASK_BY_LATEST:
         if url_count <= 50:
-            q_url_crawler.enqueue_in(
-                timedelta(minutes=60), enqueue_url_crawler)
+            sched.add_job(enqueue_url_crawler, 'date',
+                          run_date=datetime.now() + timedelta(minutes=60))
             return
         if url_count <= 100:
-            q_url_crawler.enqueue_in(
-                timedelta(minutes=45), enqueue_url_crawler)
+            sched.add_job(enqueue_url_crawler, 'date',
+                          run_date=datetime.now() + timedelta(minutes=45))
             return
         if url_count <= 200:
-            q_url_crawler.enqueue_in(
-                timedelta(minutes=30), enqueue_url_crawler)
+            sched.add_job(enqueue_url_crawler, 'date',
+                          run_date=datetime.now() + timedelta(minutes=30))
             return
 
-        q_url_crawler.enqueue_in(timedelta(minutes=60), enqueue_url_crawler)
+        sched.add_job(enqueue_url_crawler, 'date',
+                          run_date=datetime.now() + timedelta(minutes=60))
 
 
 def enqueue_url_crawler():
     for city in CITIES:
         ins = UrlCrawler(on_finish_url_crawling)
         ins.setup_city_and_source(city.get('city'), city.get('source'))
-        q_url_crawler.enqueue(ins.start_by_url, args=[city.get('url')])
+        q_url_crawler.enqueue(ins.start_by_url, args=[
+                              city.get('url')], timeout='1h')

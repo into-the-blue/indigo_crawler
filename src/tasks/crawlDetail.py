@@ -16,6 +16,11 @@ class DetailCrawler(BaseWebDriver):
     def __init__(self, ):
         super().__init__()
 
+    def __del__(self):
+        class_name = self.__class__.__name__
+        self.quit()
+        logger.info('[{}] detroyed'.format(class_name))
+
     def start_one_url(self, task):
         try:
             logger.info('[{}] [DetailCrawler] Start crawl new link'.format(task.get('city')))

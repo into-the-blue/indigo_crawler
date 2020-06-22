@@ -1,19 +1,13 @@
 from workers import start_worker
 from queues import q_detail_crawler, q_url_crawler, q_validator
 import atexit
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.jobstores.mongodb import MongoDBJobStore
 from db import DB
 import os
 from multiprocessing import Pool, cpu_count
 from jobs import crawl_by_district, crawl_by_metro_station, validate_data, fill_missing_info, enqueue_url_crawler
 from utils.logger import logger
+from scheduler import sched
 
-db_ins = DB()
-
-mongo_job_store = MongoDBJobStore(
-    client=db_ins.conn, database=os.getenv('DB_DATABASE'), collection='schedules')
-sched = BackgroundScheduler(daemon=True)
 
 # every day at 9pm
 sched.add_job(crawl_by_district, 'cron', hour=14)

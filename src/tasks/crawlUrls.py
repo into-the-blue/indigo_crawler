@@ -30,6 +30,11 @@ class UrlCrawler(BaseWebDriver):
         self.on_finish = on_finish
         self.city = None
 
+    def __del__(self):
+        class_name = self.__class__.__name__
+        self.quit()
+        logger.info('[{}] detroyed'.format(class_name))
+        
     def setup_city_and_source(self, city, source):
         self.city = city
         self.source = source
