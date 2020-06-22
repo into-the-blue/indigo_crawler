@@ -99,21 +99,21 @@ def on_finish_url_crawling(taskname, url_count):
     if url_count > 0:
         crawl_detail()
     if taskname == URL_CRAWLER_TASK_BY_LATEST:
-        if url_count <= 50:
-            sched.add_job(enqueue_url_crawler, 'date',
-                          run_date=datetime.now() + timedelta(minutes=60))
-            return
-        if url_count <= 100:
-            sched.add_job(enqueue_url_crawler, 'date',
-                          run_date=datetime.now() + timedelta(minutes=45))
-            return
-        if url_count <= 200:
-            sched.add_job(enqueue_url_crawler, 'date',
-                          run_date=datetime.now() + timedelta(minutes=30))
-            return
+        # if url_count <= 50:
+        #     sched.add_job(enqueue_url_crawler, 'date',
+        #                   run_date=datetime.now() + timedelta(minutes=180))
+        #     return
+        # if url_count <= 100:
+        #     sched.add_job(enqueue_url_crawler, 'date',
+        #                   run_date=datetime.now() + timedelta(minutes=45))
+        #     return
+        # if url_count <= 200:
+        #     sched.add_job(enqueue_url_crawler, 'date',
+        #                   run_date=datetime.now() + timedelta(minutes=30))
+        #     return
 
         sched.add_job(enqueue_url_crawler, 'date',
-                          run_date=datetime.now() + timedelta(minutes=60))
+                          run_date=datetime.now() + timedelta(minutes=180))
 
 
 def enqueue_url_crawler():
