@@ -242,7 +242,13 @@ def get_info_of_single_url(driver, url):
             '\d{4}-\d{2}-\d{2}', locate_updated_at(driver).text)[0]
 
         # 编号
-        house_code = re.findall('[A-Z]+\d+', locate_house_code(driver).text)[0]
+        house_code = None
+        try:
+            house_code = re.findall(
+                '[A-Z]+\d+', locate_house_code(driver).text)[0]
+        except:
+            house_code = re.findall(
+                '\/([A-Z]{1,3}\d+)\.html', url)[0]
         house_id = re.findall('[0-9]+', house_code)[0]
         city_abbreviation = re.findall('[a-zA-Z]+', house_code)[0].lower()
 
@@ -282,7 +288,12 @@ def get_info_of_single_url(driver, url):
 
         facility_info = get_facility_info(driver)
 
-        community_info = get_community_info(driver)
+        community_info = {}
+        try:
+            # can be null
+            community_info = get_community_info(driver)
+        except:
+            missing_info = True
 
         # 地址和交通，地铁便利性
         # TODO:地铁便利性的筛选标准，距任一地铁站的距离有小于1000m的
