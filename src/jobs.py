@@ -71,10 +71,16 @@ def crawl_by_metro_station():
 
 
 def validate_data():
-    ins = DataValidator()
     staging_apts = db_ins.get_unchecked_staging_apts()
+    if not len(staging_apts):
+        return
+    ins = DataValidator()
+    job_ids = q_validator.job_ids
     for apt in staging_apts:
-        q_validator.enqueue(ins.examine_single_apartment, args=[apt])
+        if apt.get('house_code') not in job_ids:
+            job = Job.create(ins.examine_single_apartment, args=[
+                             apt], id=apt.get('house_code'))
+            q_validator.enqueue_job(job)
 
 
 def crawl_detail():
@@ -83,7 +89,7 @@ def crawl_detail():
         return
     job_ids = q_detail_crawler.job_ids
     for task in tasks:
-        if task.url not in job_ids:
+        if task.get('url') not in job_ids:
             ins = DetailCrawler()
             job = Job.create(ins.start_by_url, args=[task], id=task.get('url'))
             q_detail_crawler.enqueue_job(job)
@@ -93,13 +99,17 @@ def fill_missing_info():
     apts = db_ins.get_missing_info()
     if not len(apts):
         return
-    ins = DetailCrawler()
+    job_ids = q_detail_crawler.job_ids
     for apt in apts:
-        q_detail_crawler.enqueue(ins.start_fill_missing, args=[apt])
+        if apt.get('house_code') not in job_ids:
+            ins = DetailCrawler()
+            job = Job.create(ins.start_fill_missing, args=[
+                             apt], id=apt.get('house_code'))
+            q_detail_crawler.enqueue_job(job)
 
 
 def on_finish_url_crawling(taskname, url_count):
-    print('on_finish_url_crawling', taskname, url_count)
+    print('[UrlCrawler] Done', taskname, url_count)
     if url_count > 0:
         crawl_detail()
     if taskname == URL_CRAWLER_TASK_BY_LATEST:
