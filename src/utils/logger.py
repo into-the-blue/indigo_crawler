@@ -4,7 +4,7 @@ from logging import handlers
 from datetime import datetime, timezone, timedelta, date
 from pathlib import Path
 import os
-LOG_FILE_DIR = str((Path(os.path.abspath(__file__))/'..'/'logs').resolve())
+LOG_FILE_DIR = str((Path(os.path.abspath(__file__))/'..'/'..'/'logs').resolve())
 
 if not os.path.exists(LOG_FILE_DIR):
     os.mkdir(LOG_FILE_DIR)

@@ -36,7 +36,7 @@ def main():
         for i in range(cpu_num):
             if i == 0:
                 p.apply_async(start_worker, args=(
-                    ['validator', 'url_crawler'],))
+                    ['validator', 'url_crawler', 'detail_crawler'],))
             else:
                 p.apply_async(start_worker, args=(
                     ['url_crawler', 'detail_crawler'],))

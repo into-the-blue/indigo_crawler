@@ -9,6 +9,7 @@ import os
 from multiprocessing import Pool
 from scheduler import sched
 from datetime import datetime
+from rq.job import Job
 
 CITIES = [
     {
@@ -80,9 +81,12 @@ def crawl_detail():
     tasks = db_ins.find_idle_tasks()
     if not len(tasks):
         return
-    ins = DetailCrawler()
+    job_ids = q_detail_crawler.job_ids
     for task in tasks:
-        q_detail_crawler.enqueue(ins.start_one_url, args=[task])
+        if task.url not in job_ids:
+            ins = DetailCrawler()
+            job = Job.create(ins.start_by_url, args=[task], id=task.get('url'))
+            q_detail_crawler.enqueue_job(job)
 
 
 def fill_missing_info():
@@ -90,8 +94,8 @@ def fill_missing_info():
     if not len(apts):
         return
     ins = DetailCrawler()
-    for task in apts:
-        q_detail_crawler.enqueue(ins.start_one_url, args=[task])
+    for apt in apts:
+        q_detail_crawler.enqueue(ins.start_fill_missing, args=[apt])
 
 
 def on_finish_url_crawling(taskname, url_count):
@@ -113,7 +117,7 @@ def on_finish_url_crawling(taskname, url_count):
         #     return
 
         sched.add_job(enqueue_url_crawler, 'date',
-                          run_date=datetime.now() + timedelta(minutes=180))
+                      run_date=datetime.now() + timedelta(minutes=180))
 
 
 def enqueue_url_crawler():
