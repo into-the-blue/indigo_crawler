@@ -248,7 +248,7 @@ def get_info_of_single_url(driver, url):
                 '[A-Z]+\d+', locate_house_code(driver).text)[0]
         except:
             house_code = re.findall(
-                '(?<=(\/))[A-Z]{1,2}\d+(?=(.html))', url)[0]
+                '\/([A-Z]{1,3}\d+)\.html', url)[0]
         house_id = re.findall('[0-9]+', house_code)[0]
         city_abbreviation = re.findall('[a-zA-Z]+', house_code)[0].lower()
 
