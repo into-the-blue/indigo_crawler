@@ -172,7 +172,7 @@ class DB(object):
         except ErrorExistsException:
             pass
 
-    def get_missing_info(self):
+    def get_missing_info(self, limit=1000):
         arr = list(self.apartments_staging.aggregate([
             {'$match': {
                 'missing_info': True, 'updated_time': {'$lte': datetime.now()-timedelta(hours=24)},
@@ -184,7 +184,10 @@ class DB(object):
                 ],
             }
             },
-            {'$sample': {'size': 1}}
+            {
+                '$sort': {'created_at': -1}
+            },
+            {'$limit': limit}
         ]))
         res = arr[0] if len(arr) else None
         if res:

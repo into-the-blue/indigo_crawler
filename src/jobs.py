@@ -117,7 +117,7 @@ def crawl_detail():
 
 
 def fill_missing_info():
-    apts = db_ins.get_missing_info()
+    apts = db_ins.get_missing_info(1000)
     if not len(apts):
         return
     job_ids = q_detail_crawler.job_ids
