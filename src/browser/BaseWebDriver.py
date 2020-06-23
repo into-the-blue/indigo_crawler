@@ -10,8 +10,13 @@ class BaseWebDriver(object):
         self.opened_url_count = 0
         self.connected = False
 
-    def renew_driver(self, test_url=None):
-        self.__driver =  setup_proxy_for_driver(self.driver, test_url=test_url)
+    def renew_driver(self, open_last_page=True):
+        logger.info('RENEW DRIVER')
+        current_url = self.__driver.current_url
+        self.__driver = setup_proxy_for_driver(
+            self.driver, test_url=current_url)
+        if open_last_page:
+            self.__driver.get(current_url)
         return self.__driver
 
     @property
@@ -32,7 +37,7 @@ class BaseWebDriver(object):
         except (TooManyTimesException, TimeoutException, WebDriverException) as e:
             logger.error('timeout tried times{} {}'.format(times, e))
             self.opened_url_count = 0
-            self.renew_driver()
+            self.renew_driver(open_last_page=False)
             return self.get(url, times=times + 1)
 
     def quit(self):
