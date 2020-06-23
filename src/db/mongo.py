@@ -93,11 +93,11 @@ class DB(object):
             '$orderby': {'priority': -1}
         }))
 
-    def find_idle_tasks(self):
+    def find_idle_tasks(self, limit=1000):
         tasks = self.tasks.find({
             'status': 'idle',
             'failed_times': {'$lt': 3},
-        })
+        }).limit(limit)
         return list(tasks)
 
     def update_apartment(self, apt_id, doc):

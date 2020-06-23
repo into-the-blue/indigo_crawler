@@ -96,7 +96,7 @@ def validate_data():
 
 def crawl_detail():
     logger.info('[crawl_detail] start')
-    tasks = db_ins.find_idle_tasks()
+    tasks = db_ins.find_idle_tasks(1000)
     if not len(tasks):
         logger.info('[crawl_detail] no task available')
         return
