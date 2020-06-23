@@ -295,6 +295,8 @@ def get_info_of_single_url(driver, url):
             community_info = get_community_info(driver)
             if not community_info.get('city'):
                 missing_info = True
+            if not len(community_info.get('bizcircle')):
+                missing_info = True
         except:
             missing_info = True
 
@@ -372,7 +374,7 @@ def get_info_of_single_url(driver, url):
                        'house_url': url,
                        **community_info,
                        'price_per_square_meter': price_per_square_meter,
-                       'missing_info': (len(img_urls) < 2) or (len(rent_type) < 2),
+                       'missing_info': missing_info,
                        'version': os.environ.get('VER')
                        }
         return dict_single
