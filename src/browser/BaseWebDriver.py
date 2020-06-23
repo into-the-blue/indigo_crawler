@@ -11,7 +11,8 @@ class BaseWebDriver(object):
         self.connected = False
 
     def renew_driver(self, test_url=None):
-        return setup_proxy_for_driver(self.driver, test_url=test_url)
+        self.__driver =  setup_proxy_for_driver(self.driver, test_url=test_url)
+        return self.__driver
 
     @property
     def driver(self):
