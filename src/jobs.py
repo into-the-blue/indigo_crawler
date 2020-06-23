@@ -96,11 +96,13 @@ def validate_data():
 
 def crawl_detail():
     logger.info('[crawl_detail] start')
-    tasks = db_ins.find_idle_tasks(1000)
+    job_ids = q_detail_crawler.job_ids
+    if len(job_ids) >= 1000:
+        return
+    tasks = db_ins.find_idle_tasks(1000, job_ids)
     if not len(tasks):
         logger.info('[crawl_detail] no task available')
         return
-    job_ids = q_detail_crawler.job_ids
     enqueued_job_num = 0
     logger.info('[crawl_detail] total: {}, existing: {}'.format(
         len(tasks), len(job_ids)))
@@ -117,10 +119,12 @@ def crawl_detail():
 
 
 def fill_missing_info():
-    apts = db_ins.get_missing_info(1000)
+    job_ids = q_detail_crawler.job_ids
+    if len(job_ids) >= 1000:
+        return
+    apts = db_ins.get_missing_info(1000, job_ids)
     if not len(apts):
         return
-    job_ids = q_detail_crawler.job_ids
     enqueued_job_num = 0
     logger.info('[fill_missing_info] total: {}, existing: {}'.format(
         len(apts), len(job_ids)))
@@ -149,7 +153,7 @@ def enqueue_url_crawler(_city=None):
     _cities = CITIES
     if _city:
         _cities = [_city]
-        
+
     for city in _cities:
         logger.info(
             '[enqueue_url_crawler] [{}] enqueue job'.format(city.get('city')))

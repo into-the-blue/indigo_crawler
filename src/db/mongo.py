@@ -93,10 +93,11 @@ class DB(object):
             '$orderby': {'priority': -1}
         }))
 
-    def find_idle_tasks(self, limit=1000):
+    def find_idle_tasks(self, limit=1000, exclude=[]):
         tasks = self.tasks.find({
             'status': 'idle',
             'failed_times': {'$lt': 3},
+            'url': {'$nin': exclude}
         }).limit(limit)
         return list(tasks)
 
@@ -172,9 +173,10 @@ class DB(object):
         except ErrorExistsException:
             pass
 
-    def get_missing_info(self, limit=1000):
+    def get_missing_info(self, limit=1000, exclude=[]):
         arr = list(self.apartments_staging.aggregate([
             {'$match': {
+                'house_code': {'$nin': exclude},
                 'missing_info': True, 'updated_time': {'$lte': datetime.now()-timedelta(hours=24)},
                 '$or': [
                     {'failed_times': {'$exists': False}},
