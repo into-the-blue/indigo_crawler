@@ -34,10 +34,11 @@ class UrlCrawler(BaseWebDriver):
         class_name = self.__class__.__name__
         # self.quit()
         logger.info('[{}] detroyed'.format(class_name))
-        
-    def setup_city_and_source(self, city, source):
-        self.city = city
-        self.source = source
+
+    def setup_city_and_source(self, city_obj):
+        self.city = city_obj.get('city')
+        self.source = city_obj.get('source')
+        self.city_obj = city_obj
 
     def go_to_next_page(self):
         try:
@@ -45,7 +46,8 @@ class UrlCrawler(BaseWebDriver):
                 "window.scrollTo(0, document.body.scrollHeight);")
             next_btn = find_next_button(self.driver)
             next_btn.click()
-            logger.info('[{}] [UrlCrawler] Click next button'.format(self.city))
+            logger.info(
+                '[{}] [UrlCrawler] Click next button'.format(self.city))
         except:
             '''
             next button not found
@@ -62,7 +64,8 @@ class UrlCrawler(BaseWebDriver):
                 current_page = int(current_page)
                 elm = find_paging_elm_index(self.driver, current_page+1)
                 elm.click()
-                logger.info('[{}] [UrlCrawler] Click page index success'.format(self.city))
+                logger.info(
+                    '[{}] [UrlCrawler] Click page index success'.format(self.city))
             except:
                 # logger.info('BLOCKED, CHANGE PROXY')
                 raise ProxyBlockedException()
@@ -81,7 +84,8 @@ class UrlCrawler(BaseWebDriver):
                 self.city, page_count))
             return int(page_count)
         except NoSuchElementException:
-            logger.info('[{}] [UrlCrawler] Page info not found'.format(self.city))
+            logger.info(
+                '[{}] [UrlCrawler] Page info not found'.format(self.city))
             return 0
 
     def get_urls_in_page(self, station_info=None):
@@ -91,7 +95,8 @@ class UrlCrawler(BaseWebDriver):
         urls = []
         elms = find_apartments_in_list(self.driver)
 
-        logger.info('[{}] [UrlCrawler] elments in page {}'.format(self.city, len(elms)))
+        logger.info('[{}] [UrlCrawler] elments in page {}'.format(
+            self.city, len(elms)))
         for i in elms:
             url = i.get_attribute('href')
             if 'apartment' not in url and '广告' not in i.text:
@@ -103,7 +108,8 @@ class UrlCrawler(BaseWebDriver):
             loop all pages, get all urls
         '''
         page_count = self.read_page_count()
-        logger.info('[{}] [UrlCrawler] total pages {}'.format(self.city, page_count))
+        logger.info('[{}] [UrlCrawler] total pages {}'.format(
+            self.city, page_count))
         if page_count > 0:
             for i in range(page_count):
                 try:
@@ -117,7 +123,7 @@ class UrlCrawler(BaseWebDriver):
                     if not url_saved:
                         raise UrlCrawlerNoMoreNewUrlsException()
                     logger.info('[{}] [UrlCrawler] URLS SAVED! {} TOTAL: {}'.format(self.city,
-                                                                       len(urls), len(self.apartment_urls)))
+                                                                                    len(urls), len(self.apartment_urls)))
                     if i < page_count - 1:
                         self.go_to_next_page()
                 except ProxyBlockedException:
@@ -162,7 +168,8 @@ class UrlCrawler(BaseWebDriver):
         logger.info('[{}] [UrlCrawler] Total url length {}'.format(
             self.city, num_of_new_apartments))
         self.apartment_urls = []
-        self.on_finish and self.on_finish(taskname, num_of_new_apartments)
+        self.on_finish and self.on_finish(
+            taskname, num_of_new_apartments, self.city_obj)
         self.quit()
 
     def click_order_by_time(self):
@@ -183,10 +190,12 @@ class UrlCrawler(BaseWebDriver):
             priority = get_num_of_apartment(self.driver)
             mongo.update_priority_of_station(station_info, priority)
         except NoSuchElementException:
-            logger.info('[{}] [UrlCrawler] Unable to get apartment count'.format(self.city))
+            logger.info(
+                '[{}] [UrlCrawler] Unable to get apartment count'.format(self.city))
             raise
         except Exception as e:
-            logger.error('[{}] [UrlCrawler] [on_open_station] err'.format(self.city))
+            logger.error(
+                '[{}] [UrlCrawler] [on_open_station] err'.format(self.city))
             logger.exception(e)
             mongo.report_unexpected_error_url_crawler(e)
 
@@ -198,10 +207,12 @@ class UrlCrawler(BaseWebDriver):
             priority = get_num_of_apartment(self.driver)
             mongo.update_priority_of_bizcircle(bizcircle_info, priority)
         except NoSuchElementException:
-            logger.info('[{}] [UrlCrawler] Unable to get apartment count'.format(self.city))
+            logger.info(
+                '[{}] [UrlCrawler] Unable to get apartment count'.format(self.city))
             raise
         except Exception as e:
-            logger.error('[{}] [UrlCrawler] [on_open_bizcircle]'.format(self.city))
+            logger.error(
+                '[{}] [UrlCrawler] [on_open_bizcircle]'.format(self.city))
             logger.exception(e)
             mongo.report_unexcepted_error_url_crawler(e)
 
@@ -215,7 +226,8 @@ class UrlCrawler(BaseWebDriver):
             if bizcircle_info:
                 self.on_open_bizcircle(bizcircle_info)
             self.click_order_by_time()
-            logger.info('[{}] [UrlCrawler] Clicked order by time'.format(self.city))
+            logger.info(
+                '[{}] [UrlCrawler] Clicked order by time'.format(self.city))
             self.get_all_urls(station_info)
             logger.info('[{}] [UrlCrawler] start DONE'.format(self.city))
         except UrlCrawlerNoMoreNewUrlsException:
@@ -232,7 +244,8 @@ class UrlCrawler(BaseWebDriver):
     def start_by_district(self, city):
         bizcircles = mongo.find_all_bizcircles(city)
         count = 0
-        logger.info('[{}] [UrlCrawler] start_by_district {}'.format(city, city))
+        logger.info(
+            '[{}] [UrlCrawler] start_by_district {}'.format(city, city))
         for bizcircle in bizcircles:
             count += 1
             url = bizcircle.get('bizcircle_url')
@@ -240,7 +253,8 @@ class UrlCrawler(BaseWebDriver):
             logger.info(f"[{city}] [UrlCrawler] START {bizcircle_name}")
             self.start_by_url(
                 url, taskname=URL_CRAWLER_TASK_BY_BIZCIRCLE, bizcircle_info=bizcircle)
-            logger.info(f'[{city}] [UrlCrawler] {bizcircle_name}, DONE, {count}')
+            logger.info(
+                f'[{city}] [UrlCrawler] {bizcircle_name}, DONE, {count}')
 
     def start_by_metro(self, city):
         '''
@@ -248,7 +262,7 @@ class UrlCrawler(BaseWebDriver):
         '''
         stations = mongo.find_all_stations(city)
         count = 0
-        logger.info('[{}] [UrlCrawler] start_by_metro: {}'.format(city,city))
+        logger.info('[{}] [UrlCrawler] start_by_metro: {}'.format(city, city))
         for station in stations:
             count += 1
             url = station.get('url')

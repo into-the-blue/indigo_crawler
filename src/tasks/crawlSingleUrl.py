@@ -177,7 +177,7 @@ def get_community_info(driver):
     return {
         'city': city,
         'district': district,
-        'bizcircle': bizcircle,
+        'bizcircle': bizcircle.strip(),
         'community_name': community_name,
         'community_url': community_url
     }
@@ -236,6 +236,7 @@ def get_info_of_single_url(driver, url):
             rent_type_fallback) else rent_type_fallback
         if '未知' in rent_type:
             rent_type = '未知'
+            missing_info = True
 
         # 上架时间
         time_listed = re.findall(
@@ -292,6 +293,8 @@ def get_info_of_single_url(driver, url):
         try:
             # can be null
             community_info = get_community_info(driver)
+            if not community_info.get('city'):
+                missing_info = True
         except:
             missing_info = True
 
