@@ -45,7 +45,7 @@ def main():
                     ['validator', 'url_crawler', 'detail_crawler'],))
             else:
                 p.apply_async(start_worker, args=(
-                    ['url_crawler', 'detail_crawler'],))
+                    ['detail_crawler', 'url_crawler'],))
         p.close()
         p.join()
     except Exception as e:
