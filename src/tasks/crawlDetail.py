@@ -18,7 +18,7 @@ class DetailCrawler(BaseWebDriver):
 
     def __del__(self):
         class_name = self.__class__.__name__
-        # self.quit()
+        self.quit()
         # logger.info('[{}] detroyed'.format(class_name))
 
     def start_one_url(self, task):

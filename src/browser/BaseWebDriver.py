@@ -8,6 +8,7 @@ class BaseWebDriver(object):
     def __init__(self):
         self.__driver = None
         self.opened_url_count = 0
+        self.connected = False
 
     def renew_driver(self, test_url=None):
         return setup_proxy_for_driver(self.driver, test_url=test_url)
@@ -16,6 +17,7 @@ class BaseWebDriver(object):
     def driver(self):
         if self.__driver is None:
             self.__driver = connect_to_driver()
+            self.connected = True
         return self.__driver
 
     def get(self, url, times=0):
@@ -30,11 +32,13 @@ class BaseWebDriver(object):
             logger.error('timeout tried times{} {}'.format(times, e))
             self.opened_url_count = 0
             self.renew_driver()
-
             return self.get(url, times=times + 1)
 
     def quit(self):
+        if not self.connected:
+            return
         try:
             self.driver.quit()
+            self.connected = False
         except Exception as e:
             logger.error(f'QUIT DRIVER ERROR {e}')
