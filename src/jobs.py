@@ -55,13 +55,13 @@ CITIES = [
 db_ins = DB()
 
 
-MAXIMUMAL_NUMBER_OF_TASKS = 3600*4
+MAXIMAL_NUMBER_OF_TASKS = 3600*4
 
 
 
 def crawl_by_district():
     num_of_idle = db_ins.get_num_of_idle_tasks()
-    if num_of_idle >= MAXIMUMAL_NUMBER_OF_TASKS:
+    if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
         return
     for city in CITIES:
         ins = UrlCrawler()
@@ -74,7 +74,7 @@ def crawl_by_district():
 
 def crawl_by_metro_station():
     num_of_idle = db_ins.get_num_of_idle_tasks()
-    if num_of_idle >= MAXIMUMAL_NUMBER_OF_TASKS:
+    if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
         return
     for city in CITIES:
         ins = UrlCrawler()
@@ -96,7 +96,7 @@ def on_finish_url_crawling(taskname=URL_CRAWLER_TASK_BY_LATEST, url_count=0, cit
 
 def enqueue_url_crawler(_city=None):
     num_of_idle = db_ins.get_num_of_idle_tasks()
-    if num_of_idle >= MAXIMUMAL_NUMBER_OF_TASKS:
+    if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
         logger.warning(
             'Too many tasks: {}, retry after 3h'.format(num_of_idle))
         delayed = math.floor(num_of_idle/3600/4)
