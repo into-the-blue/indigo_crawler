@@ -76,7 +76,8 @@ def connect_to_driver():
         'http://chrome:4444/wd/hub', desired_capabilities=capabilities, options=chrome_options)
     # clean cookies
     driver.delete_all_cookies()
-    driver.maximize_window()
+    # driver.maximize_window()
+    driver.set_window_size(1280,720)
     logger.info('driver inited')
     return driver
 
