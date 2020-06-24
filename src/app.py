@@ -34,11 +34,12 @@ def on_exit():
 
 
 def main():
-    enqueue_url_crawler()
     try:
         sched.start()
+        enqueue_url_crawler()
         cpu_num = max(4, cpu_count())
         p = Pool(cpu_num)
+        logger.info('cpu num {}'.format(cpu_num))
         for i in range(cpu_num):
             if i == 0:
                 p.apply_async(start_worker, args=(

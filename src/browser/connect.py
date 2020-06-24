@@ -101,7 +101,7 @@ def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0):
         raise TooManyTimesException('setup_proxy_for_driver')
     try:
         try:
-            # clean cookie and close sesstion
+            # clean cookie and close session
             driver.delete_all_cookies()
             driver.quit()
         except:

@@ -1,8 +1,5 @@
-TODO:
-- refactor crawler
-- build a scalable and robust structure
-
-A crawler to grab data from internet(beike)
+### 声明
+此爬虫仅供学习所用, 禁止从事非法行为
 
 ### requirements
 

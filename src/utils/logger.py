@@ -12,7 +12,6 @@ if not os.path.exists(LOG_FILE_DIR):
 
 def get_logger():
     logger = logging.getLogger("INDIGO")
-
     handler1 = logging.StreamHandler()
     handler2 = handlers.TimedRotatingFileHandler(
         filename=LOG_FILE_DIR+"/{}.log".format(date.today().isoformat()), when="D", backupCount=10, interval=1)
@@ -21,7 +20,7 @@ def get_logger():
     handler2.setLevel(logging.ERROR)
 
     formatter = logging.Formatter(
-        "%(asctime)s %(name)s %(levelname)s: %(message)s")
+        "[$(process)] $(asctime) $(levelname): $(message)")
     handler1.setFormatter(formatter)
     handler2.setFormatter(formatter)
 

@@ -44,6 +44,7 @@ class BaseWebDriver(object):
         if not self.connected:
             return
         try:
+            logger.info('DRIVER QUIT')
             self.driver.quit()
             self.connected = False
         except Exception as e:
