@@ -35,7 +35,7 @@ class BaseWebDriver(object):
             self.opened_url_count += 1
             return self.driver
         except (TooManyTimesException, TimeoutException, WebDriverException) as e:
-            logger.error('timeout tried times{} {}'.format(times, e))
+            logger.error('timeout tried times {} {}'.format(times, e))
             self.opened_url_count = 0
             self.renew_driver(open_last_page=False)
             return self.get(url, times=times + 1)

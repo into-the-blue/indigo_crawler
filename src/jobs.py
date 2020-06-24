@@ -12,6 +12,7 @@ from datetime import datetime
 from rq.job import Job
 from time import sleep
 from tqdm import tqdm
+import math
 
 CITIES = [
     {
@@ -55,6 +56,9 @@ db_ins = DB()
 
 
 def crawl_by_district():
+    num_of_idle = db_ins.get_num_of_idle_tasks()
+    if num_of_idle >= 3600*3:
+        return
     for city in CITIES:
         ins = UrlCrawler()
         ins.setup_city_and_source(city)
@@ -65,6 +69,9 @@ def crawl_by_district():
 
 
 def crawl_by_metro_station():
+    num_of_idle = db_ins.get_num_of_idle_tasks()
+    if num_of_idle >= 3600*3:
+        return
     for city in CITIES:
         ins = UrlCrawler()
         ins.setup_city_and_source(city)
@@ -72,6 +79,37 @@ def crawl_by_metro_station():
             '[crawl_by_metro_station] [{}] enqueue job'.format(city.get('city')))
         q_url_crawler.enqueue(ins.start_by_metro, args=[
                               city.get('city')], job_timeout='5h')
+
+
+def on_finish_url_crawling(taskname=URL_CRAWLER_TASK_BY_LATEST, url_count=0, city=None):
+    logger.info('[{}] [on_finish_url_crawling] Done {} {}'.format(
+        city.get('city'), taskname, url_count))
+    if taskname == URL_CRAWLER_TASK_BY_LATEST:
+        logger.info('[on_finish_url_crawling] enqueue url crawler')
+        q_url_crawler.enqueue_at(
+            datetime.now() + timedelta(minutes=180), enqueue_url_crawler, args=(city,))
+
+
+def enqueue_url_crawler(_city=None):
+    num_of_idle = db_ins.get_num_of_idle_tasks()
+    if num_of_idle >= 3600*3:
+        logger.warning(
+            'Too many tasks: {}, retry after 3h'.format(num_of_idle))
+        delayed = math.floor(num_of_idle/3600/4)
+        q_url_crawler.enqueue_at(
+            datetime.now()+timedelta(minutes=delayed*60), enqueue_url_crawler, args=(_city,))
+        logger.warning('enqueued, execute after {}h'.format(delayed))
+        return
+    _cities = CITIES
+    if _city:
+        _cities = [_city]
+    for city in _cities:
+        logger.info(
+            '[enqueue_url_crawler] [{}] enqueue job'.format(city.get('city')))
+        ins = UrlCrawler(on_finish_url_crawling)
+        ins.setup_city_and_source(city)
+        q_url_crawler.enqueue(ins.start_by_url, args=(
+                              city.get('url'),), job_timeout='1h')
 
 
 def validate_data():
@@ -122,7 +160,7 @@ def fill_missing_info():
     job_ids = q_detail_crawler.job_ids
     if len(job_ids) >= 1000:
         return
-    apts = db_ins.get_missing_info(1000, job_ids)
+    apts = db_ins.get_staging_apts_with_missing_info(1000, job_ids)
     if not len(apts):
         return
     enqueued_job_num = 0
@@ -138,26 +176,3 @@ def fill_missing_info():
                                      apt], job_timeout='10m', job_id=apt.get('house_code'))
     logger.info('[fill_missing_info] total: {}, enqueued: {}'.format(
         len(apts), enqueued_job_num))
-
-
-def on_finish_url_crawling(taskname, url_count, city):
-    logger.info('[{}] [on_finish_url_crawling] Done {} {}'.format(
-        city.get('city'), taskname, url_count))
-    if taskname == URL_CRAWLER_TASK_BY_LATEST:
-        logger.info('[on_finish_url_crawling] enqueue url crawler')
-        q_url_crawler.enqueue_at(
-            datetime.now() + timedelta(minutes=180), enqueue_url_crawler, args=(city,), job_timeout='10m')
-
-
-def enqueue_url_crawler(_city=None):
-    _cities = CITIES
-    if _city:
-        _cities = [_city]
-
-    for city in _cities:
-        logger.info(
-            '[enqueue_url_crawler] [{}] enqueue job'.format(city.get('city')))
-        ins = UrlCrawler(on_finish_url_crawling)
-        ins.setup_city_and_source(city)
-        q_url_crawler.enqueue(ins.start_by_url, args=(
-                              city.get('url'),), job_timeout='1h')

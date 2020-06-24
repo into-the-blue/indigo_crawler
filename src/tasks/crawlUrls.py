@@ -188,7 +188,7 @@ class UrlCrawler(BaseWebDriver):
         '''
         try:
             priority = get_num_of_apartment(self.driver)
-            mongo.update_priority_of_station(station_info, priority)
+            mongo.update_priority_of_station(station_info.get('_id'), priority)
         except NoSuchElementException:
             logger.info(
                 '[{}] [UrlCrawler] Unable to get apartment count'.format(self.city))
@@ -205,7 +205,8 @@ class UrlCrawler(BaseWebDriver):
         '''
         try:
             priority = get_num_of_apartment(self.driver)
-            mongo.update_priority_of_bizcircle(bizcircle_info, priority)
+            mongo.update_priority_of_bizcircle(
+                bizcircle_info.get('_id'), priority)
         except NoSuchElementException:
             logger.info(
                 '[{}] [UrlCrawler] Unable to get apartment count'.format(self.city))

@@ -81,19 +81,41 @@ class DB(object):
         # ensure_indexes_of_apartment(self.apartments)
         # ensure_indexes_of_apartment(self.apartments_staging)
 
+    def get_num_of_idle_tasks(self):
+        '''
+        get number of idle tasks
+        '''
+        cursor = self.tasks.find({'status': 'idle'})
+        return cursor.count()
+
     def find_all_stations(self, city):
+        '''
+            get all metro stations of a city
+        '''
         return list(self.station_col.find({
             '$query': {'city': city},
             '$orderby': {'priority': -1}
         }))
 
     def find_all_bizcircles(self, city):
+        '''
+        get all bizcircles of a city
+        '''
         return list(self.bizcircles_col.find({
             '$query': {'city': city},
             '$orderby': {'priority': -1}
         }))
 
     def find_idle_tasks(self, limit=1000, exclude=[]):
+        '''
+        get idles tasks
+
+        args:
+            limit:
+                the number of tasks to return
+            exclude: a list of urls
+                exclude urls in list
+        '''
         tasks = self.tasks.find({
             'status': 'idle',
             'failed_times': {'$lt': 3},
@@ -102,6 +124,14 @@ class DB(object):
         return list(tasks)
 
     def update_apartment(self, apt_id, doc):
+        '''
+        update a apartment
+        args:
+            apt_id: object id
+                id
+            doc:
+                document to update
+        '''
         self.apartments.update_one(
             {'_id': apt_id},
             {'$set': {
@@ -110,18 +140,24 @@ class DB(object):
             }}
         )
 
-    def update_priority_of_station(self, station_info, priority):
+    def update_priority_of_station(self, station_id, priority):
+        '''
+        update priority of station
+        '''
         self.station_col.update_one(
-            {'_id': station_info.get('_id')},
+            {'_id': station_id},
             {'$set': {
                 'priority': priority,
                 'updated_at': datetime.now()
             }}
         )
 
-    def update_priority_of_bizcircle(self, bizcircle_info, priority):
+    def update_priority_of_bizcircle(self, bizcircle_id, priority):
+        '''
+        update priority of bizcircle
+        '''
         self.bizcircles_col.update_one(
-            {'_id': bizcircle_info.get('_id')},
+            {'_id': bizcircle_id},
             {'$set': {
                 'priority': priority,
                 'updated_at': datetime.now()
@@ -173,7 +209,10 @@ class DB(object):
         except ErrorExistsException:
             pass
 
-    def get_missing_info(self, limit=1000, exclude=[]):
+    def get_staging_apts_with_missing_info(self, limit=1000, exclude=[]):
+        '''
+        get apartments from staging with missing info
+        '''
         arr = list(self.apartments_staging.aggregate([
             {'$match': {
                 'house_code': {'$nin': exclude},
