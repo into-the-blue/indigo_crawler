@@ -4,7 +4,8 @@ from logging import handlers
 from datetime import datetime, timezone, timedelta, date
 from pathlib import Path
 import os
-LOG_FILE_DIR = str((Path(os.path.abspath(__file__))/'..'/'..'/'logs').resolve())
+LOG_FILE_DIR = str(
+    (Path(os.path.abspath(__file__))/'..'/'..'/'logs').resolve())
 
 if not os.path.exists(LOG_FILE_DIR):
     os.mkdir(LOG_FILE_DIR)
@@ -20,7 +21,7 @@ def get_logger():
     handler2.setLevel(logging.ERROR)
 
     formatter = logging.Formatter(
-        "[${process}] ${asctime} ${levelname}: ${message}")
+        "[%(process)s] %(asctime)s %(levelname)s: %(message)s")
     handler1.setFormatter(formatter)
     handler2.setFormatter(formatter)
 
