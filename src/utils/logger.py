@@ -20,7 +20,7 @@ def get_logger():
     handler2.setLevel(logging.ERROR)
 
     formatter = logging.Formatter(
-        "[$(process)] $(asctime) $(levelname): $(message)")
+        "[${process}] ${asctime} ${levelname}: ${message}")
     handler1.setFormatter(formatter)
     handler2.setFormatter(formatter)
 
