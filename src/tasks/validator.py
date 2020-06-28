@@ -75,6 +75,8 @@ validator = {
 
 GUANG_ZHOU_DISTRICTS = ['南海']
 
+SU_ZHOU_BIZCIRCLES = ['玉山城南', '玉山城北']
+
 
 def district_validator(district):
     if district in ['上海周边', *GUANG_ZHOU_DISTRICTS]:
@@ -83,7 +85,7 @@ def district_validator(district):
 
 
 def bizcircle_validator(biz):
-    if biz in ['昆山', '嘉兴', '启东', '上海周边']:
+    if biz in ['昆山', '嘉兴', '启东', '上海周边', *SU_ZHOU_BIZCIRCLES]:
         return True
     return mongo.is_valid_bizcircle(biz)
 

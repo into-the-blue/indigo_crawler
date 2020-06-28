@@ -219,7 +219,7 @@ def locate_house_code(driver):
     1. 详情页面
     '''
     return find_elm_by_xpath(driver,
-                             "//div[@class='content__subtitle']/i[@class='house_code']")
+                             "//div[@class='content__subtitle']/i[@class='house_code']", report=False)
 
 
 def locate_img_list(driver):

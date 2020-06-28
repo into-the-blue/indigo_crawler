@@ -12,10 +12,10 @@ class BaseWebDriver(object):
 
     def renew_driver(self, open_last_page=True):
         logger.info('RENEW DRIVER')
-        current_url = self.__driver.current_url
+        current_url = self.__driver.current_url if self.__driver is not None else None
         self.__driver = setup_proxy_for_driver(
             self.driver, test_url=current_url)
-        if open_last_page:
+        if open_last_page and current_url:
             self.__driver.get(current_url)
         return self.__driver
 
