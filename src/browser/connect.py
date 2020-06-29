@@ -16,13 +16,14 @@ is_ubuntu = os.getenv('PY_ENV', 'mac') == 'ubuntu'
 TEST_URL = 'https://sh.zu.ke.com/zufang'
 
 
-def test_proxy(driver, test_url=None):
+def test_proxy(driver, test_url=None, proxy=None):
     test_url = test_url or TEST_URL
     try:
         driver.set_page_load_timeout(13)
         driver.get(test_url)
         return True
     except TimeoutException:
+        delete_proxy(proxy)
         return False
 
 
@@ -43,11 +44,15 @@ def get_proxy():
     return res
 
 
-# def delete_proxy(proxy=None):
-#     _proxy = proxy if bool(proxy) else None
-#     if not bool(_proxy):
-#         return
-#     requests.get(f"{proxy_server}/delete/?proxy={proxy}")
+def delete_proxy(proxy=None):
+    _proxy = proxy if bool(proxy) else None
+    if not bool(_proxy):
+        return
+    try:
+        requests.get(f"{proxy_server}/delete/?proxy={proxy}")
+        logger.info('[Proxy Deleted]: {}'.format(proxy))
+    except:
+        pass
 
 
 # def connect_local_driver():
@@ -77,7 +82,7 @@ def connect_to_driver():
     # clean cookies
     driver.delete_all_cookies()
     # driver.maximize_window()
-    driver.set_window_size(1280,720)
+    driver.set_window_size(1280, 720)
     logger.info('driver inited')
     return driver
 
@@ -93,7 +98,6 @@ def get_capabilities(proxy_url: str):
     capabilities = webdriver.DesiredCapabilities.CHROME
     prox.add_to_capabilities(capabilities)
     return capabilities
-
 
 
 def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0):
@@ -117,7 +121,7 @@ def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0):
         driver.start_session(capabilities=capabilities)
         logger.info('start testing proxy')
 
-        ok = test_proxy(driver, test_url)
+        ok = test_proxy(driver, test_url, proxy_url)
         if not ok:
             logger.warning(
                 'proxy checking failed for {} times'.format(times+1))
@@ -152,4 +156,3 @@ def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0):
     except Exception as e:
         logger.error(f'setup_proxy_for_driver {e}')
         raise e
-
