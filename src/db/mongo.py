@@ -386,7 +386,7 @@ class DB(object):
             }
         })
 
-    def insert_into_pool(self, metadata):
+    def insert_into_pool(self, metadata, station_info=None):
         '''
         url     string unique
         source  beike
@@ -398,37 +398,42 @@ class DB(object):
         created_at  
         updated_at
         '''
-        if self.tasks.find_one({
-            'url': metadata.get('url')
-        }):
-            return False
+        urls = [d.get('url') for d in metadata]
 
-        staging = self.apartments_staging.find_one({
-            'house_url': metadata.get('url')
-        })
-        if staging:
-            if metadata.get('station_info'):
-                self._update_station_info_for_apartment(
-                    self.apartments_staging, staging, metadata.get('station_info'))
-            return False
+        def _get_urls_exists(col, key, _urls):
+            arr = list(col.find({
+                '{}'.format(key): {
+                    '$in': _urls
+                }
+            }))
+            return [o.get(key) for o in arr]
 
-        apartment = self.apartments.find_one({
-            'house_url': metadata.get('url')
-        })
-        if apartment:
-            if metadata.get('station_info'):
-                self._update_station_info_for_apartment(
-                    self.apartments, apartment, metadata.get('station_info'))
-            return False
+        urls_exist_in_task = _get_urls_exists(self.tasks, 'url', urls)
+        urls_exist_in_staging = _get_urls_exists(
+            self.apartments_staging, 'house_url', urls)
+        urls_exist_in_apartment = _get_urls_exists(
+            self.apartments, 'house_url', urls)
 
-        self.tasks.insert_one({
-            **metadata,
+        all_existing_urls = set(
+            [*urls_exist_in_task, *urls_exist_in_staging, *urls_exist_in_apartment])
+
+        new_tasks = filter(lambda o: o.get(
+            'url') not in all_existing_urls, metadata)
+
+        # existing_tasks = filter(lambda o: o.get(
+        #     'url') in all_existing_urls, metadata)
+
+        new_tasks = [{
+            **o,
             'status': 'idle',
             'failed_times': 0,
             'created_at': datetime.now(),
             'updated_at': datetime.now()
-        })
-        return True
+        } for o in new_tasks]
+        if len(new_tasks):
+            self.tasks.insert_many(new_tasks)
+
+        return [o.get('url') for o in new_tasks]
 
     def report_unexpected_error_url_crawler(self, *args):
         return self.report_unexpected_error('url_crawler', *args)

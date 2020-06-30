@@ -123,7 +123,7 @@ class UrlCrawler(BaseWebDriver):
                     if not url_saved:
                         raise UrlCrawlerNoMoreNewUrlsException()
                     logger.info('[{}] [UrlCrawler] URLS SAVED! {} TOTAL: {}'.format(self.city,
-                                                                                    len(urls), len(self.apartment_urls)))
+                                                                                    len(url_saved), len(self.apartment_urls)))
                     if i < page_count - 1:
                         self.go_to_next_page()
                 except ProxyBlockedException:
@@ -146,22 +146,21 @@ class UrlCrawler(BaseWebDriver):
         #     }
         # )
 
-    def on_get_new_urls(self, urls, station_info):
+    def on_get_new_urls(self, urls, station_info=None):
         '''
         on get url, save them into db
         '''
         saved_count = 0
-        for url in urls:
-            if mongo.insert_into_pool({
-                'url': url.strip(),
-                'city': self.city,
-                'source': self.source,
-                'station_info': station_info
-            }):
-                self.apartment_urls.append(url)
-                saved_count += 1
+        metadata = [{
+            'url': url.strip(),
+            'city': self.city,
+            'source': self.source,
+            'station_info': station_info
+        } for url in urls]
 
-        return saved_count
+        urls_saved = mongo.insert_into_pool(metadata)
+        self.apartment_urls.extend(urls_saved)
+        return len(urls_saved)
 
     def on_accomplish(self, taskname=None):
         num_of_new_apartments = len(self.apartment_urls)

@@ -64,7 +64,8 @@ def main():
         # wait for webdriver up
         sleep(20)
         start_schedule()
-        cpu_num = math.floor(cpu_count()*1.5)
+        # cpu_num = math.floor(cpu_count()*1.5)
+        cpu_num = 1
         p = Pool(cpu_num)
         logger.info('cpu num {}'.format(cpu_num))
         for i in range(cpu_num):
@@ -75,9 +76,11 @@ def main():
                     _scopes = ['validator', *_scopes]
                 p.apply_async(start_worker, args=(
                     _scopes,))
+            elif i < 3:
+                p.apply_async(start_worker, args=(SCOPES,))
             else:
                 p.apply_async(start_worker, args=(
-                    SCOPES,))
+                    ['detail_crawler'],))
         p.close()
         p.join()
     except Exception as e:
