@@ -71,12 +71,15 @@ def delete_proxy(proxy=None):
 def connect_to_driver():
     capabilities = webdriver.DesiredCapabilities.CHROME
 
+    # https://stackoverflow.com/questions/48450594/selenium-timed-out-receiving-message-from-renderer
     # options are unnecessary
     chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('start-maximized')
+    chrome_options.add_argument('enable-automation')
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--no-sandbox')
-
+    chrome_options.add_argument('--disable-gpu')
     logger.info('connecting remote webdriver')
     driver = webdriver.Remote(
         'http://chrome:4444/wd/hub', desired_capabilities=capabilities, options=chrome_options)
