@@ -8,7 +8,7 @@ services:
       - ./prod.env
     build:
       context: .
-    image: meanless/indigo_crawler
+    image: indigo-crawler
     command: ['python3', '-u', 'app.py']
     depends_on: 
       - chrome

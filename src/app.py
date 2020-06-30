@@ -11,7 +11,7 @@ from scheduler import sched
 
 IS_MASTER = ROLE == 'master'
 
-SCOPES = ['detail_crawler', 'url_crawler'] if SCOPE == '*' else [SCOPE]
+SCOPES = ['detail_crawler', 'url_crawler'] if SCOPE == '*' else SCOPE.split('|')
 
 
 def schedule_validator():
