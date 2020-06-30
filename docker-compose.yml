@@ -8,7 +8,7 @@ services:
       - ./prod.env
     build:
       context: .
-    image: indigo-crawler
+    image: registry.cn-hangzhou.aliyuncs.com/timvel/indigo-crawler
     command: ['python3', '-u', 'app.py']
     depends_on: 
       - chrome
