@@ -54,7 +54,7 @@ def on_exit():
 def main():
     try:
         start_schedule()
-        cpu_num = max(4, cpu_count())
+        cpu_num = min(4, cpu_count())
         p = Pool(cpu_num)
         logger.info('cpu num {}'.format(cpu_num))
         for i in range(cpu_num):
