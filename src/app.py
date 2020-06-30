@@ -11,6 +11,10 @@ from scheduler import sched
 
 IS_MASTER = ROLE == 'master'
 
+if IS_MASTER:
+    q_url_crawler.empty()
+    q_validator.empty()
+    q_detail_crawler.empty()
 SCOPES = ['detail_crawler', 'url_crawler'] if SCOPE == '*' else SCOPE.split('|')
 
 
