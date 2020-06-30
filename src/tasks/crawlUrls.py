@@ -123,7 +123,7 @@ class UrlCrawler(BaseWebDriver):
                     if not url_saved:
                         raise UrlCrawlerNoMoreNewUrlsException()
                     logger.info('[{}] [UrlCrawler] URLS SAVED! {} TOTAL: {}'.format(self.city,
-                                                                                    len(url_saved), len(self.apartment_urls)))
+                                                                                    url_saved, len(self.apartment_urls)))
                     if i < page_count - 1:
                         self.go_to_next_page()
                 except ProxyBlockedException:
