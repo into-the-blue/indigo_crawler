@@ -7,7 +7,6 @@ from utils.constants import URL_CRAWLER_TASK_BY_LATEST
 from datetime import timedelta
 import os
 from multiprocessing import Pool
-from scheduler import sched
 from datetime import datetime
 from rq.job import Job
 from time import sleep
@@ -60,9 +59,9 @@ MAXIMAL_NUMBER_OF_TASKS = 3600*4
 
 
 def crawl_by_district():
-    num_of_idle = db_ins.get_num_of_idle_tasks()
-    if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
-        return
+    # num_of_idle = db_ins.get_num_of_idle_tasks()
+    # if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
+    #     return
     for city in CITIES:
         ins = UrlCrawler()
         ins.setup_city_and_source(city)
@@ -73,9 +72,9 @@ def crawl_by_district():
 
 
 def crawl_by_metro_station():
-    num_of_idle = db_ins.get_num_of_idle_tasks()
-    if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
-        return
+    # num_of_idle = db_ins.get_num_of_idle_tasks()
+    # if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
+    #     return
     for city in CITIES:
         ins = UrlCrawler()
         ins.setup_city_and_source(city)

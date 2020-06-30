@@ -7,5 +7,8 @@ db_ins = DB()
 
 mongo_job_store = MongoDBJobStore(
     client=db_ins.conn, database=os.getenv('DB_DATABASE'), collection='schedules')
-    
-sched = BackgroundScheduler(daemon=True)
+
+jobstores = {
+    'mongo': mongo_job_store
+}
+sched = BackgroundScheduler(daemon=True, jobstores=jobstores)

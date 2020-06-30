@@ -39,10 +39,10 @@ def schedule_crawler_detail_jobs():
 
 def schedule_url_crawler():
     # every day at 9pm
-    sched.add_job(crawl_by_district, 'cron', hour=14)
+    sched.add_job(crawl_by_district, 'cron', hour=18)
 
     # every day at 3am
-    sched.add_job(crawl_by_metro_station, 'cron', hour=20)
+    sched.add_job(crawl_by_metro_station, 'cron', hour=8)
 
 
 def start_schedule():
@@ -62,7 +62,7 @@ def on_exit():
 def main():
     try:
         # wait for webdriver up
-        sleep(20)
+        sleep(10)
         start_schedule()
         cpu_num = math.floor(cpu_count()*1.5)
         p = Pool(cpu_num)
