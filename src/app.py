@@ -48,9 +48,8 @@ def start_schedule():
         schedule_crawler_detail_jobs()
         schedule_validator()
         schedule_url_crawler()
-        enqueue_url_crawler()
         sched.start()
-
+        enqueue_url_crawler()
 
 @atexit.register
 def on_exit():
