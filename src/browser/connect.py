@@ -45,14 +45,15 @@ def get_proxy():
 
 
 def delete_proxy(proxy=None):
-    _proxy = proxy if bool(proxy) else None
-    if not bool(_proxy):
-        return
-    try:
-        requests.get(f"{proxy_server}/delete/?proxy={proxy}")
-        logger.info('[Proxy Deleted]: {}'.format(proxy))
-    except:
-        pass
+    pass
+    # _proxy = proxy if bool(proxy) else None
+    # if not bool(_proxy):
+    #     return
+    # try:
+    #     requests.get(f"{proxy_server}/delete/?proxy={proxy}")
+    #     logger.info('[Proxy Deleted]: {}'.format(proxy))
+    # except:
+    #     pass
 
 
 # def connect_local_driver():

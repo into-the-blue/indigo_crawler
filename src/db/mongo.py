@@ -214,34 +214,34 @@ class DB(object):
         get apartments from staging with missing info
         '''
         arr = list(self.apartments_staging.aggregate([
-            {'$match': {
-                'house_code': {'$nin': exclude},
-                'missing_info': True, 'updated_time': {'$lte': datetime.now()-timedelta(hours=24)},
-                '$or': [
-                    {'failed_times': {'$exists': False}},
-                    {'failed_times': {'$lt': 1}},
-                    {'check_times': {'$exists': False}},
-                    {'check_times': {'$lt': 3}}
-                ],
-            }
+            {
+                '$match': {
+                    'house_code': {'$nin': exclude},
+                    'missing_info': True, 'updated_time': {'$lte': datetime.now()-timedelta(hours=24)},
+                    '$or': [
+                        {'failed_times': {'$exists': False}},
+                        {'failed_times': {'$lt': 1}},
+                        {'check_times': {'$exists': False}},
+                        {'check_times': {'$lt': 3}}
+                    ],
+                }
             },
             {
                 '$sort': {'created_at': -1}
             },
             {'$limit': limit}
         ]))
-        res = arr[0] if len(arr) else None
-        if res:
+        for apt in arr:
             self.apartments_staging.update_one(
-                {'_id': res.get('_id')},
+                {'_id': apt.get('_id')},
                 {
                     '$set': {
                         'updated_time': datetime.now(),
-                        'checked_times': res.get('checked_times', 0)+1
+                        'checked_times': apt.get('checked_times', 0)+1
                     }
                 }
             )
-        return res
+        return arr
 
     def update_missing_info(self, apartment, updated):
         self.apartments_staging.update_one(
@@ -471,11 +471,15 @@ class DB(object):
         self.clean_tasks_stuck_on_processing()
         res = self.apartments_staging.find({
             '$or': [
-                {'checked_times': {'$gte': 5}, 'missing_info': True},
                 {'failed_times': {'$exists': False}, 'missing_info': False},
                 {'failed_times': {'$lt': 1}, 'missing_info': False}
             ]
         })
+        to_force_pass = self.apartments_staging.find(
+            {'checked_times': {'$gte': 5}, 'missing_info': True}
+        )
+        for apt in to_force_pass:
+            self.on_pass_validation(apt)
         return list(res)
 
     def report_error_validator(self, message, url, payload):

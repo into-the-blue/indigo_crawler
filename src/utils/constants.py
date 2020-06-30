@@ -1,3 +1,4 @@
+import os
 ERROR_AWAIT_TIME = 60*3
 TASK_DONE_AWAIT_TIME = 60*15
 
@@ -14,3 +15,11 @@ URL_CRAWLER_TASK_BY_METRO = 'by_metro'
 URL_CRAWLER_TASK_BY_BIZCIRCLE = 'by_bizcircle'
 
 URL_CRAWLER_TASK_BY_LATEST = 'by_latest'
+
+
+# url_crawler, *
+SCOPE = os.getenv('SCOPE')
+
+
+# master, worker
+ROLE = os.getenv('ROLE')
