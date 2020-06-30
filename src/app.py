@@ -9,6 +9,7 @@ from utils.logger import logger
 from utils.constants import SCOPE, ROLE
 from scheduler import sched
 from time import sleep
+import math
 
 IS_MASTER = ROLE == 'master'
 
@@ -16,7 +17,8 @@ if IS_MASTER:
     q_url_crawler.empty()
     q_validator.empty()
     q_detail_crawler.empty()
-SCOPES = ['detail_crawler', 'url_crawler'] if SCOPE == '*' else SCOPE.split('|')
+SCOPES = ['detail_crawler',
+          'url_crawler'] if SCOPE == '*' else SCOPE.split('|')
 
 
 def schedule_validator():
@@ -51,6 +53,7 @@ def start_schedule():
         sched.start()
         enqueue_url_crawler()
 
+
 @atexit.register
 def on_exit():
     sched.shutdown()
@@ -61,12 +64,13 @@ def main():
         # wait for webdriver up
         sleep(20)
         start_schedule()
-        cpu_num = min(4, cpu_count())
+        cpu_num = min(4, math.floor(cpu_count()*1.5))
         p = Pool(cpu_num)
         logger.info('cpu num {}'.format(cpu_num))
         for i in range(cpu_num):
             if i == 0:
                 _scopes = SCOPES
+                _scopes.reverse()
                 if IS_MASTER and 'validator' not in _scopes:
                     _scopes = ['validator', *_scopes]
                 p.apply_async(start_worker, args=(
