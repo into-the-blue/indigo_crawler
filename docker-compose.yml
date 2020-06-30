@@ -2,14 +2,13 @@ version: '3.7'
 services:
   crawler:
     volumes:
-      - ./src:/apps/crawler
+      - ./logs:/apps/crawler/logs
     restart: always
     env_file:
       - ./prod.env
     build:
       context: .
     image: meanless/indigo_crawler
-    working_dir: /apps/crawler
     command: ['python3', '-u', 'app.py']
     depends_on: 
       - chrome

@@ -9,3 +9,4 @@ notebooks/
 common/logs/
 src/logs
 src/utils/logs
+logs/
