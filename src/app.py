@@ -45,10 +45,11 @@ def schedule_url_crawler():
 
 def start_schedule():
     if IS_MASTER:
+        schedule_crawler_detail_jobs()
         schedule_validator()
         schedule_url_crawler()
         enqueue_url_crawler()
-        schedule_crawler_detail_jobs()
+        sched.start()
 
 
 @atexit.register
