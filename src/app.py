@@ -8,6 +8,7 @@ from jobs import crawl_by_district, crawl_by_metro_station, validate_data, fill_
 from utils.logger import logger
 from utils.constants import SCOPE, ROLE
 from scheduler import sched
+from time import sleep
 
 IS_MASTER = ROLE == 'master'
 
@@ -57,6 +58,8 @@ def on_exit():
 
 def main():
     try:
+        # wait for webdriver up
+        sleep(20)
         start_schedule()
         cpu_num = min(4, cpu_count())
         p = Pool(cpu_num)
