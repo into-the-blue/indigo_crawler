@@ -64,7 +64,7 @@ def main():
         # wait for webdriver up
         sleep(20)
         start_schedule()
-        cpu_num = min(4, math.floor(cpu_count()*1.5))
+        cpu_num = math.floor(cpu_count()*1.5)
         p = Pool(cpu_num)
         logger.info('cpu num {}'.format(cpu_num))
         for i in range(cpu_num):
