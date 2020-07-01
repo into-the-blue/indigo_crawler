@@ -94,15 +94,15 @@ def on_finish_url_crawling(taskname=URL_CRAWLER_TASK_BY_LATEST, url_count=0, cit
 
 
 def enqueue_url_crawler(_city=None):
-    num_of_idle = db_ins.get_num_of_idle_tasks()
-    if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
-        logger.warning(
-            'Too many tasks: {}'.format(num_of_idle))
-        delayed = math.floor(num_of_idle/3600/4)
-        q_url_crawler.enqueue_at(
-            datetime.now()+timedelta(minutes=delayed*60), enqueue_url_crawler, args=(_city,))
-        logger.warning('enqueued, execute after {}h'.format(delayed))
-        return
+    # num_of_idle = db_ins.get_num_of_idle_tasks()
+    # if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
+    #     logger.warning(
+    #         'Too many tasks: {}'.format(num_of_idle))
+    #     delayed = math.floor(num_of_idle/3600/4)
+    #     q_url_crawler.enqueue_at(
+    #         datetime.now()+timedelta(minutes=delayed*60), enqueue_url_crawler, args=(_city,))
+    #     logger.warning('enqueued, execute after {}h'.format(delayed))
+    #     return
     _cities = CITIES
     if _city:
         _cities = [_city]
@@ -176,6 +176,6 @@ def fill_missing_info():
             enqueued_job_num += 1
             ins = DetailCrawler()
             q_detail_crawler.enqueue(ins.start_fill_missing, args=[
-                                     apt], job_timeout='10m', job_id=apt.get('house_code'))
+                                     apt], job_timeout='20m', job_id=apt.get('house_code'))
     logger.info('[fill_missing_info] total: {}, enqueued: {}'.format(
         len(apts), enqueued_job_num))

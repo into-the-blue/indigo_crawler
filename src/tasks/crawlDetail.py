@@ -8,7 +8,7 @@ from utils.constants import DETAIL_CRAWLER_AWAIT_TIME, ERROR_AWAIT_TIME, TASK_DO
 from exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException, TooManyTimesException
 from random import shuffle
 from locateElms import find_apartments_in_list
-from .crawlSingleUrl import get_info_of_single_url
+from .crawlDetailOfSingleUrl import get_info_of_single_url
 from browser import BaseWebDriver
 
 

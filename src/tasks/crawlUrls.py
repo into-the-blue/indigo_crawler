@@ -167,9 +167,10 @@ class UrlCrawler(BaseWebDriver):
         logger.info('[{}] [UrlCrawler] Total url length {}'.format(
             self.city, num_of_new_apartments))
         self.apartment_urls = []
-        self.on_finish and self.on_finish(
-            taskname, num_of_new_apartments, self.city_obj)
-        self.quit()
+        if taskname == URL_CRAWLER_TASK_BY_LATEST:
+            self.on_finish and self.on_finish(
+                taskname, num_of_new_apartments, self.city_obj)
+            self.quit()
 
     def click_order_by_time(self):
         '''
