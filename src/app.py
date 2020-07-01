@@ -69,14 +69,16 @@ def main():
         logger.info('cpu num {}'.format(cpu_num))
         for i in range(cpu_num):
             if i == 0:
-                _scopes = SCOPES
+                _scopes = [*SCOPES]
                 _scopes.reverse()
                 if IS_MASTER and 'validator' not in _scopes:
                     _scopes = ['validator', *_scopes]
                 p.apply_async(start_worker, args=(
                     _scopes,))
             elif i < 3:
-                p.apply_async(start_worker, args=(SCOPES,))
+                _scopes = [*SCOPES]
+                _scopes.reverse()
+                p.apply_async(start_worker, args=(_scopes,))
             else:
                 p.apply_async(start_worker, args=(
                     ['detail_crawler'],))
