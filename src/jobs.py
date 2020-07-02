@@ -57,10 +57,9 @@ db_ins = DB()
 MAXIMAL_NUMBER_OF_TASKS = 3600*4
 
 
-
 def crawl_by_district():
     num_of_idle = db_ins.get_num_of_idle_tasks()
-    if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
+    if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS*8:
         return
     for city in CITIES:
         ins = UrlCrawler()
@@ -73,7 +72,7 @@ def crawl_by_district():
 
 def crawl_by_metro_station():
     num_of_idle = db_ins.get_num_of_idle_tasks()
-    if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
+    if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS*8:
         return
     for city in CITIES:
         ins = UrlCrawler()
