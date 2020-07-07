@@ -13,6 +13,8 @@ import math
 
 IS_MASTER = ROLE == 'master'
 
+CPU_NUM = int(os.getenv('CPU_NUM', math.floor(cpu_count()*1.5)))
+
 if IS_MASTER:
     q_url_crawler.empty()
     q_validator.empty()
@@ -64,10 +66,9 @@ def main():
         # wait for webdriver up
         sleep(10)
         start_schedule()
-        cpu_num = math.floor(cpu_count()*1.5)
-        p = Pool(cpu_num)
-        logger.info('cpu num {}'.format(cpu_num))
-        for i in range(cpu_num):
+        p = Pool(CPU_NUM)
+        logger.info('cpu num {}'.format(CPU_NUM))
+        for i in range(CPU_NUM):
             if i == 0:
                 _scopes = [*SCOPES]
                 _scopes.reverse()
