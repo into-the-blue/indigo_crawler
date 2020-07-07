@@ -56,6 +56,9 @@ db_ins = DB()
 
 # MAXIMAL_NUMBER_OF_TASKS = 3600*4
 
+BATCH_SIZE_OF_DETAIL_CRAWLER = 1800 * 5
+
+BATCH_SIZE_OF_MISSING_INFO = 10000
 
 def crawl_by_district():
     # num_of_idle = db_ins.get_num_of_idle_tasks()
@@ -137,9 +140,9 @@ def validate_data():
 def crawl_detail():
     logger.info('[crawl_detail] start')
     job_ids = q_detail_crawler.job_ids
-    if len(job_ids) >= 1000:
+    if len(job_ids) >= BATCH_SIZE_OF_DETAIL_CRAWLER:
         return
-    tasks = db_ins.find_idle_tasks(1000, job_ids)
+    tasks = db_ins.find_idle_tasks(BATCH_SIZE_OF_DETAIL_CRAWLER, job_ids)
     if not len(tasks):
         logger.info('[crawl_detail] no task available')
         return
@@ -160,9 +163,9 @@ def crawl_detail():
 
 def fill_missing_info():
     job_ids = q_detail_crawler.job_ids
-    if len(job_ids) >= 1000:
+    if len(job_ids) >= BATCH_SIZE_OF_MISSING_INFO:
         return
-    apts = db_ins.get_staging_apts_with_missing_info(1000, job_ids)
+    apts = db_ins.get_staging_apts_with_missing_info(BATCH_SIZE_OF_MISSING_INFO, job_ids)
     if not len(apts):
         return
     enqueued_job_num = 0
