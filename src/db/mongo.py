@@ -360,6 +360,7 @@ class DB(object):
         self.apartments_staging.insert_one(apartment)
 
     def insert_page_source(self, url, page_source):
+        return None
         res = self.page_source.find_one({
             'url': url
         })

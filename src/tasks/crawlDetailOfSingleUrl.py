@@ -208,173 +208,186 @@ def get_info_of_single_url(driver, url):
     """
     # TODO：支持对公寓房源的爬取。
     if 'apartment' in url:
+        return
+
+    try:
+        # url expired
+        offline_texts = ['你访问的房源已失效', '你访问的房源已下架/成交']
+        offline_text = locate_elm_of_offline_text(driver).text
+        if offline_text in offline_texts or len(offline_text) > 0:
+            raise ApartmentExpiredException()
+    except NoSuchElementException:
         pass
-    else:
-        try:
-            # url expired
-            offline_texts = ['你访问的房源已失效', '你访问的房源已下架/成交']
-            offline_text = locate_elm_of_offline_text(driver).text
-            if offline_text in offline_texts or len(offline_text) > 0:
-                raise ApartmentExpiredException()
-        except NoSuchElementException:
-            pass
 
-        # scroll to end of the page to avoid lazy rendering
-        sleep(1)
+    # scroll to end of the page to avoid lazy rendering
+    sleep(1)
 
-        missing_info = False
+    missing_info = False
+    missing_keys = []
 
-        driver.execute_script(
-            "window.scrollTo(0, document.body.scrollHeight);")
+    driver.execute_script(
+        "window.scrollTo(0, document.body.scrollHeight);")
 
-        # get rent type from title
-        # eg.合租·瑞和城叁街区(汇臻路815弄) 4居室 南卧
-        title = locate_apartment_title(driver).text
-        rent_type = title.split('·')[0]
-        rent_type_fallback = find_elm_of_house_type(driver, 0)
-        rent_type = rent_type if len(rent_type) <= len(
-            rent_type_fallback) else rent_type_fallback
-        if '未知' in rent_type:
-            rent_type = '未知'
-            missing_info = True
+    # get rent type from title
+    # eg.合租·瑞和城叁街区(汇臻路815弄) 4居室 南卧
+    title = locate_apartment_title(driver).text
+    rent_type = title.split('·')[0]
+    rent_type_fallback = find_elm_of_house_type(driver, 0)
+    rent_type = rent_type if len(rent_type) <= len(
+        rent_type_fallback) else rent_type_fallback
+    if '未知' in rent_type:
+        rent_type = '未知'
+        missing_info = True
+        missing_keys.append('type')
 
-        # 上架时间
-        time_listed = re.findall(
-            '\d{4}-\d{2}-\d{2}', locate_updated_at(driver).text)[0]
+    # 上架时间
+    time_listed = re.findall(
+        '\d{4}-\d{2}-\d{2}', locate_updated_at(driver).text)[0]
 
-        # 编号
-        house_code = None
-        try:
-            house_code = re.findall(
-                '[A-Z]+\d+', locate_house_code(driver).text)[0]
-        except:
-            house_code = re.findall(
-                '\/([A-Z]{1,3}\d+)\.html', url)[0]
-        house_id = re.findall('[0-9]+', house_code)[0]
-        city_abbreviation = re.findall('[a-zA-Z]+', house_code)[0].lower()
+    # 编号
+    house_code = None
+    try:
+        house_code = re.findall(
+            '[A-Z]+\d+', locate_house_code(driver).text)[0]
+    except:
+        house_code = re.findall(
+            '\/([A-Z]{1,3}\d+)\.html', url)[0]
+    house_id = re.findall('[0-9]+', house_code)[0]
+    city_abbreviation = re.findall('[a-zA-Z]+', house_code)[0].lower()
 
-        # 房源照片列表
-        img_urls = []
-        # lazy load return placeholder img
-        # get thumbnail img
-        for i in locate_img_list(driver):
-            img_url = i.get_attribute('src')
-            cover_img_size = '780x439'
-            img_url = re.sub('\d{2,3}x\d{2,3}', cover_img_size, img_url)
-            img_urls.append(img_url)
+    # 房源照片列表
+    img_urls = []
+    # lazy load return placeholder img
+    # get thumbnail img
+    for i in locate_img_list(driver):
+        img_url = i.get_attribute('src')
+        cover_img_size = '780x439'
+        img_url = re.sub('\d{2,3}x\d{2,3}', cover_img_size, img_url)
+        img_urls.append(img_url)
 #             json_house_imgs = json.dumps(json_house_imgs, ensure_ascii=False)
 
-        missing_info = missing_info or len(img_urls) < 2
-        # 价格
-        price = int(locate_price(driver).text)
+    if len(img_urls) <= 2:
+        missing_info = True
+        missing_keys.append('img_urls')
+    # 价格
+    price = int(locate_price(driver).text)
 
-        # 特色标签列表
-        tags = []
-        try:
-            for i in locate_tags(driver):
-                tags.append(i.text)
-        except NoSuchElementException:
+    # 特色标签列表
+    tags = []
+    try:
+        for i in locate_tags(driver):
+            tags.append(i.text)
+    except NoSuchElementException:
+        missing_info = True
+        missing_keys.append('tags')
+    # json_house_tags = json.dumps(json_house_tags, ensure_ascii=False)
+
+    # 户型、面积、朝向
+    house_type, area, orient = get_house_type_info_27_nov(driver)
+
+    if '未知' in orient:
+        missing_info = True
+        missing_keys.append('orient')
+    content_article_info = get_info_1(driver)
+
+    content_article_info['area'] = content_article_info['area'] or area
+    if not content_article_info['area']:
+        missing_info = True
+        missing_keys.append('area')
+
+    facility_info = get_facility_info(driver)
+
+    community_info = {}
+    try:
+        # can be null
+        community_info = get_community_info(driver)
+        if not community_info.get('city'):
             missing_info = True
-        # json_house_tags = json.dumps(json_house_tags, ensure_ascii=False)
-
-        # 户型、面积、朝向
-        house_type, area, orient = get_house_type_info_27_nov(driver)
-
-        if '未知' in orient:
+            missing_keys.append('city')
+        if not len(community_info.get('bizcircle')):
             missing_info = True
-        content_article_info = get_info_1(driver)
+            missing_keys.append('bizcircle')
+    except:
+        missing_info = True
+        missing_keys.extend(
+            ['city', 'bizcircle', 'district', 'community_url', 'community_name'])
 
-        content_article_info['area'] = content_article_info['area'] or area
-        missing_info = missing_info or not content_article_info['area']
+    # 地址和交通，地铁便利性
+    # TODO:地铁便利性的筛选标准，距任一地铁站的距离有小于1000m的
 
-        facility_info = get_facility_info(driver)
+    transportation_info = get_transportation_info(driver)
 
-        community_info = {}
-        try:
-            # can be null
-            community_info = get_community_info(driver)
-            if not community_info.get('city'):
-                missing_info = True
-            if not len(community_info.get('bizcircle')):
-                missing_info = True
-        except:
-            missing_info = True
+    # 小区最新成交
+    try:
+        community_deals = driver.find_element_by_xpath(
+            "//div[@class='table']").get_attribute('innerHTML')
+        table = BeautifulSoup(community_deals, 'lxml')
+        record = []
+        # 表格内容
+        for tr in table.find_all("div", class_='tr')[1:]:
+            cols = tr.find_all("div", class_='td')
+            cols = [ele.text.strip() for ele in cols]
+            # Get rid of empty values
+            record.append([ele for ele in cols if ele])
+        community_deals = pd.DataFrame(
+            data=record,
+            columns=['成交日期', '居室', '面积', '租赁方式', '出租价格']
+        ).to_json(orient='records', force_ascii=False)
+    except:
+        # _print("无小区最新成交信息：", url)
+        community_deals = ''
 
-        # 地址和交通，地铁便利性
-        # TODO:地铁便利性的筛选标准，距任一地铁站的距离有小于1000m的
+    # 房源描述
+    house_description = ''
+    try:
+        desc = locate_house_desc(
+            driver).get_attribute('data-desc')
+        if desc:
+            house_description = desc
+    except:
+        pass
+    # if len(driver.find_elements_by_xpath("//div[@class='content__article__info3 ']/ul/li/p")) > 2:
+    #     house_description = ''
+    #     logger.info(
+    #         f"请调整子函数get_list_info的房源描述部分，有超过一条评论的情况需要全部考虑。（做成列表而不再是文本）{url}")
+    # else:
+    #     try:
+    #         house_description = driver.find_element_by_xpath(
+    #             "//div[@class='content__article__info3 ']/ul/li/p[1]").text
+    #     except:
+    #         house_description = ''
 
-        transportation_info = get_transportation_info(driver)
+    # 每平米房价
+    try:
+        price_per_square_meter = round(
+            price/content_article_info.get('area'), 2)
+    except:
+        logger.info(f'无法计算每平米房价：{url}',)
+        price_per_square_meter = float(price)
 
-        # 小区最新成交
-        try:
-            community_deals = driver.find_element_by_xpath(
-                "//div[@class='table']").get_attribute('innerHTML')
-            table = BeautifulSoup(community_deals, 'lxml')
-            record = []
-            # 表格内容
-            for tr in table.find_all("div", class_='tr')[1:]:
-                cols = tr.find_all("div", class_='td')
-                cols = [ele.text.strip() for ele in cols]
-                # Get rid of empty values
-                record.append([ele for ele in cols if ele])
-            community_deals = pd.DataFrame(
-                data=record,
-                columns=['成交日期', '居室', '面积', '租赁方式', '出租价格']
-            ).to_json(orient='records', force_ascii=False)
-        except:
-            # _print("无小区最新成交信息：", url)
-            community_deals = ''
+    # 上下楼便利性：无障碍性，楼层与电梯的合成项
 
-        # 房源描述
-        house_description = ''
-        try:
-            desc = locate_house_desc(
-                driver).get_attribute('data-desc')
-            if desc:
-                house_description = desc
-        except:
-            pass
-        # if len(driver.find_elements_by_xpath("//div[@class='content__article__info3 ']/ul/li/p")) > 2:
-        #     house_description = ''
-        #     logger.info(
-        #         f"请调整子函数get_list_info的房源描述部分，有超过一条评论的情况需要全部考虑。（做成列表而不再是文本）{url}")
-        # else:
-        #     try:
-        #         house_description = driver.find_element_by_xpath(
-        #             "//div[@class='content__article__info3 ']/ul/li/p[1]").text
-        #     except:
-        #         house_description = ''
-
-        # 每平米房价
-        try:
-            price_per_square_meter = round(
-                price/content_article_info.get('area'), 2)
-        except:
-            logger.info(f'无法计算每平米房价：{url}',)
-            price_per_square_meter = float(price)
-
-        # 上下楼便利性：无障碍性，楼层与电梯的合成项
-
-        # 导出所有信息
-        dict_single = {'type': rent_type,
-                       'title': title,
-                       'created_at': time_listed,
-                       'house_code': house_code,
-                       'house_id': house_id,
-                       'city_abbreviation': city_abbreviation,
-                       'img_urls': img_urls,
-                       'price': price,
-                       'tags': tags,
-                       'house_type': house_type,
-                       **content_article_info,
-                       **facility_info,
-                       **transportation_info,
-                       'community_deals': community_deals,
-                       'house_description': house_description,
-                       'house_url': url,
-                       **community_info,
-                       'price_per_square_meter': price_per_square_meter,
-                       'missing_info': missing_info,
-                       'version': os.environ.get('VER')
-                       }
-        return dict_single
+    # 导出所有信息
+    dict_single = {'type': rent_type,
+                   'title': title,
+                   'created_at': time_listed,
+                   'house_code': house_code,
+                   'house_id': house_id,
+                   'city_abbreviation': city_abbreviation,
+                   'img_urls': img_urls,
+                   'price': price,
+                   'tags': tags,
+                   'house_type': house_type,
+                   **content_article_info,
+                   **facility_info,
+                   **transportation_info,
+                   'community_deals': community_deals,
+                   'house_description': house_description,
+                   'house_url': url,
+                   **community_info,
+                   'price_per_square_meter': price_per_square_meter,
+                   'missing_info': missing_info,
+                   'missing_keys': missing_keys,
+                   'version': os.environ.get('VER')
+                   }
+    return dict_single
