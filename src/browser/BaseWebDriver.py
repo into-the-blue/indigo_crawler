@@ -9,12 +9,13 @@ class BaseWebDriver(object):
         self.__driver = None
         self.opened_url_count = 0
         self.connected = False
+        self.setup_proxy_when_init_driver = False
 
     def renew_driver(self, open_last_page=True):
         logger.info('RENEW DRIVER')
         current_url = self.__driver.current_url if self.__driver is not None else None
         self.__driver = setup_proxy_for_driver(
-            self.driver, test_url=current_url)
+            self.__driver, test_url=current_url)
         if open_last_page and current_url:
             self.__driver.get(current_url)
         return self.__driver
@@ -24,6 +25,8 @@ class BaseWebDriver(object):
         if self.__driver is None:
             self.__driver = connect_to_driver()
             self.connected = True
+            if self.setup_proxy_when_init_driver:
+                self.__driver = setup_proxy_for_driver(self.__driver)
         return self.__driver
 
     def get(self, url, times=0):
