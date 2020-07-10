@@ -10,18 +10,12 @@ from random import shuffle
 from locateElms import find_apartments_in_list
 from .crawlDetailOfSingleUrl import get_info_of_single_url
 from browser import BaseWebDriver
-import os
 
-
-# cn-sh-1 / fc-sg-1
-SERVER_NAME = os.getenv('SERVER_NAME', 'unknown')
 
 
 class DetailCrawler(BaseWebDriver):
     def __init__(self, ):
         super().__init__()
-        if 'cn' not in SERVER_NAME.lower():
-            self.setup_proxy_when_init_driver = True
 
     def __del__(self):
         class_name = self.__class__.__name__

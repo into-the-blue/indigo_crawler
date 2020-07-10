@@ -2,6 +2,10 @@ from .connect import connect_to_driver, setup_proxy_for_driver
 from utils.logger import logger
 from exceptions import TooManyTimesException, IpBlockedException
 from selenium.common.exceptions import InvalidSessionIdException, WebDriverException, NoSuchElementException, TimeoutException
+import os
+
+# cn-sh-1 / fc-sg-1
+SERVER_NAME = os.getenv('SERVER_NAME', 'unknown')
 
 
 class BaseWebDriver(object):
@@ -9,7 +13,6 @@ class BaseWebDriver(object):
         self.__driver = None
         self.opened_url_count = 0
         self.connected = False
-        self.setup_proxy_when_init_driver = False
 
     def renew_driver(self, open_last_page=True):
         logger.info('RENEW DRIVER')
@@ -25,7 +28,8 @@ class BaseWebDriver(object):
         if self.__driver is None:
             self.__driver = connect_to_driver()
             self.connected = True
-            if self.setup_proxy_when_init_driver:
+            setup_proxy_when_init_driver = 'cn' not in SERVER_NAME.lower()
+            if setup_proxy_when_init_driver:
                 self.__driver = setup_proxy_for_driver(self.__driver)
         return self.__driver
 

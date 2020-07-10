@@ -12,7 +12,6 @@ proxy_server = os.getenv('PROXY_SERVER')
 
 chrome_driver_pth = '/Users/origami/Downloads/chromedriver'
 
-is_ubuntu = os.getenv('PY_ENV', 'mac') == 'ubuntu'
 TEST_URL = 'https://sh.zu.ke.com/zufang'
 
 
