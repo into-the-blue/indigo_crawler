@@ -5,7 +5,7 @@ from db import mongo
 from utils.logger import logger
 from utils.util import safely_get_url_from_driver
 from utils.constants import DETAIL_CRAWLER_AWAIT_TIME, ERROR_AWAIT_TIME, TASK_DONE_AWAIT_TIME
-from exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException, TooManyTimesException
+from exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, NoTaskException, TooManyTimesException, IpBlockedException
 from random import shuffle
 from locateElms import find_apartments_in_list
 from .crawlDetailOfSingleUrl import get_info_of_single_url
@@ -47,13 +47,15 @@ class DetailCrawler(BaseWebDriver):
             # probably proxy blocked
             logger.info(
                 '[{}] [DetailCrawler] Elm not found'.format(task.get('city')))
-            self.renew_driver()
+            # self.renew_driver()
         except (TimeoutException, WebDriverException, InvalidSessionIdException):
             logger.info(
                 '[{}] [DetailCrawler] Session timeout'.format(task.get('city')))
-            self.renew_driver()
-        except (TooManyTimesException):
+            # self.renew_driver()
+        except TooManyTimesException:
             pass
+        except IpBlockedException:
+            mongo.report_error_ip_blocked(task.get('url'))
         except Exception as e:
             logger.exception(e)
             mongo.update_failure_task(task, e, self.driver.page_source)
@@ -88,9 +90,11 @@ class DetailCrawler(BaseWebDriver):
         except (TimeoutException, WebDriverException, InvalidSessionIdException):
             logger.info('[{}] [DetailCrawler] Session timeout'.format(
                 apartment.get('city')))
-            self.renew_driver()
-        except (TooManyTimesException):
+            # self.renew_driver()
+        except TooManyTimesException:
             pass
+        except IpBlockedException:
+            mongo.report_error_ip_blocked(apartment.get('house_url'))
         except Exception as e:
             logger.error('[{}] [DetailCrawler] [start_fill_missing] err'.format(
                 apartment.get('city')))

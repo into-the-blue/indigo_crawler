@@ -46,3 +46,8 @@ class NoProxyAvailableException(Exception):
 class ErrorExistsException(Exception):
     def __init__(self, *args, **kwargs):
         super().__init__('Error already reported', *args, **kwargs)
+
+
+class IpBlockedException(Exception):
+    def __init__(self, *args, **kwargs):
+        super().__init__('blocked by target', *args, **kwargs)

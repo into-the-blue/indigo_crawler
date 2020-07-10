@@ -308,13 +308,13 @@ class DB(object):
     def report_unexpected_error_detail_crawler(self, *args, **kwargs):
         return self.report_unexpected_error('detail_crawler', *args, **kwargs)
 
-    def report_error_detail_crawler(self, message, url, payload):
-        return self._report_error({
-            'error_source': 'detail_crawler',
-            'url': url,
-            'message': message,
-            'payload': payload
-        })
+    # def report_error_detail_crawler(self, message, url, payload={}):
+    #     return self._report_error({
+    #         'error_source': 'detail_crawler',
+    #         'url': url,
+    #         'message': message,
+    #         'payload': payload
+    #     })
 
     def task_expired(self, task):
         self.tasks.update_one(
@@ -487,8 +487,16 @@ class DB(object):
         for apt in to_force_pass:
             self.on_pass_validation(apt)
         return list(res)
+    
+    def report_error_ip_blocked(self,url,payload={}):
+        self._report_error({
+            'error_source': 'ip_blocked',
+            'url': url,
+            'message': 'ip_blocked',
+            'payload': payload
+        })
 
-    def report_error_validator(self, message, url, payload):
+    def report_error_validator(self, message, url, payload={}):
         return self._report_error({
             'error_source': 'data_validator',
             'url': url,

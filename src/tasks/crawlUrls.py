@@ -4,7 +4,7 @@ from time import sleep
 from db import mongo
 from utils.logger import logger
 from utils.util import safely_get_url_from_driver
-from exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, UrlCrawlerNoMoreNewUrlsException, TooManyTimesException
+from exceptions import ProxyBlockedException, UrlExistsException, ApartmentExpiredException, UrlCrawlerNoMoreNewUrlsException, TooManyTimesException, IpBlockedException
 from random import shuffle
 from locateElms import find_next_button, find_paging_elm, find_apartments_in_list, find_paging_elm_index, find_elm_of_latest_btn, get_num_of_apartment
 from utils.constants import ERROR_AWAIT_TIME, URL_CRAWLER_TASK_DOWN_AWAIT_TIME, URL_CRAWLER_AWAIT_TIME, URL_CRAWLER_TASK_BY_BIZCIRCLE, URL_CRAWLER_TASK_BY_METRO, URL_CRAWLER_TASK_BY_LATEST
@@ -238,6 +238,11 @@ class UrlCrawler(BaseWebDriver):
             sleep(ERROR_AWAIT_TIME)
         except (TimeoutException, WebDriverException, InvalidSessionIdException):
             logger.info('[{}] [UrlCrawler] Session timeout'.format(self.city))
+            self.renew_driver()
+        except IpBlockedException:
+            logger.info(
+                '[{}] [UrlCrawler] IP blocked by target'.format(self.city))
+            mongo.report_error_ip_blocked(url)
             self.renew_driver()
         finally:
             self.on_accomplish(taskname)

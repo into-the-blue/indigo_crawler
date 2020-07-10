@@ -1,6 +1,6 @@
 from .connect import connect_to_driver, setup_proxy_for_driver
 from utils.logger import logger
-from exceptions import TooManyTimesException
+from exceptions import TooManyTimesException, IpBlockedException
 from selenium.common.exceptions import InvalidSessionIdException, WebDriverException, NoSuchElementException, TimeoutException
 
 
@@ -36,6 +36,8 @@ class BaseWebDriver(object):
             self.driver.set_page_load_timeout(13)
             self.driver.get(url)
             self.opened_url_count += 1
+            if self.driver.title == '人机认证':
+                raise IpBlockedException()
             return self.driver
         except (TooManyTimesException, TimeoutException, WebDriverException) as e:
             logger.error('timeout tried times {} {}'.format(times, e))
