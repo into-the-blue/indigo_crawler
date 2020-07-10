@@ -54,11 +54,23 @@ CITIES = [
 db_ins = DB()
 
 
+def get_crawl_by_latest_await_time():
+    hour = datetime.now().hour+8
+    if 0 <= hour <= 6:
+        return (8-hour)*60
+
+    if 20 <= hour <= 23:
+        return (24-hour+6)*60
+
+    return 120
+
 # MAXIMAL_NUMBER_OF_TASKS = 3600*4
+
 
 BATCH_SIZE_OF_DETAIL_CRAWLER = 1800 * 5
 
 BATCH_SIZE_OF_MISSING_INFO = 10000
+
 
 def crawl_by_district():
     # num_of_idle = db_ins.get_num_of_idle_tasks()
@@ -92,7 +104,7 @@ def on_finish_url_crawling(taskname=URL_CRAWLER_TASK_BY_LATEST, url_count=0, cit
     if taskname == URL_CRAWLER_TASK_BY_LATEST:
         logger.info('[on_finish_url_crawling] enqueue url crawler')
         q_url_crawler.enqueue_at(
-            datetime.now() + timedelta(minutes=180), enqueue_url_crawler, args=(city,))
+            datetime.now() + timedelta(minutes=get_crawl_by_latest_await_time()), enqueue_url_crawler, args=(city,))
 
 
 def enqueue_url_crawler(_city=None):
@@ -165,7 +177,8 @@ def fill_missing_info():
     job_ids = q_detail_crawler.job_ids
     if len(job_ids) >= BATCH_SIZE_OF_MISSING_INFO:
         return
-    apts = db_ins.get_staging_apts_with_missing_info(BATCH_SIZE_OF_MISSING_INFO, job_ids)
+    apts = db_ins.get_staging_apts_with_missing_info(
+        BATCH_SIZE_OF_MISSING_INFO, job_ids)
     if not len(apts):
         return
     enqueued_job_num = 0
