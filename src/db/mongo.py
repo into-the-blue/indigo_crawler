@@ -77,9 +77,33 @@ class DB(object):
         self.tasks = self.indigo.tasks
         self.apartments_staging = self.indigo.apartmentsStaging
         self.page_source = self.indigo.pageSource
+
+        self.crawler_col = self.indigo.crawler
         # ensure_indexes_of_station(self.station_col)
         # ensure_indexes_of_apartment(self.apartments)
         # ensure_indexes_of_apartment(self.apartments_staging)
+
+    def on_job_start(self, job_name, payload={}):
+        self.crawler_col.insert_one({
+            'name': job_name,
+            'phase': 'start',
+            'payload': payload,
+            'created_at': datetime.now()
+        })
+
+    def on_job_done(self, job_name, payload={}):
+        self.crawler_col.insert_one({
+            'name': job_name,
+            'phase': 'done',
+            'payload': payload,
+            'created_at': datetime.now()
+        })
+
+    def save_crawler_procedures(self, doc):
+        self.crawler_col.insert_one({
+            **doc,
+            'created_at': datetime.now()
+        })
 
     def get_num_of_idle_tasks(self):
         '''
@@ -487,8 +511,8 @@ class DB(object):
         for apt in to_force_pass:
             self.on_pass_validation(apt)
         return list(res)
-    
-    def report_error_ip_blocked(self,url,payload={}):
+
+    def report_error_ip_blocked(self, url, payload={}):
         self._report_error({
             'error_source': 'ip_blocked',
             'url': url,

@@ -76,6 +76,7 @@ def crawl_by_district():
     # num_of_idle = db_ins.get_num_of_idle_tasks()
     # if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS*8:
     #     return
+    db_ins.on_job_start('crawl_by_district')
     for city in CITIES:
         ins = UrlCrawler()
         ins.setup_city_and_source(city)
@@ -89,6 +90,7 @@ def crawl_by_metro_station():
     # num_of_idle = db_ins.get_num_of_idle_tasks()
     # if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS*8:
     #     return
+    db_ins.on_job_start('crawl_by_metro_station')
     for city in CITIES:
         ins = UrlCrawler()
         ins.setup_city_and_source(city)
@@ -101,10 +103,18 @@ def crawl_by_metro_station():
 def on_finish_url_crawling(taskname=URL_CRAWLER_TASK_BY_LATEST, url_count=0, city=None):
     logger.info('[{}] [on_finish_url_crawling] Done {} {}'.format(
         city.get('city'), taskname, url_count))
+
+    next_run_at = datetime.now() + timedelta(minutes=get_crawl_by_latest_await_time())
+
+    _city = city or {}
+
+    db_ins.on_job_done(taskname, {
+        'next_run_at': datetime.now() + timedelta(minutes=get_crawl_by_latest_await_time())
+    })
     if taskname == URL_CRAWLER_TASK_BY_LATEST:
         logger.info('[on_finish_url_crawling] enqueue url crawler')
         q_url_crawler.enqueue_at(
-            datetime.now() + timedelta(minutes=get_crawl_by_latest_await_time()), enqueue_url_crawler, args=(city,))
+            next_run_at, enqueue_url_crawler, args=(city,))
 
 
 def enqueue_url_crawler(_city=None):
@@ -117,6 +127,7 @@ def enqueue_url_crawler(_city=None):
     #         datetime.now()+timedelta(minutes=delayed*60), enqueue_url_crawler, args=(_city,))
     #     logger.warning('enqueued, execute after {}h'.format(delayed))
     #     return
+    db_ins.on_job_start(URL_CRAWLER_TASK_BY_LATEST, {**_city} if _city else {})
     _cities = CITIES
     if _city:
         _cities = [_city]
@@ -130,6 +141,7 @@ def enqueue_url_crawler(_city=None):
 
 
 def validate_data():
+    db_ins.on_job_start('validate_data')
     staging_apts = db_ins.get_unchecked_staging_apts()
     if not len(staging_apts):
         return
@@ -150,6 +162,7 @@ def validate_data():
 
 
 def crawl_detail():
+    db_ins.on_job_start('crawl_detail')
     logger.info('[crawl_detail] start')
     job_ids = q_detail_crawler.job_ids
     if len(job_ids) >= BATCH_SIZE_OF_DETAIL_CRAWLER:
@@ -174,6 +187,7 @@ def crawl_detail():
 
 
 def fill_missing_info():
+    db_ins.on_job_start('fill_missing_info')
     job_ids = q_detail_crawler.job_ids
     if len(job_ids) >= BATCH_SIZE_OF_MISSING_INFO:
         return

@@ -50,7 +50,7 @@ def schedule_url_crawler():
     sched.add_job(crawl_by_metro_station, 'cron', hour=24-5)
 
     # 15pm
-    sched.add_job(crawl_by_metro_station, 'cron', 15-8)
+    sched.add_job(crawl_by_metro_station, 'cron', hour=15-8)
 
 
 def start_schedule():
