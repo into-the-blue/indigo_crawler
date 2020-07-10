@@ -234,13 +234,13 @@ class UrlCrawler(BaseWebDriver):
         except UrlCrawlerNoMoreNewUrlsException:
             logger.info('[{}] [UrlCrawler] No more new urls'.format(self.city))
         except NoSuchElementException:
-            logger.info('[{}] [UrlCrawler] Elm not found'.format(self.city))
+            logger.warning('[{}] [UrlCrawler] Elm not found'.format(self.city))
             sleep(ERROR_AWAIT_TIME)
         except (TimeoutException, WebDriverException, InvalidSessionIdException):
-            logger.info('[{}] [UrlCrawler] Session timeout'.format(self.city))
+            logger.warning('[{}] [UrlCrawler] Session timeout'.format(self.city))
             self.renew_driver()
         except IpBlockedException:
-            logger.info(
+            logger.warning(
                 '[{}] [UrlCrawler] IP blocked by target'.format(self.city))
             mongo.report_error_ip_blocked(url)
             self.renew_driver()

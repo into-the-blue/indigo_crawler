@@ -40,21 +40,23 @@ class DetailCrawler(BaseWebDriver):
                 '[{}] [DetailCrawler] Data get'.format(task.get('city')))
             mongo.insert_into_staing(task, info)
         except ApartmentExpiredException:
-            logger.info(
+            logger.warning(
                 '[{}] [DetailCrawler] Url expired'.format(task.get('city')))
             mongo.task_expired(task)
         except NoSuchElementException:
             # probably proxy blocked
-            logger.info(
+            logger.warning(
                 '[{}] [DetailCrawler] Elm not found'.format(task.get('city')))
             # self.renew_driver()
         except (TimeoutException, WebDriverException, InvalidSessionIdException):
-            logger.info(
+            logger.warning(
                 '[{}] [DetailCrawler] Session timeout'.format(task.get('city')))
             # self.renew_driver()
         except TooManyTimesException:
             pass
         except IpBlockedException:
+            logger.warning(
+                '[{}] [DetailCrawler] IP blocked by target'.format(task.get('city')))
             mongo.report_error_ip_blocked(task.get('url'))
         except Exception as e:
             logger.exception(e)
