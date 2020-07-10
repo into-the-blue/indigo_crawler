@@ -77,9 +77,11 @@ GUANG_ZHOU_DISTRICTS = ['南海']
 
 SU_ZHOU_BIZCIRCLES = ['玉山城南', '玉山城北', '玉山老城区', '玉山城西', '玉山城东', '玉山南星渎']
 
+HANG_ZHOU_DISTRICTS = ['海宁市']
+
 
 def district_validator(district):
-    if district in ['上海周边', *GUANG_ZHOU_DISTRICTS]:
+    if district in ['上海周边', *GUANG_ZHOU_DISTRICTS, *HANG_ZHOU_DISTRICTS]:
         return True
     return mongo.is_valid_district(district)
 
