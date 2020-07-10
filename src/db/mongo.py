@@ -83,7 +83,7 @@ class DB(object):
         # ensure_indexes_of_apartment(self.apartments)
         # ensure_indexes_of_apartment(self.apartments_staging)
 
-    def on_job_start(self, job_name, payload={}):
+    def on_job_start(self, job_name, payload=None):
         self.crawler_col.insert_one({
             'name': job_name,
             'phase': 'start',
@@ -91,7 +91,7 @@ class DB(object):
             'created_at': datetime.now()
         })
 
-    def on_job_done(self, job_name, payload={}):
+    def on_job_done(self, job_name, payload=None):
         self.crawler_col.insert_one({
             'name': job_name,
             'phase': 'done',
