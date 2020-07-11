@@ -177,6 +177,7 @@ class UrlCrawler(BaseWebDriver):
             self.city, num_of_new_apartments))
         self.apartment_urls = []
         if taskname == URL_CRAWLER_TASK_BY_LATEST:
+            mongo.on_job_done(job_id, city=self.city)
             self.on_finish and self.on_finish(
                 taskname, url_count=num_of_new_apartments, city=self.city_obj, job_id=job_id)
             self.quit()

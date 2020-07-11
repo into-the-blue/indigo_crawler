@@ -107,12 +107,9 @@ def on_finish_url_crawling(taskname=URL_CRAWLER_TASK_BY_LATEST, url_count=0, cit
         city.get('city'), taskname, url_count))
 
     next_run_at = datetime.now() + timedelta(minutes=get_crawl_by_latest_await_time())
-
-    _city = city or {}
-
-    db_ins.on_job_done(job_id, next_run_at=next_run_at, city=_city.get('city'))
     if taskname == URL_CRAWLER_TASK_BY_LATEST:
-        logger.info('[on_finish_url_crawling] enqueue url crawler')
+        logger.info(
+            '[on_finish_url_crawling] enqueue url crawler, next run at {}'.format(next_run_at))
         q_url_crawler.enqueue_at(
             next_run_at, enqueue_url_crawler, args=(city,))
 
