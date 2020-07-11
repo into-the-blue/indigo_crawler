@@ -29,6 +29,7 @@ class UrlCrawler(BaseWebDriver):
         self.apartment_urls = []
         self.on_finish = on_finish
         self.city = None
+        self.timesOfOUrls = 0
 
     def __del__(self):
         class_name = self.__class__.__name__
@@ -121,7 +122,9 @@ class UrlCrawler(BaseWebDriver):
                     urls = self.get_urls_in_page(station_info)
                     url_saved = self.on_get_new_urls(urls, station_info)
                     if not url_saved:
-                        raise UrlCrawlerNoMoreNewUrlsException()
+                        self.timesOfOUrls = self.timesOfOUrls+1
+                        if self.timesOfOUrls >= 3:
+                            raise UrlCrawlerNoMoreNewUrlsException()
                     logger.info('[{}] [UrlCrawler] URLS SAVED! {} TOTAL: {}'.format(self.city,
                                                                                     url_saved, len(self.apartment_urls)))
                     if i < page_count - 1:
@@ -160,7 +163,8 @@ class UrlCrawler(BaseWebDriver):
 
         urls_saved = mongo.insert_into_pool(metadata)
         self.apartment_urls.extend(urls_saved)
-        return len(urls_saved)
+        num_of_saved_urls = len(urls_saved)
+        return num_of_saved_urls
 
     def on_accomplish(self, taskname=None, job_id=None):
         num_of_new_apartments = len(self.apartment_urls)
