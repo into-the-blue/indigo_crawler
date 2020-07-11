@@ -21,7 +21,7 @@ def get_logger():
     handler2.setLevel(logging.ERROR)
 
     formatter = logging.Formatter(
-        "[%(process)s|%(filename)s %(lineno)s] %(asctime)s %(levelname)s: %(message)s")
+        "[%(process)s] [%(filename)s %(lineno)s] %(asctime)s %(levelname)s: %(message)s")
     handler1.setFormatter(formatter)
     handler2.setFormatter(formatter)
 

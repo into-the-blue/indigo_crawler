@@ -1,10 +1,9 @@
 from workers import start_worker
 from queues import q_detail_crawler, q_url_crawler, q_validator
 import atexit
-from db import DB
 import os
 from multiprocessing import Pool, cpu_count
-from jobs import crawl_by_district, crawl_by_metro_station, validate_data, fill_missing_info, enqueue_url_crawler, crawl_detail
+from jobs import crawl_by_district, crawl_by_metro_station, validate_data, fill_missing_info, enqueue_url_crawler, crawl_detail, enqueue_url_crawler_normal
 from utils.logger import logger
 from utils.constants import SCOPE, ROLE
 from scheduler import sched
@@ -60,6 +59,7 @@ def start_schedule():
         schedule_url_crawler()
         sched.start()
         enqueue_url_crawler()
+        enqueue_url_crawler_normal()
 
 
 @atexit.register
@@ -82,13 +82,13 @@ def main():
                     _scopes = ['validator', *_scopes]
                 p.apply_async(start_worker, args=(
                     _scopes,))
-            # elif i <= 3:
-            #     _scopes = [*SCOPES]
-            #     _scopes.reverse()
-            #     p.apply_async(start_worker, args=(_scopes,))
             else:
-                p.apply_async(start_worker, args=(
-                    ['detail_crawler'],))
+                _scopes = [*SCOPES]
+                _scopes.reverse()
+                p.apply_async(start_worker, args=(_scopes,))
+            # else:
+            #     p.apply_async(start_worker, args=(
+            #         ['detail_crawler'],))
         p.close()
         p.join()
     except Exception as e:

@@ -117,6 +117,18 @@ def on_finish_url_crawling(taskname=URL_CRAWLER_TASK_BY_LATEST, url_count=0, cit
             next_run_at, enqueue_url_crawler, args=(city,))
 
 
+def enqueue_url_crawler_normal():
+    for city in CITIES:
+        logger.info(
+            '[enqueue_url_crawler] [{}] enqueue job normal'.format(city.get('city')))
+        ins = UrlCrawler()
+        ins.setup_city_and_source(city)
+        q_url_crawler.enqueue(ins.start_by_url,
+                              args=(city.get('url'),),
+                              kwargs={'by_latest': False},
+                              job_timeout='2h')
+
+
 def enqueue_url_crawler(_city=None):
     # num_of_idle = db_ins.get_num_of_idle_tasks()
     # if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS:
@@ -140,7 +152,7 @@ def enqueue_url_crawler(_city=None):
         q_url_crawler.enqueue(ins.start_by_url,
                               args=(city.get('url'),),
                               kwargs={'job_id': job_id},
-                              job_timeout='1h')
+                              job_timeout='2h')
 
 
 def validate_data():

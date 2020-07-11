@@ -122,9 +122,14 @@ class UrlCrawler(BaseWebDriver):
                     urls = self.get_urls_in_page(station_info)
                     url_saved = self.on_get_new_urls(urls, station_info)
                     if not url_saved:
+                        # times += 1
                         self.timesOfOUrls = self.timesOfOUrls+1
                         if self.timesOfOUrls >= 3:
                             raise UrlCrawlerNoMoreNewUrlsException()
+                    else:
+                        # reset times
+                        self.timesOfOUrls = 0
+
                     logger.info('[{}] [UrlCrawler] URLS SAVED! {} TOTAL: {}'.format(self.city,
                                                                                     url_saved, len(self.apartment_urls)))
                     if i < page_count - 1:
@@ -171,11 +176,9 @@ class UrlCrawler(BaseWebDriver):
         logger.info('[{}] [UrlCrawler] Total url length {}'.format(
             self.city, num_of_new_apartments))
         self.apartment_urls = []
-        if job_id is not None:
-            mongo.on_job_done(job_id, city=self.city.get('city'))
         if taskname == URL_CRAWLER_TASK_BY_LATEST:
             self.on_finish and self.on_finish(
-                taskname, num_of_new_apartments, self.city_obj)
+                taskname, url_count=num_of_new_apartments, city=self.city_obj, job_id=job_id)
             self.quit()
 
     def click_order_by_time(self):
@@ -223,7 +226,7 @@ class UrlCrawler(BaseWebDriver):
             logger.exception(e)
             mongo.report_unexcepted_error_url_crawler(e)
 
-    def start_by_url(self, url, job_id=None, taskname=URL_CRAWLER_TASK_BY_LATEST, station_info=None, bizcircle_info=None):
+    def start_by_url(self, url, by_latest=True, job_id=None, taskname=URL_CRAWLER_TASK_BY_LATEST, station_info=None, bizcircle_info=None):
         logger.info('[{}] [UrlCrawler] PRAMS {} {} {}'.format(
             self.city, job_id, taskname, station_info or bizcircle_info))
         try:
@@ -234,7 +237,8 @@ class UrlCrawler(BaseWebDriver):
                 self.on_open_station(station_info)
             if bizcircle_info:
                 self.on_open_bizcircle(bizcircle_info)
-            self.click_order_by_time()
+            if by_latest:
+                self.click_order_by_time()
             logger.info(
                 '[{}] [UrlCrawler] Clicked order by time'.format(self.city))
             self.get_all_urls(station_info)
