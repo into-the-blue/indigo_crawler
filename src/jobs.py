@@ -77,13 +77,14 @@ def crawl_by_district():
     # if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS*8:
     #     return
     for city in CITIES:
-        db_ins.on_job_start('crawl_by_district', {**city})
+        job_id = db_ins.on_job_start('crawl_by_district',
+                                     city=city.get('city'))
         ins = UrlCrawler()
         ins.setup_city_and_source(city)
         logger.info(
             '[crawl_by_district] [{}] enqueue job'.format(city.get('city')))
         q_url_crawler.enqueue(ins.start_by_district, args=[
-                              city.get('city')], job_timeout='5h')
+                              city.get('city'), job_id], job_timeout='5h')
 
 
 def crawl_by_metro_station():
@@ -91,16 +92,17 @@ def crawl_by_metro_station():
     # if num_of_idle >= MAXIMAL_NUMBER_OF_TASKS*8:
     #     return
     for city in CITIES:
-        db_ins.on_job_start('crawl_by_metro_station', {**city})
+        job_id = db_ins.on_job_start('crawl_by_metro_station',
+                                     city=city.get('city'))
         ins = UrlCrawler()
         ins.setup_city_and_source(city)
         logger.info(
             '[crawl_by_metro_station] [{}] enqueue job'.format(city.get('city')))
         q_url_crawler.enqueue(ins.start_by_metro, args=[
-                              city.get('city')], job_timeout='5h')
+                              city.get('city'), job_id], job_timeout='5h')
 
 
-def on_finish_url_crawling(taskname=URL_CRAWLER_TASK_BY_LATEST, url_count=0, city=None):
+def on_finish_url_crawling(taskname=URL_CRAWLER_TASK_BY_LATEST, url_count=0, city=None, job_id=None):
     logger.info('[{}] [on_finish_url_crawling] Done {} {}'.format(
         city.get('city'), taskname, url_count))
 
@@ -108,10 +110,7 @@ def on_finish_url_crawling(taskname=URL_CRAWLER_TASK_BY_LATEST, url_count=0, cit
 
     _city = city or {}
 
-    db_ins.on_job_done(taskname, {
-        **_city,
-        'next_run_at': datetime.now() + timedelta(minutes=get_crawl_by_latest_await_time())
-    })
+    db_ins.on_job_done(job_id, next_run_at=next_run_at, city=_city.get('city'))
     if taskname == URL_CRAWLER_TASK_BY_LATEST:
         logger.info('[on_finish_url_crawling] enqueue url crawler')
         q_url_crawler.enqueue_at(
@@ -132,21 +131,22 @@ def enqueue_url_crawler(_city=None):
     if _city:
         _cities = [_city]
     for city in _cities:
-        db_ins.on_job_start(URL_CRAWLER_TASK_BY_LATEST, {**city})
+        job_id = db_ins.on_job_start(URL_CRAWLER_TASK_BY_LATEST,
+                                     city=city.get('city'))
         logger.info(
             '[enqueue_url_crawler] [{}] enqueue job'.format(city.get('city')))
         ins = UrlCrawler(on_finish_url_crawling)
         ins.setup_city_and_source(city)
-        q_url_crawler.enqueue(ins.start_by_url, args=(
-                              city.get('url'),), job_timeout='1h')
+        q_url_crawler.enqueue(ins.start_by_url,
+                              args=(city.get('url'),),
+                              kwargs={'job_id': job_id},
+                              job_timeout='1h')
 
 
 def validate_data():
     staging_apts = db_ins.get_unchecked_staging_apts()
     if not len(staging_apts):
-        db_ins.on_job_start('validate_data', {
-            'message': 'no task'
-        })
+        db_ins.on_job_start('validate_data', message='no task')
         return
     ins = DataValidator()
     job_ids = q_validator.job_ids
@@ -158,10 +158,7 @@ def validate_data():
             enqueued_job_num += 1
             q_validator.enqueue(ins.examine_single_apartment, args=[
                                 apt], job_id=apt.get('house_code'))
-    db_ins.on_job_start('validate_data', {
-        'message': 'ok',
-        'count': enqueued_job_num
-    })
+    db_ins.on_job_start('validate_data', count=enqueued_job_num)
     logger.info('[validate_data] total: {}, enqueued: {}'.format(
         len(staging_apts), enqueued_job_num))
 
@@ -170,16 +167,13 @@ def crawl_detail():
     logger.info('[crawl_detail] start')
     job_ids = q_detail_crawler.job_ids
     if len(job_ids) >= BATCH_SIZE_OF_DETAIL_CRAWLER:
-        db_ins.on_job_start('crawl_detail', {
-            'message': 'too many tasks: {}'.format(len(job_ids))
-        })
+        db_ins.on_job_start('crawl_detail',
+                            message='too many tasks: {}'.format(len(job_ids)))
         return
     tasks = db_ins.find_idle_tasks(BATCH_SIZE_OF_DETAIL_CRAWLER, job_ids)
     if not len(tasks):
         logger.info('[crawl_detail] no task available')
-        db_ins.on_job_start('crawl_detail', {
-            'message': 'no task'
-        })
+        db_ins.on_job_start('crawl_detail', message='no task')
         return
     enqueued_job_num = 0
     logger.info('[crawl_detail] total: {}, existing: {}'.format(
@@ -190,10 +184,9 @@ def crawl_detail():
             ins = DetailCrawler()
             job = q_detail_crawler.enqueue(ins.start_one_url, args=[
                                            task], job_id=task.get('url'))
-    db_ins.on_job_start('crawl_detail', {
-        'message': 'ok',
-        'count': enqueued_job_num
-    })
+    db_ins.on_job_start('crawl_detail',
+                        count=enqueued_job_num
+                        )
     logger.info('[crawl_detail] total: {}, enqueued: {}'.format(
         len(tasks), enqueued_job_num))
 
@@ -201,16 +194,14 @@ def crawl_detail():
 def fill_missing_info():
     job_ids = q_detail_crawler.job_ids
     if len(job_ids) >= BATCH_SIZE_OF_MISSING_INFO:
-        db_ins.on_job_start('fill_missing_info', {
-            'message': 'too many tasks: {}'.format(len(job_ids))
-        })
+        db_ins.on_job_start('fill_missing_info',
+                            message='too many tasks: {}'.format(len(job_ids))
+                            )
         return
     apts = db_ins.get_staging_apts_with_missing_info(
         BATCH_SIZE_OF_MISSING_INFO, job_ids)
     if not len(apts):
-        db_ins.on_job_start('fill_missing_info', {
-            'message': 'no task'
-        })
+        db_ins.on_job_start('fill_missing_info', message='no task')
         return
     enqueued_job_num = 0
     logger.info('[fill_missing_info] total: {}, existing: {}'.format(
@@ -221,9 +212,8 @@ def fill_missing_info():
             ins = DetailCrawler()
             q_detail_crawler.enqueue(ins.start_fill_missing, args=[
                                      apt], job_timeout='20m', job_id=apt.get('house_code'))
-    db_ins.on_job_start('fill_missing_info', {
-        'message': 'ok',
-        'count': enqueued_job_num
-    })
+    db_ins.on_job_start('fill_missing_info',
+                        count=enqueued_job_num
+                        )
     logger.info('[fill_missing_info] total: {}, enqueued: {}'.format(
         len(apts), enqueued_job_num))

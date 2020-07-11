@@ -162,11 +162,13 @@ class UrlCrawler(BaseWebDriver):
         self.apartment_urls.extend(urls_saved)
         return len(urls_saved)
 
-    def on_accomplish(self, taskname=None):
+    def on_accomplish(self, taskname=None, job_id=None):
         num_of_new_apartments = len(self.apartment_urls)
         logger.info('[{}] [UrlCrawler] Total url length {}'.format(
             self.city, num_of_new_apartments))
         self.apartment_urls = []
+        if job_id is not None:
+            mongo.on_job_done(job_id, city=self.city.get('city'))
         if taskname == URL_CRAWLER_TASK_BY_LATEST:
             self.on_finish and self.on_finish(
                 taskname, num_of_new_apartments, self.city_obj)
@@ -217,7 +219,9 @@ class UrlCrawler(BaseWebDriver):
             logger.exception(e)
             mongo.report_unexcepted_error_url_crawler(e)
 
-    def start_by_url(self, url, taskname=URL_CRAWLER_TASK_BY_LATEST, station_info=None, bizcircle_info=None):
+    def start_by_url(self, url, job_id=None, taskname=URL_CRAWLER_TASK_BY_LATEST, station_info=None, bizcircle_info=None):
+        logger.info('[{}] [UrlCrawler] PRAMS {} {} {}'.format(
+            self.city, job_id, taskname, station_info or bizcircle_info))
         try:
             logger.info('[{}] [UrlCrawler] START {}'.format(self.city, url))
             self.get(url)
@@ -237,17 +241,23 @@ class UrlCrawler(BaseWebDriver):
             logger.warning('[{}] [UrlCrawler] Elm not found'.format(self.city))
             sleep(ERROR_AWAIT_TIME)
         except (TimeoutException, WebDriverException, InvalidSessionIdException):
-            logger.warning('[{}] [UrlCrawler] Session timeout'.format(self.city))
+            logger.warning(
+                '[{}] [UrlCrawler] Session timeout'.format(self.city))
             self.renew_driver()
         except IpBlockedException:
             logger.warning(
                 '[{}] [UrlCrawler] IP blocked by target'.format(self.city))
             mongo.report_error_ip_blocked(url)
             self.renew_driver()
+        except Exception as e:
+            logger.warning(
+                '[{}] [UrlCrawler] unexpected error'.format(self.city, e))
+            logger.exception(e)
+            mongo.report_unexcepted_error_url_crawler(e)
         finally:
-            self.on_accomplish(taskname)
+            self.on_accomplish(taskname, job_id)
 
-    def start_by_district(self, city):
+    def start_by_district(self, city, job_id):
         bizcircles = mongo.find_all_bizcircles(city)
         count = 0
         logger.info(
@@ -261,8 +271,9 @@ class UrlCrawler(BaseWebDriver):
                 url, taskname=URL_CRAWLER_TASK_BY_BIZCIRCLE, bizcircle_info=bizcircle)
             logger.info(
                 f'[{city}] [UrlCrawler] {bizcircle_name}, DONE, {count}')
+        mongo.on_job_done(job_id, city=city)
 
-    def start_by_metro(self, city):
+    def start_by_metro(self, city, job_id):
         '''
         by metro station
         '''
@@ -277,3 +288,4 @@ class UrlCrawler(BaseWebDriver):
             self.start_by_url(
                 url, taskname=URL_CRAWLER_TASK_BY_METRO, station_info=station)
             logger.info(f'[{city}] [UrlCrawler] {station_name}, DONE, {count}')
+        mongo.on_job_done(job_id, city=city)

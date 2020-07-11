@@ -83,20 +83,26 @@ class DB(object):
         # ensure_indexes_of_apartment(self.apartments)
         # ensure_indexes_of_apartment(self.apartments_staging)
 
-    def on_job_start(self, job_name, payload=None):
-        self.crawler_col.insert_one({
+    def on_job_start(self, job_name, **kwargs):
+        return self.crawler_col.insert_one({
             'name': job_name,
             'phase': 'start',
-            'payload': payload,
-            'created_at': datetime.now()
-        })
+            'start_at': datetime.now(),
+            **kwargs
+        }).inserted_id
 
-    def on_job_done(self, job_name, payload=None):
-        self.crawler_col.insert_one({
-            'name': job_name,
-            'phase': 'done',
-            'payload': payload,
-            'created_at': datetime.now()
+    def on_job_done(self, job_id, **kwargs):
+        if not job_id:
+            return
+            
+        self.crawler_col.update_one({
+            '_id': job_id,
+        }, {
+            '$set': {
+                **kwargs,
+                'phase': 'done',
+                'finish_at': datetime.now()
+            }
         })
 
     def save_crawler_procedures(self, doc):
