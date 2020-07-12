@@ -84,7 +84,7 @@ def crawl_by_district():
         logger.info(
             '[crawl_by_district] [{}] enqueue job'.format(city.get('city')))
         q_url_crawler.enqueue(ins.start_by_district, args=[
-                              city.get('city'), job_id], job_timeout='5h')
+                              city.get('city'), job_id], job_timeout='10h')
 
 
 def crawl_by_metro_station():
@@ -99,7 +99,7 @@ def crawl_by_metro_station():
         logger.info(
             '[crawl_by_metro_station] [{}] enqueue job'.format(city.get('city')))
         q_url_crawler.enqueue(ins.start_by_metro, args=[
-                              city.get('city'), job_id], job_timeout='5h')
+                              city.get('city'), job_id], job_timeout='10h')
 
 
 def on_finish_url_crawling(taskname=URL_CRAWLER_TASK_BY_LATEST, url_count=0, city=None, job_id=None):
