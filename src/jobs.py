@@ -69,7 +69,7 @@ def get_crawl_by_latest_await_time():
 
 BATCH_SIZE_OF_DETAIL_CRAWLER = 1800 * 5
 
-BATCH_SIZE_OF_MISSING_INFO = 50000
+BATCH_SIZE_OF_MISSING_INFO = 20000
 
 
 def crawl_by_district():
@@ -183,6 +183,7 @@ def crawl_detail():
     if not len(tasks):
         logger.info('[crawl_detail] no task available')
         db_ins.on_job_start('crawl_detail', message='no task')
+        fill_missing_info()
         return
     enqueued_job_num = 0
     logger.info('[crawl_detail] total: {}, existing: {}'.format(
