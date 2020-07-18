@@ -29,7 +29,7 @@ def schedule_validator():
 
 def schedule_crawler_detail_jobs():
     # every 8 hour
-    sched.add_job(fill_missing_info, 'interval', hours=8)
+    # sched.add_job(fill_missing_info, 'interval', hours=8)
 
     # every 30 minutes
     sched.add_job(crawl_detail, 'interval', minutes=30)
