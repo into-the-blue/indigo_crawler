@@ -54,6 +54,7 @@ class BaseWebDriver(object):
             return
         try:
             logger.info('DRIVER QUIT')
+            self.driver.delete_all_cookies()
             self.driver.quit()
             self.connected = False
         except Exception as e:
