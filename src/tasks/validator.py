@@ -75,7 +75,8 @@ validator = {
 
 GUANG_ZHOU_DISTRICTS = ['南海']
 
-SU_ZHOU_BIZCIRCLES = ['玉山城南', '玉山城北', '玉山老城区', '玉山城西', '玉山城东', '玉山南星渎']
+SU_ZHOU_BIZCIRCLES = ['玉山城南', '玉山城北',
+                      '玉山老城区', '玉山城西', '玉山城东', '玉山南星渎', '玉山高新区']
 
 HANG_ZHOU_DISTRICTS = ['海宁市']
 
