@@ -94,7 +94,7 @@ class DB(object):
     def on_job_done(self, job_id, **kwargs):
         if not job_id:
             return
-            
+
         self.crawler_col.update_one({
             '_id': job_id,
         }, {
@@ -233,7 +233,7 @@ class DB(object):
                 self._check_if_error_exists({
                     'message': 'ip_blocked',
                 }, doc)
-                
+
             self.errors.insert_one(
                 {**doc,
                  'checked': False,
@@ -435,19 +435,32 @@ class DB(object):
         '''
         urls = [d.get('url') for d in metadata]
 
-        def _get_urls_exists(col, key, _urls):
+        def _get_urls_exists(col, key, _urls, conditions={}):
             arr = list(col.find({
+                **conditions,
                 '{}'.format(key): {
-                    '$in': _urls
-                }
+                    '$in': _urls,
+                },
             }))
             return [o.get(key) for o in arr]
 
-        urls_exist_in_task = _get_urls_exists(self.tasks, 'url', urls)
+        urls_exist_in_task = _get_urls_exists(self.tasks, 'url', urls, {
+            'created_at': {
+                '$gte': datetime.now()-timedelta(days=30)
+            },
+        })
         urls_exist_in_staging = _get_urls_exists(
-            self.apartments_staging, 'house_url', urls)
+            self.apartments_staging, 'house_url', urls, {
+                'created_time': {
+                    '$gte': datetime.now()-timedelta(days=60)
+                },
+            })
         urls_exist_in_apartment = _get_urls_exists(
-            self.apartments, 'house_url', urls)
+            self.apartments, 'house_url', urls, {
+                'created_time': {
+                    '$gte': datetime.now()-timedelta(days=60)
+                },
+            })
 
         all_existing_urls = set(
             [*urls_exist_in_task, *urls_exist_in_staging, *urls_exist_in_apartment])
