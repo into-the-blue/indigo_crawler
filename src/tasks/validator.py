@@ -50,8 +50,8 @@ validator = {
     'electricity': list_validator(['暂无数据', '民电', '商电']),
     'elevator': list_validator(['无', '有', '暂无数据']),
     'gas': list_validator(['有', '无', '暂无数据']),
-    # beijing specific, \d居室
-    'house_type': or_validator(regex_validator('[\d未知]{1,2}室[\d未知]{1,2}厅[\d未知]{1,2}卫'), regex_validator('[\d未知]居室')),
+    # beijing specific, \d居室 \d房间\d卫
+    'house_type': or_validator(regex_validator('[\d未知]{1,2}室[\d未知]{1,2}厅[\d未知]{1,2}卫'), regex_validator('[\d未知]居室'), regex_validator('[\d未知]房间')),
     'orient': or_validator(regex_validator('(未知)?[东南西北\s]*$'), list_validator(['暂无数据', '--'])),
     'type': list_validator(['合租', '整租']),
     'water': list_validator(['民水', '商水', '暂无数据']),
@@ -80,6 +80,8 @@ SU_ZHOU_BIZCIRCLES = ['玉山城南', '玉山城北',
 
 HANG_ZHOU_DISTRICTS = ['海宁市']
 
+BEI_JING_BIZCIRCLES = ['高米店']
+
 
 def district_validator(district):
     if district in ['上海周边', *GUANG_ZHOU_DISTRICTS, *HANG_ZHOU_DISTRICTS]:
@@ -88,7 +90,7 @@ def district_validator(district):
 
 
 def bizcircle_validator(biz):
-    if biz in ['昆山', '嘉兴', '启东', '上海周边', *SU_ZHOU_BIZCIRCLES]:
+    if biz in ['昆山', '嘉兴', '启东', '上海周边', *SU_ZHOU_BIZCIRCLES, *BEI_JING_BIZCIRCLES]:
         return True
     return mongo.is_valid_bizcircle(biz)
 

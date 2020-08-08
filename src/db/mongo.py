@@ -229,7 +229,11 @@ class DB(object):
                 self._check_if_error_exists({
                     'message': 'no_proxy_available'
                 }, doc)
-
+            if doc.get('message') == 'ip_blocked':
+                self._check_if_error_exists({
+                    'message': 'ip_blocked',
+                }, doc)
+                
             self.errors.insert_one(
                 {**doc,
                  'checked': False,
