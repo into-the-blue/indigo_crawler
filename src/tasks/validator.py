@@ -80,7 +80,7 @@ SU_ZHOU_BIZCIRCLES = ['玉山城南', '玉山城北',
 
 HANG_ZHOU_DISTRICTS = ['海宁市']
 
-BEI_JING_BIZCIRCLES = ['高米店']
+BEI_JING_BIZCIRCLES = ['高米店', '大兴新机场洋房别墅区']
 
 
 def district_validator(district):
