@@ -18,8 +18,8 @@ if IS_MASTER:
     q_url_crawler.empty()
     q_validator.empty()
     q_detail_crawler.empty()
-SCOPES = ['detail_crawler',
-          'url_crawler'] if SCOPE == '*' else SCOPE.split('|')
+SCOPES = ['url_crawler', 'detail_crawler',
+          ] if SCOPE == '*' else SCOPE.split('|')
 
 
 def schedule_validator():
@@ -77,14 +77,12 @@ def main():
         for i in range(CPU_NUM):
             if i == 0:
                 _scopes = [*SCOPES]
-                _scopes.reverse()
                 if IS_MASTER and 'validator' not in _scopes:
                     _scopes = ['validator', *_scopes]
                 p.apply_async(start_worker, args=(
                     _scopes,))
             else:
                 _scopes = [*SCOPES]
-                _scopes.reverse()
                 p.apply_async(start_worker, args=(_scopes,))
             # else:
             #     p.apply_async(start_worker, args=(
