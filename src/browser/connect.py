@@ -121,6 +121,8 @@ def setup_proxy_for_driver(driver: webdriver, test_url=None, times=0):
         capabilities = get_capabilities(proxy_url)
 
         logger.info('start new session')
+        if driver is None:
+            driver = connect_to_driver()
         driver.start_session(capabilities=capabilities)
         logger.info('start testing proxy')
 
