@@ -82,6 +82,8 @@ HANG_ZHOU_DISTRICTS = ['海宁市']
 
 BEI_JING_BIZCIRCLES = ['高米店', '大兴新机场洋房别墅区']
 
+SHNANG_HAI_BIZCIRCLES = ['闵浦', '昆山', '嘉兴', '启东', '上海周边']
+
 
 def district_validator(district):
     if district in ['上海周边', *GUANG_ZHOU_DISTRICTS, *HANG_ZHOU_DISTRICTS]:
@@ -90,7 +92,7 @@ def district_validator(district):
 
 
 def bizcircle_validator(biz):
-    if biz in ['昆山', '嘉兴', '启东', '上海周边', *SU_ZHOU_BIZCIRCLES, *BEI_JING_BIZCIRCLES]:
+    if biz in [*SHNANG_HAI_BIZCIRCLES, *SU_ZHOU_BIZCIRCLES, *BEI_JING_BIZCIRCLES]:
         return True
     return mongo.is_valid_bizcircle(biz)
 
