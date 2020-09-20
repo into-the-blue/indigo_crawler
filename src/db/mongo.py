@@ -79,6 +79,8 @@ class DB(object):
         self.page_source = self.indigo.pageSource
 
         self.crawler_col = self.indigo.crawler
+
+        self.agenda_jobs_col = self.indigo.agendaJobs
         # ensure_indexes_of_station(self.station_col)
         # ensure_indexes_of_apartment(self.apartments)
         # ensure_indexes_of_apartment(self.apartments_staging)
@@ -563,6 +565,17 @@ class DB(object):
             'url': apartment.get('house_url'),
             'invalid_value': invalid_value
         })
+
+    def del_redundant_jobs_and_tasks(self):
+        '''
+        delete redundant jobs
+        '''
+        res = self.agenda_jobs_col.delete_many({
+            'lastRunAt':{
+                '$lt':datetime.now()-timedelta(days=2)
+            }
+        })
+        return res.deleted_count
 
 
 mongo = DB()

@@ -200,6 +200,8 @@ def crawl_detail():
     logger.info('[crawl_detail] total: {}, enqueued: {}'.format(
         len(tasks), enqueued_job_num))
 
+def del_redundant_jobs_and_tasks():
+    return db_ins.del_redundant_jobs_and_tasks()
 
 def fill_missing_info():
     job_ids = q_detail_crawler.job_ids

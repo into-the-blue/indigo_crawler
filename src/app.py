@@ -3,7 +3,7 @@ from queues import q_detail_crawler, q_url_crawler, q_validator
 import atexit
 import os
 from multiprocessing import Pool, cpu_count
-from jobs import crawl_by_district, crawl_by_metro_station, validate_data, fill_missing_info, enqueue_url_crawler, crawl_detail, enqueue_url_crawler_normal
+from jobs import crawl_by_district, crawl_by_metro_station, validate_data, fill_missing_info, enqueue_url_crawler, crawl_detail, enqueue_url_crawler_normal,del_redundant_jobs_and_tasks
 from utils.logger import logger
 from utils.constants import SCOPE, ROLE
 from scheduler import sched
@@ -52,14 +52,19 @@ def schedule_url_crawler():
     sched.add_job(crawl_by_metro_station, 'cron', hour=15-8)
 
 
+def schedule_del_redundant_jobs():
+    sched.add_job(del_redundant_jobs_and_tasks,'cron', day_of_week=5,hour=0)
+
 def start_schedule():
     if IS_MASTER:
         schedule_crawler_detail_jobs()
         schedule_validator()
         schedule_url_crawler()
+        schedule_del_redundant_jobs()
         sched.start()
         enqueue_url_crawler()
         enqueue_url_crawler_normal()
+
 
 
 @atexit.register
