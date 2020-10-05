@@ -225,7 +225,7 @@ class UrlCrawler(BaseWebDriver):
             logger.error(
                 '[{}] [UrlCrawler] [on_open_bizcircle]'.format(self.city))
             logger.exception(e)
-            mongo.report_unexcepted_error_url_crawler(e)
+            mongo.report_unexpected_error_url_crawler(e)
 
     def start_by_url(self, url, by_latest=True, job_id=None, taskname=URL_CRAWLER_TASK_BY_LATEST, station_info=None, bizcircle_info=None):
         logger.info('[{}] [UrlCrawler] PRAMS {} {} {}'.format(
@@ -262,7 +262,7 @@ class UrlCrawler(BaseWebDriver):
             logger.warning(
                 '[{}] [UrlCrawler] unexpected error'.format(self.city, e))
             logger.exception(e)
-            mongo.report_unexcepted_error_url_crawler(e)
+            mongo.report_unexpected_error_url_crawler(e)
         finally:
             self.on_accomplish(taskname, job_id)
 
